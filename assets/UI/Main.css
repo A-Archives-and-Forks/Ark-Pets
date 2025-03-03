@@ -80,7 +80,9 @@ JFXButton>AnchorPane>SVGPath {
 }
 
 .btn-primary,
-.btn-secondary {
+.btn-secondary,
+.btn-plain-light,
+.btn-plain-dark {
     /* Regular */
     -fx-font-size: 12px;
     -fx-text-alignment: center;
@@ -97,11 +99,6 @@ JFXButton>AnchorPane>SVGPath {
     -fx-border-color: -theme-color;
 }
 
-.btn-primary .btn-icon {
-    /* Regular */
-    -fx-fill: white;
-}
-
 .btn-secondary {
     /* Regular */
     -fx-text-fill: -theme-color;
@@ -109,18 +106,35 @@ JFXButton>AnchorPane>SVGPath {
     -fx-border-color: -theme-color;
 }
 
-.btn-iconified-secondary {
+.btn-plain-light {
+    /* Regular */
+    -fx-text-fill: white;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.btn-plain-dark {
     /* Regular */
     -fx-text-fill: -theme-color;
-    -fx-background-color: white;
-    -fx-background-radius: 38.2%;
-    -fx-border-color: -theme-color;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.btn-iconified,
+.btn-iconified-secondary {
+    /* Regular */
     -fx-border-radius: 38.2%;
-    -fx-border-width: 1px;
-    -fx-border-style: solid;
+    -fx-background-radius: 38.2%;
+}
+
+.btn-primary .btn-icon,
+.btn-plain-light .btn-icon {
+    /* Regular */
+    -fx-fill: white;
 }
 
 .btn-secondary .btn-icon,
+.btn-plain-dark .btn-icon,
 .btn-iconified-secondary .btn-icon {
     /* Regular */
     -fx-fill: -theme-color;
@@ -446,7 +460,67 @@ JFXSlider {
 
 /*******************************************************************************
  *                                                                             *
- * 5. Other components                                                         *
+ * 5. Extra components in dialogs                                              *
+ *                                                                             *
+ ******************************************************************************/
+
+.dialog-title-bar {
+    -fx-alignment: center-left;
+    -fx-background-color: -theme-color;
+    -fx-background-radius: 0 0 30px 0;
+}
+
+.dialog-title-label {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.dialog-oper-bar {
+    -fx-alignment: center-left;
+    -fx-background-color: -theme-color-light;
+    -fx-background-radius: 0;
+}
+
+.Anno-item {
+    /* Regular */
+    -fx-cursor: hand;
+    -fx-padding: 4px 2px 4px 2px;
+    -fx-text-fill: dimgray;
+    -fx-background-color: transparent;
+    -fx-focus-traversable: true;
+}
+
+.Anno-item-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: -text-normal;
+    -fx-wrap-text: true;
+}
+
+#Anno-list {
+    -fx-padding: 4px;
+    -fx-background-radius: 3px;
+}
+
+#Anno-list .Anno-item-active .Anno-item-label {
+    -fx-text-fill: -text-normal;
+}
+
+#Anno-list:focused .Anno-item-active .Anno-item-label {
+    -fx-text-fill: white;
+}
+
+#Anno-container {
+    -fx-background-color: transparent;
+}
+
+#Anno-container .viewport {
+    -fx-background-color: transparent;
+}
+
+/*******************************************************************************
+ *                                                                             *
+ * 6. Other components                                                         *
  *                                                                             *
  ******************************************************************************/
 
@@ -534,7 +608,7 @@ ProgressBar:indeterminate>.bar {
 
 /*******************************************************************************
  *                                                                             *
- * 6. ScrollBar and ScrollPane                                                 *
+ * 7. ScrollBar and ScrollPane                                                 *
  *                                                                             *
  ******************************************************************************/
 
