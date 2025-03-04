@@ -13,6 +13,7 @@ import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.utils.GuiComponents.*;
 import com.badlogic.gdx.graphics.Color;
 import com.jfoenix.controls.*;
+import javafx.application.Platform;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -32,6 +33,8 @@ import static cn.harryh.arkpets.Const.*;
 
 
 public final class SettingsModule implements Controller<ArkHomeFX> {
+    @FXML
+    private ScrollPane moduleScroll;
     @FXML
     private Pane noticeBox;
 
@@ -123,6 +126,8 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         initConfigAdvanced();
         initAbout();
         initScheduledListener();
+
+        Platform.runLater(() -> GuiPrefabs.disableScrollPaneCache(moduleScroll));
     }
 
     private void initConfigDisplay() {

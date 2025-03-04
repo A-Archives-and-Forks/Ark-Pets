@@ -6,12 +6,14 @@ package cn.harryh.arkpets.controllers;
 import cn.harryh.arkpets.ArkHomeFX;
 import cn.harryh.arkpets.guitasks.FetchAnnounceTask;
 import cn.harryh.arkpets.guitasks.GuiTask.GuiTaskStyle;
+import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.NetUtils;
 import cn.harryh.arkpets.utils.markdown.FxmlConvertor;
 import cn.harryh.arkpets.utils.markdown.FxmlDocumentController;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.jfoenix.controls.*;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -59,6 +61,8 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
         );
 
         annoRefetch.setOnAction(e -> this.fetchAnnounce());
+
+        Platform.runLater(() -> GuiPrefabs.disableScrollPaneCache(annoScroll));
     }
 
     public void fetchAnnounce() {

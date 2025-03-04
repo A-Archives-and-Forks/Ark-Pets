@@ -8,10 +8,11 @@ import cn.harryh.arkpets.assets.ModelItem;
 import cn.harryh.arkpets.assets.ModelItemGroup;
 import cn.harryh.arkpets.assets.ModelsDataset;
 import cn.harryh.arkpets.guitasks.*;
+import cn.harryh.arkpets.utils.GuiComponents.NoticeBar;
 import cn.harryh.arkpets.utils.*;
-import cn.harryh.arkpets.utils.GuiComponents.*;
 import com.alibaba.fastjson.JSONObject;
 import com.jfoenix.controls.*;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableSet;
@@ -24,7 +25,10 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.*;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 import javafx.stage.FileChooser;
@@ -85,9 +89,13 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     @FXML
     private JFXButton toggleManagePane;
     @FXML
+    private ScrollPane infoPaneTagScroll;
+    @FXML
     private FlowPane infoPaneTagFlow;
     @FXML
-    public Label filterPaneTagClear;
+    private Label filterPaneTagClear;
+    @FXML
+    private ScrollPane filterPaneTagScroll;
     @FXML
     private FlowPane filterPaneTagFlow;
 
@@ -147,6 +155,11 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         initModelManage();
         initModelFavorite();
         modelReload(false);
+
+        Platform.runLater(() -> {
+            GuiPrefabs.disableScrollPaneCache(infoPaneTagScroll);
+            GuiPrefabs.disableScrollPaneCache(filterPaneTagScroll);
+        });
     }
 
     public boolean initModelsDataset(boolean doPopNotice) {
