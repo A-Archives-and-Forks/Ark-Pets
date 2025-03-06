@@ -87,9 +87,9 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
     private JFXListCell<AnnounceItem> getMenuItem(AnnounceItem annoItem, JFXListView<JFXListCell<AnnounceItem>> container) {
         double width = container.getPrefWidth() * 0.799;
         JFXListCell<AnnounceItem> item = new JFXListCell<>();
-        item.getStyleClass().addAll("Anno-item");
+        item.getStyleClass().addAll("list-item");
         Label name = new Label(annoItem.title);
-        name.getStyleClass().addAll("Anno-item-label");
+        name.getStyleClass().addAll("list-item-label");
         name.setPrefWidth(width);
         item.setPrefWidth(width);
         item.setGraphic(name);
@@ -100,10 +100,10 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
     private void selectAnnounce(AnnounceItem anno, JFXListCell<AnnounceItem> cell) {
         // Reset
         if (selectedAnnoCell != null) {
-            selectedAnnoCell.getStyleClass().setAll("Anno-item");
+            selectedAnnoCell.getStyleClass().setAll("list-item");
         }
         selectedAnnoCell = cell;
-        selectedAnnoCell.getStyleClass().add("Anno-item-active");
+        selectedAnnoCell.getStyleClass().add("list-item-active");
         // Display info
         annoTitle.setText(anno.title);
         if (anno.date != null && !anno.date.isBlank()) {

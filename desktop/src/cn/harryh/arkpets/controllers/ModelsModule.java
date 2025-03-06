@@ -599,13 +599,13 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         double height = 30;
         double divide = 0.618;
         JFXListCell<ModelItem> item = new JFXListCell<>();
-        item.getStyleClass().addAll("Search-models-item");
+        item.getStyleClass().addAll("list-item");
         Label name = new Label(modelItem.toString());
-        name.getStyleClass().addAll("Search-models-label", "Search-models-label-primary");
+        name.getStyleClass().addAll("list-item-label");
         name.setPrefSize(modelItem.skinGroupName == null ? width : width * divide, height);
         name.setLayoutX(15);
         Label alias1 = new Label(modelItem.skinGroupName);
-        alias1.getStyleClass().addAll("Search-models-label", "Search-models-label-secondary");
+        alias1.getStyleClass().addAll("list-item-label-sub");
         alias1.setPrefSize(width * (1 - divide), height);
         alias1.setLayoutX(modelItem.skinGroupName == null ? 0 : width * divide);
         SVGPath fav = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_STAR_FILLED, GuiPrefabs.COLOR_WARNING);
@@ -626,12 +626,12 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     private void selectModel(ModelItem asset, JFXListCell<ModelItem> item) {
         // Reset
         if (selectedModelCell != null) {
-            selectedModelCell.getStyleClass().setAll("Search-models-item");
+            selectedModelCell.getStyleClass().setAll("list-item");
             if (app.config.character_favorites.containsKey(selectedModelCell.getItem().key))
                 selectedModelCell.getStyleClass().add("Search-models-item-favorite");
         }
         selectedModelCell = item;
-        selectedModelCell.getStyleClass().add("Search-models-item-active");
+        selectedModelCell.getStyleClass().add("list-item-active");
         // Display details
         selectedModelName.setText(asset.name);
         selectedModelAppellation.setText(asset.appellation);

@@ -37,9 +37,9 @@
                           wrappingWidth="117.0">
                     </Text>
                     <Line endX="128.0" layoutY="60.0" startX="12.0" stroke="#0000009e"/>
-                    <JFXButton id="AnnoEntrance" fx:id="annoEntrance" layoutX="40.0" layoutY="64.0"
-                               minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="28.0"
-                               prefWidth="60.0" text="公告">
+                    <JFXButton fx:id="annoEntrance" layoutX="40.0" layoutY="64.0" minHeight="-Infinity"
+                               minWidth="-Infinity" mnemonicParsing="false" prefHeight="28.0" prefWidth="60.0"
+                               text="公告">
                         <graphic>
                             <AnchorPane prefHeight="25.0" prefWidth="16.0" styleClass="btn-icon">
                                 <SVGPath

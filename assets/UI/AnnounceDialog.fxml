@@ -87,8 +87,8 @@
         </JFXButton>
         <Label styleClass="dialog-title-label" text="公告"/>
     </HBox>
-    <JFXListView id="Anno-list" fx:id="annoListView" prefHeight="250.0" prefWidth="175.0" AnchorPane.bottomAnchor="-5.0"
-                 AnchorPane.leftAnchor="-5.0"/>
+    <JFXListView fx:id="annoListView" prefHeight="250.0" prefWidth="175.0" styleClass="list"
+                 AnchorPane.bottomAnchor="-5.0" AnchorPane.leftAnchor="-5.0"/>
     <ScrollPane id="Anno-container" fx:id="annoScroll" layoutX="234.0" layoutY="61.0" prefHeight="250.0"
                 prefWidth="350.0" styleClass="scroll-v" AnchorPane.bottomAnchor="-5.0" AnchorPane.rightAnchor="-5.0">
         <VBox fx:id="annoContainer"/>

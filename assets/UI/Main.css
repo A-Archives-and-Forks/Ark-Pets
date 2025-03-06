@@ -45,7 +45,7 @@
 
 /*******************************************************************************
  *                                                                             *
- * 2. Common Attributes for Controllers                                        *
+ * 2. Common Attributes for Controls                                           *
  *                                                                             *
  ******************************************************************************/
 
@@ -142,6 +142,53 @@ JFXButton>AnchorPane>SVGPath {
 .btn-iconified-secondary .btn-icon {
     /* Regular */
     -fx-fill: -theme-color;
+}
+
+.list {
+    -fx-padding: 4px;
+    -fx-background-radius: 3px;
+}
+
+.list-item {
+    /* Regular */
+    -fx-cursor: hand;
+    -fx-padding: 4px 2px;
+    -fx-text-fill: dimgray;
+    -fx-background-color: transparent;
+    -fx-focus-traversable: true;
+}
+
+.list-item-label {
+    -fx-font-size: 12px;
+    -fx-label-padding: 2px;
+    -fx-text-fill: -text-normal;
+    -fx-text-overrun: ellipsis;
+}
+
+.list-item-label-sub {
+    -fx-font-size: 11px;
+    -fx-text-fill: dimgray;
+    -fx-text-overrun: ellipsis;
+}
+
+.list-item-active .list-item-label {
+    -fx-font-size: 12.5px;
+    -fx-text-fill: -text-normal;
+}
+
+.list-item-active .list-item-label-sub {
+    -fx-font-size: 11.5px;
+    -fx-text-fill: dimgray;
+}
+
+.list:focused .list-item-active .list-item-label {
+    -fx-font-size: 12.5px;
+    -fx-text-fill: white;
+}
+
+.list:focused .list-item-active .list-item-label-sub {
+    -fx-font-size: 11.5px;
+    -fx-text-fill: white;
 }
 
 JFXCheckBox {
@@ -278,66 +325,12 @@ JFXSlider {
     -fx-label-padding: 0 2px;
 }
 
-#Search-models-list {
-    -fx-padding: 4px;
-    -fx-background-radius: 3px;
-}
-
-.Search-models-item {
-    /* Regular */
-    -fx-cursor: hand;
-    -fx-padding: 4px 2px;
-    -fx-text-fill: dimgray;
-    -fx-background-color: transparent;
-    -fx-focus-traversable: true;
-}
-
-.Search-models-item-active {
-    /* Active */
-}
-
 .Search-models-star {
     -fx-opacity: 0;
 }
 
 .Search-models-item-favorite .Search-models-star {
     -fx-opacity: 1;
-}
-
-.Search-models-label {
-    -fx-text-overrun: ellipsis;
-    -fx-label-padding: 2px 2px 2px 4px;
-    -fx-background-color: transparent;
-}
-
-.Search-models-label-primary {
-    -fx-font-size: 12px;
-    -fx-text-fill: -text-normal;
-}
-
-.Search-models-label-secondary {
-    -fx-font-size: 11px;
-    -fx-text-fill: dimgray;
-}
-
-#Search-models-list .Search-models-item-active .Search-models-label-primary {
-    -fx-font-size: 12.5px;
-    -fx-text-fill: -text-normal;
-}
-
-#Search-models-list .Search-models-item-active .Search-models-label-secondary {
-    -fx-font-size: 11.5px;
-    -fx-text-fill: dimgray;
-}
-
-#Search-models-list:focused .Search-models-item-active .Search-models-label-primary {
-    -fx-font-size: 12.5px;
-    -fx-text-fill: white;
-}
-
-#Search-models-list:focused .Search-models-item-active .Search-models-label-secondary {
-    -fx-font-size: 11.5px;
-    -fx-text-fill: white;
 }
 
 #Info-filter-label {
@@ -495,38 +488,7 @@ JFXSlider {
     -fx-pref-row-count: 12;
 }
 
-.Anno-item {
-    /* Regular */
-    -fx-cursor: hand;
-    -fx-padding: 4px 2px;
-    -fx-text-fill: dimgray;
-    -fx-background-color: transparent;
-    -fx-focus-traversable: true;
-}
-
-.Anno-item-label {
-    -fx-font-size: 12px;
-    -fx-text-fill: -text-normal;
-    -fx-wrap-text: true;
-}
-
-#Anno-list {
-    -fx-padding: 4px;
-    -fx-background-radius: 3px;
-}
-
-#Anno-list .Anno-item-active .Anno-item-label {
-    -fx-text-fill: -text-normal;
-}
-
-#Anno-list:focused .Anno-item-active .Anno-item-label {
-    -fx-text-fill: white;
-}
-
-#Anno-container {
-    -fx-background-color: transparent;
-}
-
+#Anno-container,
 #Anno-container .viewport {
     -fx-background-color: transparent;
 }
@@ -540,7 +502,7 @@ JFXSlider {
 /* Progress bar's outer track */
 ProgressBar>.track {
     -fx-background-color: #DDDDDDDD;
-    -fx-background-radius: 2.5px;
+    -fx-background-radius: 3px;
     -fx-background-insets: 0;
 }
 
@@ -548,7 +510,7 @@ ProgressBar>.track {
 ProgressBar>.bar,
 ProgressBar:indeterminate>.bar {
     -fx-background-color: derive(-theme-color, 20%);
-    -fx-background-radius: 2.5px;
+    -fx-background-radius: 3px;
     -fx-background-insets: 0;
 }
 
@@ -599,7 +561,7 @@ ProgressBar:indeterminate>.bar {
 
 #Title-minimize-btn:hover,
 #Title-minimize-btn:focused {
-    -fx-background-color: #305890;
+    -fx-background-color: derive(-theme-color, 20%);
 }
 
 #Title-close-btn:hover,
@@ -617,19 +579,25 @@ ProgressBar:indeterminate>.bar {
  *                                                                             *
  ******************************************************************************/
 
+.scroll-bar {
+    -arrow-color: #9696A0;
+    -thumb-color: #BCBCC2;
+    -track-color: #F1F1F5;
+}
+
 .scroll-bar>.thumb {
     -fx-cursor: hand;
-    -fx-background-color: #BCBCC2;
+    -fx-background-color: -thumb-color;
     -fx-background-insets: 0;
-    -fx-background-radius: 2px;
+    -fx-background-radius: 3px;
 }
 
 .scroll-bar:vertical>.track-background,
 .scroll-bar:horizontal>.track-background {
     -fx-cursor: default;
-    -fx-background-color: #F1F1F5;
+    -fx-background-color: -track-color;
     -fx-background-insets: 0;
-    -fx-background-radius: 1px;
+    -fx-background-radius: 3px;
 }
 
 .scroll-bar>.increment-button,
@@ -653,7 +621,7 @@ ProgressBar:indeterminate>.bar {
 /* All Arrows */
 .scroll-bar>.increment-button>.increment-arrow,
 .scroll-bar>.decrement-button>.decrement-arrow {
-    -fx-background-color: #9696A0;
+    -fx-background-color: -arrow-color;
 }
 
 /* Up Arrow */
