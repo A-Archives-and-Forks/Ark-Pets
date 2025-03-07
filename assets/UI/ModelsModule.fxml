@@ -221,7 +221,7 @@
             <String fx:value="btn-with-icon"/>
         </styleClass>
     </JFXButton>
-    <JFXListView fx:id="searchModelView" layoutX="${_modelViewX}" layoutY="100.0" prefHeight="260.0"
+    <JFXListView fx:id="modelListView" layoutX="${_modelViewX}" layoutY="100.0" prefHeight="260.0"
                  prefWidth="${_modelViewW}" styleClass="list">
         <placeholder>
             <VBox id="Loading-empty-tip" alignment="CENTER" spacing="5.0">

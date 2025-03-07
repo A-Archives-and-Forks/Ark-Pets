@@ -56,7 +56,7 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
 
         annoListView.getSelectionModel().getSelectedItems().addListener(
                 (ListChangeListener<JFXListCell<AnnounceItem>>) (observable -> observable.getList().forEach(
-                        (Consumer<JFXListCell<AnnounceItem>>) cell -> selectAnnounce(cell.getItem(), cell))
+                        (Consumer<JFXListCell<AnnounceItem>>) this::selectCell)
                 )
         );
 
@@ -74,7 +74,7 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
             change.next();
             if (change.wasAdded()) {
                 Logger.info("Announce", "Fetched " + change.getAddedSize() + " announcements");
-                change.getAddedSubList().forEach(annoItem -> annoListView.getItems().add(getMenuItem(annoItem, annoListView)));
+                change.getAddedSubList().forEach(anno -> annoListView.getItems().add(createCell(anno)));
             }
             if (!annoListView.getItems().isEmpty()) {
                 annoListView.setFixedCellSize(40);
@@ -84,20 +84,20 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
         });
     }
 
-    private JFXListCell<AnnounceItem> getMenuItem(AnnounceItem annoItem, JFXListView<JFXListCell<AnnounceItem>> container) {
-        double width = container.getPrefWidth() * 0.799;
-        JFXListCell<AnnounceItem> item = new JFXListCell<>();
-        item.getStyleClass().addAll("list-item");
-        Label name = new Label(annoItem.title);
+    private JFXListCell<AnnounceItem> createCell(AnnounceItem anno) {
+        double width = annoListView.getPrefWidth() * 0.799;
+        JFXListCell<AnnounceItem> cell = new JFXListCell<>();
+        cell.getStyleClass().addAll("list-item");
+        Label name = new Label(anno.title);
         name.getStyleClass().addAll("list-item-label");
         name.setPrefWidth(width);
-        item.setPrefWidth(width);
-        item.setGraphic(name);
-        item.setItem(annoItem);
-        return item;
+        cell.setPrefWidth(width);
+        cell.setGraphic(name);
+        cell.setItem(anno);
+        return cell;
     }
 
-    private void selectAnnounce(AnnounceItem anno, JFXListCell<AnnounceItem> cell) {
+    private void selectCell(JFXListCell<AnnounceItem> cell) {
         // Reset
         if (selectedAnnoCell != null) {
             selectedAnnoCell.getStyleClass().setAll("list-item");
@@ -105,6 +105,7 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
         selectedAnnoCell = cell;
         selectedAnnoCell.getStyleClass().add("list-item-active");
         // Display info
+        AnnounceItem anno = cell.getItem();
         annoTitle.setText(anno.title);
         if (anno.date != null && !anno.date.isBlank()) {
             annoDate.setText(anno.date);
