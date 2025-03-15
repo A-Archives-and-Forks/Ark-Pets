@@ -22,11 +22,18 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
 import javafx.scene.control.*;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 
+import java.io.Serializable;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -46,6 +53,8 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
     private JFXButton annoRefetch;
     @FXML
     private Label annoTitle;
+    @FXML
+    private Label annoGroup;
     @FXML
     private Label annoDate;
     @FXML
@@ -71,16 +80,16 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
                 )
         );
 
-        annoRefetch.setOnAction(e -> this.fetchAnnounce());
+        annoRefetch.setOnAction(e -> this.fetchAnnounce(true, () -> {}));
 
         announceReadHandler = new AnnounceReadHandler(app.config);
 
         Platform.runLater(() -> GuiPrefabs.disableScrollPaneCache(annoScroll));
     }
 
-    public void fetchAnnounce() {
+    public void fetchAnnounce(boolean doPopNotice, Runnable onNeedImmediateShow) {
         ObservableList<AnnounceItem> annoItemList = FXCollections.observableArrayList();
-        new FetchAnnounceTask(app.body, GuiTaskStyle.COMMON, annoItemList).start();
+        new FetchAnnounceTask(app.body, doPopNotice ? GuiTaskStyle.COMMON : GuiTaskStyle.HIDDEN, annoItemList).start();
 
         annoListView.getItems().clear();
         annoItemList.addListener((ListChangeListener<AnnounceItem>) change -> {
@@ -90,10 +99,12 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
                 change.getAddedSubList().forEach(anno -> annoListView.getItems().add(createCell(anno)));
                 announceReadHandler.retainAll(change.getAddedSubList());
             }
-            if (!annoListView.getItems().isEmpty()) {
-                annoListView.setFixedCellSize(40);
-                annoListView.getSelectionModel().select(0);
+            for (AnnounceItem anno : annoItemList) {
+                if (!announceReadHandler.isRead(anno) && anno.getParsedGroup().immediateShow) {
+                    onNeedImmediateShow.run();
+                }
             }
+            annoListView.setFixedCellSize(40);
             annoListView.refresh();
         });
     }
@@ -106,10 +117,11 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
         cell.setPrefWidth(width);
         cell.setItem(anno);
         cell.setId(anno.getAnnoId());
-        SVGPath dot = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_DIAMOND, GuiPrefabs.COLOR_WARNING);
+        SVGPath dot = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_DIAMOND, anno.getParsedGroup().color);
         dot.setLayoutX(-offset);
         dot.setScaleX(0.6);
         dot.setScaleY(0.6);
+        dot.setEffect(new DropShadow(null, GuiPrefabs.COLOR_WHITE, 4.0, 0.5, 0.0, 0.0));
         Label name = new Label(anno.title);
         name.getStyleClass().addAll("list-item-label");
         cell.setGraphic(new Group(dot, name));
@@ -137,25 +149,17 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
         // Display info
         AnnounceItem anno = cell.getItem();
         annoTitle.setText(anno.title);
-        if (anno.date != null && !anno.date.isBlank()) {
-            annoDate.setText(anno.date);
-            annoDate.setManaged(true);
-            annoDate.setVisible(true);
-        } else {
-            annoDate.setText("");
-            annoDate.setManaged(false);
-            annoDate.setVisible(false);
-        }
-        if (anno.source != null && !anno.source.isBlank()) {
-            annoGotoOrigin.setOnMouseClicked(e -> NetUtils.browseWebpage(anno.source));
-            annoGotoOrigin.setManaged(true);
-            annoGotoOrigin.setVisible(true);
-        } else {
-            annoGotoOrigin.setOnMouseClicked(null);
-            annoGotoOrigin.setManaged(false);
-            annoGotoOrigin.setVisible(false);
-        }
+        GuiPrefabs.replaceTextAutoVisibility(annoGroup, switch (anno.getParsedGroup()) {
+            case DEFAULT -> null;
+            case INFO -> "普通公告";
+            case WARN -> "重要公告";
+            case DANGER -> "紧急公告";
+        });
+        GuiPrefabs.replaceTextAutoVisibility(annoDate, anno.getFormattedDate(DateTimeFormatter.ISO_DATE));
+        GuiPrefabs.replaceTextAutoVisibility(annoGotoOrigin, anno.source != null ? "查看原文" : null);
+        annoGotoOrigin.setOnMouseClicked(e -> NetUtils.browseWebpage(anno.source));
         // Display announcement
+        annoScroll.setVvalue(0.0);
         annoContainer.getChildren().clear();
         FxmlDocumentController document = FxmlConvertor.toFxmlController(anno.markdown);
         document.getBodyNode().setMaxWidth(annoScroll.getWidth());
@@ -167,6 +171,22 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
         annoContainer.getChildren().add(document.getBodyNode());
         // Mark as read
         announceReadHandler.setRead(anno);
+    }
+
+
+    public enum AnnounceGroup {
+        DEFAULT(GuiPrefabs.COLOR_LIGHT_GRAY, false),
+        INFO(GuiPrefabs.COLOR_INFO, false),
+        WARN(GuiPrefabs.COLOR_WARNING, true),
+        DANGER(GuiPrefabs.COLOR_DANGER, true);
+
+        private final Color color;
+        private final boolean immediateShow;
+
+        AnnounceGroup(Color color, boolean immediateShow) {
+            this.color = color;
+            this.immediateShow = immediateShow;
+        }
     }
 
 
@@ -212,7 +232,7 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
     }
 
 
-    public static class AnnounceItem {
+    public static class AnnounceItem implements Serializable {
         /** @since ArkPets 3.7 */ @JSONField
         public String title;
         /** @since ArkPets 3.7 */ @JSONField
@@ -221,9 +241,38 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
         public String markdown;
         /** @since ArkPets 3.7 */ @JSONField
         public String source;
+        /** @since ArkPets 3.7 */ @JSONField
+        public String group;
 
+        @JSONField(deserialize = false)
         public String getAnnoId() {
             return String.format("%08x", hashCode());
+        }
+
+        @JSONField(deserialize = false)
+        public String getFormattedDate(DateTimeFormatter format) {
+            Instant parsedDate = getParsedDate();
+            return parsedDate != null ? LocalDate.ofInstant(parsedDate, ZoneId.systemDefault()).format(format) : null;
+        }
+
+        @JSONField(deserialize = false)
+        public Instant getParsedDate() {
+            try {
+                return date != null ? Instant.parse(date) : null;
+            } catch (DateTimeParseException e) {
+                Logger.warn("Announce", "Unrecognized date string \"" + date + "\"");
+                return null;
+            }
+        }
+
+        @JSONField(deserialize = false)
+        public AnnounceGroup getParsedGroup() {
+            try {
+                return group != null ? AnnounceGroup.valueOf(group) : null;
+            } catch (IllegalArgumentException e) {
+                Logger.warn("Announce", "Unrecognized group string \"" + group + "\"");
+                return AnnounceGroup.DEFAULT;
+            }
         }
 
         @Override

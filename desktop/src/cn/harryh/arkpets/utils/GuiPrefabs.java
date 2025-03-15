@@ -153,6 +153,18 @@ public class GuiPrefabs {
         node.getStyleClass().setAll(styleClass);
     }
 
+    public static void replaceTextAutoVisibility(Labeled labeled, String text) {
+        if (text == null || text.isEmpty()) {
+            labeled.setText("");
+            labeled.setManaged(false);
+            labeled.setVisible(false);
+        } else {
+            labeled.setText(text);
+            labeled.setManaged(true);
+            labeled.setVisible(true);
+        }
+    }
+
     public static void addTooltip(Control control, String content) {
         Tooltip tooltip = new Tooltip(content);
         tooltip.setStyle(tooltipStyle);
