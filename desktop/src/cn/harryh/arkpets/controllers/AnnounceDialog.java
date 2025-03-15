@@ -15,7 +15,6 @@ import cn.harryh.arkpets.utils.markdown.FxmlDocumentController;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.jfoenix.controls.*;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -39,6 +38,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import static cn.harryh.arkpets.Const.durationFast;
 
 
 public final class AnnounceDialog implements Controller<ArkHomeFX> {
@@ -83,8 +84,6 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
         annoRefetch.setOnAction(e -> this.fetchAnnounce(true, () -> {}));
 
         announceReadHandler = new AnnounceReadHandler(app.config);
-
-        Platform.runLater(() -> GuiPrefabs.disableScrollPaneCache(annoScroll));
     }
 
     public void fetchAnnounce(boolean doPopNotice, Runnable onNeedImmediateShow) {
@@ -159,16 +158,20 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
         GuiPrefabs.replaceTextAutoVisibility(annoGotoOrigin, anno.source != null ? "查看原文" : null);
         annoGotoOrigin.setOnMouseClicked(e -> NetUtils.browseWebpage(anno.source));
         // Display announcement
-        annoScroll.setVvalue(0.0);
-        annoContainer.getChildren().clear();
-        FxmlDocumentController document = FxmlConvertor.toFxmlController(anno.markdown);
-        document.getBodyNode().setMaxWidth(annoScroll.getWidth());
-        document.setHyperlinkConsumer(string -> {
-            if (string.startsWith("https://") || string.startsWith("http://")) {
-                NetUtils.browseWebpage(string);
-            }
+        GuiPrefabs.fadeOutNode(annoContainer, durationFast, e -> {
+            GuiPrefabs.disableScrollPaneCache(annoScroll);
+            annoScroll.setVvalue(0.0);
+            annoContainer.getChildren().clear();
+            FxmlDocumentController document = FxmlConvertor.toFxmlController(anno.markdown);
+            document.getBodyNode().setMaxWidth(annoScroll.getWidth());
+            document.setHyperlinkConsumer(string -> {
+                if (string.startsWith("https://") || string.startsWith("http://")) {
+                    NetUtils.browseWebpage(string);
+                }
+            });
+            annoContainer.getChildren().add(document.getBodyNode());
+            GuiPrefabs.fadeInNode(annoContainer, durationFast, null);
         });
-        annoContainer.getChildren().add(document.getBodyNode());
         // Mark as read
         announceReadHandler.setRead(anno);
     }
@@ -238,11 +241,11 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
         /** @since ArkPets 3.7 */ @JSONField
         public String date;
         /** @since ArkPets 3.7 */ @JSONField
+        public String group;
+        /** @since ArkPets 3.7 */ @JSONField
         public String markdown;
         /** @since ArkPets 3.7 */ @JSONField
         public String source;
-        /** @since ArkPets 3.7 */ @JSONField
-        public String group;
 
         @JSONField(deserialize = false)
         public String getAnnoId() {
@@ -286,7 +289,7 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
 
         @Override
         public int hashCode() {
-            return Objects.hash(title, date, markdown, source);
+            return Objects.hash(title, date, group, markdown, source);
         }
     }
 }
