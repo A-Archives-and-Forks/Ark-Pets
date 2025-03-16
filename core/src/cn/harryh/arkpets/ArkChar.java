@@ -90,7 +90,15 @@ public class ArkChar {
             String path2atlas = assetLocation + separator + modelAssetAccessor.getFirstFileOf(".atlas");
             String path2skel = assetLocation + separator + modelAssetAccessor.getFirstFileOf(".skel");
             // Load atlas
-            TextureAtlas atlas = new TextureAtlas(Gdx.files.internal(path2atlas));
+            FileHandle packFile = Gdx.files.internal(path2atlas);
+            TextureAtlas.TextureAtlasData atlasData = new TextureAtlas.TextureAtlasData(packFile,packFile.parent(),false);
+            if(config.enable_mipmap) {
+                for (TextureAtlas.TextureAtlasData.Page page : atlasData.getPages()) {
+                    page.minFilter = Texture.TextureFilter.MipMapLinearLinear;
+                    page.useMipMaps = true;
+                }
+            }
+            TextureAtlas atlas = new TextureAtlas(atlasData);
             // Load skel (use SkeletonJson instead of SkeletonBinary if the file type is JSON)
             try {
                 SkeletonBinary binary = new SkeletonBinary(atlas);
