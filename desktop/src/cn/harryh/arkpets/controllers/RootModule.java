@@ -289,21 +289,38 @@ public final class RootModule implements Controller<ArkHomeFX> {
         }
         // Entrance button logic
         annoEntrance.setOnAction(e -> {
+            if (annoEntrance.isDisable())
+                return;
+            annoEntrance.setDisable(true);
+            // Blur out background nodes
             List<Pane> panesBelow = List.of(sidebar, wrapper1, wrapper2, wrapper3);
             panesBelow.forEach(pane -> GuiPrefabs.blurNode(pane, durationNormal, null));
+            // Setup and show popup
             JFXDialog popup = new JFXDialog(body, announceDialog.dialog, JFXDialog.DialogTransition.TOP, false);
+            popup.setOnDialogOpened(ev -> popup.setOnMouseClicked(eve -> {
+                popup.setOnMouseClicked(null);
+                // Transfer overlay close
+                announceDialog.dialogReturn.getOnAction().handle(
+                        new ActionEvent(ev.getSource(), ev.getTarget())
+                );
+            }));
             popup.show();
+            // Bind return actions
             announceDialog.dialogReturn.setOnAction(ev -> {
+                announceDialog.dialogReturn.setOnAction(null);
+                // Close popup
                 popup.close();
                 panesBelow.forEach(pane -> GuiPrefabs.deblurNode(pane, durationNormal, null));
+                annoEntrance.setDisable(false);
             });
         });
         // Fetch once on app initialized
         announceDialog.fetchAnnounce(false, () -> {
-                    Logger.info("Announce", "Need immediate show");
-                    annoEntrance.getOnAction().handle(new ActionEvent(this, Event.NULL_SOURCE_TARGET));
-                }
-        );
+            Logger.info("Announce", "Need immediate show");
+            annoEntrance.getOnAction().handle(
+                    new ActionEvent(this, Event.NULL_SOURCE_TARGET)
+            );
+        });
     }
 
     private void initMenuButtons() {

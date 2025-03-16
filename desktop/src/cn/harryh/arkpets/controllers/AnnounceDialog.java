@@ -92,17 +92,23 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
 
         annoListView.getItems().clear();
         annoItemList.addListener((ListChangeListener<AnnounceItem>) change -> {
+            // Receive new items
             change.next();
             if (change.wasAdded() && change.getAddedSize() > 0) {
                 Logger.info("Announce", "Fetched " + change.getAddedSize() + " announcements");
                 change.getAddedSubList().forEach(anno -> annoListView.getItems().add(createCell(anno)));
                 announceReadHandler.retainAll(change.getAddedSubList());
             }
-            for (AnnounceItem anno : annoItemList) {
-                if (!announceReadHandler.isRead(anno) && anno.getParsedGroup().immediateShow) {
-                    onNeedImmediateShow.run();
+            // Handle callback
+            if (onNeedImmediateShow != null) {
+                for (AnnounceItem anno : annoItemList) {
+                    if (!announceReadHandler.isRead(anno) && anno.getParsedGroup().immediateShow) {
+                        onNeedImmediateShow.run();
+                        break;
+                    }
                 }
             }
+            // Refresh listview
             annoListView.setFixedCellSize(40);
             annoListView.refresh();
         });
