@@ -72,8 +72,8 @@ public class ArkChar {
         renderer.setPremultipliedAlpha(true);
         /* Shader pedantic should be disabled to avoid uniform not-found error. */
         ShaderProgram.pedantic = false;
-        shader1 = getShader(pass1VShader, pass1FShader);
-        shader2 = getShader(pass2VShader, pass2FShader);
+        shader1 = getShader(pass1VShader, pass1FShader, config.enable_angle);
+        shader2 = getShader(pass2VShader, pass2FShader, config.enable_angle);
         Logger.debug("Shader", "Shader program compiled");
         // 2.Geometry setup
         EasingFunction easingFunction = ArkConfig.getEasingFunctionFrom(config.transition_type);
@@ -265,8 +265,9 @@ public class ArkChar {
         batch.setShader(null);
     }
 
-    private ShaderProgram getShader(String path2vertex, String path2fragment) {
-        ShaderProgram shader = new ShaderProgram(Gdx.files.internal(path2vertex), Gdx.files.internal(path2fragment));
+    private ShaderProgram getShader(String path2vertex, String path2fragment, boolean gles30) {
+        String ver = gles30 ? "gles30" : "gl21";
+        ShaderProgram shader = new ShaderProgram(Gdx.files.internal(String.format(path2vertex,ver)), Gdx.files.internal(String.format(path2fragment,ver)));
         if (!shader.isCompiled()) {
             Logger.error("Shader", "Shader program failed to compile.");
             Logger.error("Shader", "Shader source: " + path2vertex + " & " + path2fragment);

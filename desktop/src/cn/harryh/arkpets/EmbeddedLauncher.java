@@ -11,6 +11,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Color;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.system.Configuration;
 import org.lwjgl.system.MemoryUtil;
 
 import java.io.File;
@@ -86,6 +87,12 @@ public class EmbeddedLauncher {
         try {
             WindowSystem.init();
             Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+            // Configure ANGLE
+            if (appConfig.enable_angle) {
+                Logger.info("System", "Using ANGLE renderer");
+                config.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.ANGLE_GLES20, 2, 0);
+                Configuration.OPENGL_EXPLICIT_INIT.set(true);
+            }
             // Configure FPS
             config.setForegroundFPS(fpsDefault);
             config.setIdleFPS(fpsDefault);

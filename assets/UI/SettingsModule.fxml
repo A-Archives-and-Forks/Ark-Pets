@@ -131,6 +131,10 @@
                         </HBox>
                     </VBox>
                 </HBox>
+                <HBox>
+                    <JFXCheckBox fx:id="configEnableAngle" mnemonicParsing="false" text="原生渲染"/>
+                    <JFXButton fx:id="configEnableAngleHelp"/>
+                </HBox>
                 <Separator/>
                 <Label styleClass="config-group-title" text="高级设置"/>
                 <HBox>

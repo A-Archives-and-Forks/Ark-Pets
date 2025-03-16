@@ -108,6 +108,8 @@ public class ArkConfig implements Serializable {
     public boolean      window_style_toolwindow;
     /** @since ArkPets 3.2 */ @JSONField(defaultValue = "true")
     public boolean      window_style_topmost;
+    /** @since ArkPets 3.8 */ @JSONField(defaultValue = "false")
+    public boolean      enable_angle;
 
     private ArkConfig() {
     }
