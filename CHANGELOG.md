@@ -18,6 +18,11 @@
 | [`344713c`] | 优化了着色器的少许计算性能开销。                    |
 | [`60e330b`] | 优化了单选框和下拉框组件的鼠标指针表现。                |
 
+| **补丁**                  |                                                                 |
+|:------------------------|:----------------------------------------------------------------|
+| `v3.7.1`<br>[`3d4fd7d`] | 修复了公告 Markdown 渲染发生乱码的问题。<br>修复了不带显式对齐属性的 Markdown 表格列无法被解析的问题。 |
+| `v3.7.1`<br>[`00a6f0a`] | 修复了特殊情况下公告栏无法被正常关闭的问题。                                          |
+
 ## v3.6
 | **新增**                            |                                                       |
 |:----------------------------------|:------------------------------------------------------|
@@ -568,3 +573,5 @@
 [`c797fb0`]: https://github.com/isHarryh/Ark-Pets/commit/c797fb084f5328520d40ccc8933e76e5916f1ef6
 [`83979e6`]: https://github.com/isHarryh/Ark-Pets/commit/83979e658ccf7bbae3ef339c22594fda4956457a
 [`51b04c7`]: https://github.com/isHarryh/Ark-Pets/commit/51b04c7547cb94434fd265861c8c2f19ad7c31ff
+[`3d4fd7d`]: https://github.com/isHarryh/Ark-Pets/commit/3d4fd7d0de215690d3484b1c3c696601b604e97e
+[`00a6f0a`]: https://github.com/isHarryh/Ark-Pets/commit/00a6f0aa7b07eb1e309e95889e387272b50146fd
