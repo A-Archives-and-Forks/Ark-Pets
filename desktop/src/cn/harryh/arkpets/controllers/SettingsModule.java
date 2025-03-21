@@ -292,7 +292,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
 
         configEnableMipMap.setSelected(app.config.enable_mipmap);
         configEnableMipMap.setOnAction(e -> {
-            app.config.enable_angle = configEnableMipMap.isSelected();
+            app.config.enable_mipmap = configEnableMipMap.isSelected();
             app.config.save();
         });
         new HelpHandbookEntrance(app.body, configEnableMipMapHelp) {
