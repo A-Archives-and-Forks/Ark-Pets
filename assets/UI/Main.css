@@ -669,3 +669,9 @@ ProgressBar:indeterminate>.bar {
     -fx-hbar-policy: never;
     -fx-vbar-policy: as-needed;
 }
+
+#Toast {
+    -fx-background-color: white;
+    -fx-background-radius: 3px;
+    -fx-padding: 4px 8px;
+}

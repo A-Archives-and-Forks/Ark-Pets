@@ -5,7 +5,7 @@ package cn.harryh.arkpets.utils;
 
 import cn.harryh.arkpets.Const;
 import com.jfoenix.controls.*;
-import javafx.animation.ScaleTransition;
+import javafx.animation.*;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.value.ChangeListener;
@@ -22,6 +22,9 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+import javafx.util.Duration;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
@@ -601,6 +604,83 @@ public class GuiComponents {
         @Override
         protected SVGPath getIcon() {
             return GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_HELP, GuiPrefabs.COLOR_INFO);
+        }
+    }
+
+
+    public static final class Toast {
+        private final HBox pane;
+        private Timeline line;
+
+        public Toast(HBox toastPane) {
+            this.pane = toastPane;
+        }
+
+        private void buildToast(String text, String okText, String cancelText, Runnable okPressed, Runnable cancelPressed) {
+            pane.getChildren().clear();
+            if (okPressed == null && cancelPressed == null) {
+                JFXButton closeIcon = new JFXButton();
+                closeIcon.setRipplerFill(Color.GRAY);
+                closeIcon.setGraphic(GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_CLOSE, Color.BLACK));
+                closeIcon.setOnAction(e -> GuiPrefabs.fadeOutNode(pane, Const.durationFast, null));
+                pane.getChildren().add(closeIcon);
+            }
+            Text txt = new Text(text);
+            txt.setTextAlignment(TextAlignment.CENTER);
+            pane.getChildren().add(txt);
+            if (okPressed != null) {
+                JFXButton okButton = new JFXButton(okText != null ? okText : "确定");
+                okButton.getStyleClass().add("btn-primary");
+                okButton.setOnAction(e -> {
+                    okPressed.run();
+                    GuiPrefabs.fadeOutNode(pane, Const.durationFast, null);
+                });
+                okButton.setPrefHeight(28.0);
+                okButton.setPrefWidth(60.0);
+                pane.getChildren().add(okButton);
+            }
+            if (cancelPressed != null) {
+                JFXButton cancelButton = new JFXButton(cancelText != null ? cancelText : "取消");
+                cancelButton.getStyleClass().add("btn-plain-dark");
+                cancelButton.setOnAction(e -> {
+                    cancelPressed.run();
+                    GuiPrefabs.fadeOutNode(pane, Const.durationFast, null);
+                });
+                cancelButton.setPrefHeight(28.0);
+                cancelButton.setPrefWidth(60.0);
+                pane.getChildren().add(cancelButton);
+            }
+        }
+
+        public void playAnim(Duration time) {
+            if (line != null) line.stop();
+            if (time == null) return;
+            line = new Timeline(
+                    new KeyFrame(Duration.ZERO, new KeyValue(pane.opacityProperty(), 1)),
+                    new KeyFrame(time, new KeyValue(pane.opacityProperty(), 1)),
+                    new KeyFrame(new Duration(time.toMillis() + Const.durationFast.toMillis()), new KeyValue(pane.opacityProperty(), 0))
+            );
+            line.setOnFinished(e -> {
+                pane.setVisible(false);
+                pane.setManaged(false);
+            });
+            line.setCycleCount(1);
+            line.play();
+        }
+
+        public void show(String text, Duration time) {
+            buildToast(text, null, null, null, null);
+            GuiPrefabs.fadeInNode(pane, Const.durationFast, e -> playAnim(time));
+        }
+
+        public void show(String text, Runnable okPressed, Runnable cancelPressed, Duration time) {
+            buildToast(text, null, null, okPressed, cancelPressed);
+            GuiPrefabs.fadeInNode(pane, Const.durationFast, e -> playAnim(time));
+        }
+
+        public void show(String text, String okText, String cancelText, Runnable okPressed, Runnable cancelPressed, Duration time) {
+            buildToast(text, okText, cancelText, okPressed, cancelPressed);
+            GuiPrefabs.fadeInNode(pane, Const.durationFast, e -> playAnim(time));
         }
     }
 }

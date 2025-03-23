@@ -12,6 +12,7 @@ import cn.harryh.arkpets.controllers.SettingsModule;
 import cn.harryh.arkpets.tray.HostTray;
 import cn.harryh.arkpets.utils.FXMLHelper;
 import cn.harryh.arkpets.utils.FXMLHelper.LoadFXMLResult;
+import cn.harryh.arkpets.utils.GuiComponents;
 import cn.harryh.arkpets.utils.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -39,6 +40,7 @@ public class ArkHomeFX extends Application {
     public ArkConfig config;
     public ModelsDataset modelsDataset;
     public StackPane body;
+    public GuiComponents.Toast toast;
 
     public RootModule rootModule;
     public ModelsModule modelsModule;
