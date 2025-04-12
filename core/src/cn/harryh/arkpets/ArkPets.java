@@ -49,6 +49,10 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     private boolean isToolwindowStyle = false;
     private boolean isAlwaysTransparent = false;
 
+    private boolean isCtrlPressed;
+    private boolean isLeftPressed;
+    private boolean isRightPressed;
+
     public ArkPets(String title) {
         APP_TITLE = title;
     }
@@ -116,11 +120,13 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
         cha.render();
 
         // 2.Select a new animation.
-        AnimData newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime()); // AI anim.
+        AnimData newAnim;
+        if (tray.keepAnim == null) newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime()); // AI anim.
+        else newAnim = tray.keepAnim;
         if (!mouseStatus.dragging) { // If no dragging:
             plane.updatePosition(Gdx.graphics.getDeltaTime());
             if (cha.getPlaying().mobility() != 0) {
-                if (willReachBorder(cha.getPlaying().mobility())) {
+                if (tray.keepAnim == null && willReachBorder(cha.getPlaying().mobility())) {
                     // Turn around if auto-walk cause the collision from screen border.
                     newAnim = cha.getPlaying();
                     newAnim = new AnimData(newAnim.animClip(), null, newAnim.isLoop(), newAnim.isStrict(), -newAnim.mobility());
@@ -135,8 +141,9 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
             newAnim = behavior.defaultAnim();
         } else if (plane.getDropped()) { // If dropped, play the dropped anim.
             newAnim = behavior.dropped();
-        } else if (tray.keepAnim != null) { // If keep-anim is enabled.
-            newAnim = tray.keepAnim;
+        } else if (tray.keepAnim != null) { // If action-mode is enabled.
+            if ( !isCtrlPressed && isLeftPressed) newAnim = behavior.walkAnim(-1);      // Left pressed
+            else if ( !isCtrlPressed && isRightPressed) newAnim = behavior.walkAnim(1); // Right pressed
         }
         changeAnimation(newAnim); // Apply the new anim.
 
@@ -279,12 +286,37 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        return false;
+        if (keycode == Input.Keys.CONTROL_LEFT || keycode == Input.Keys.CONTROL_RIGHT) {
+            isCtrlPressed = true;
+        }
+        if (keycode == Input.Keys.LEFT) {
+            isLeftPressed = true;
+        }
+        if (keycode == Input.Keys.RIGHT) {
+            isRightPressed = true;
+        }
+        if (tray.keepAnim != null && isCtrlPressed) { // Switch animation
+            if (isLeftPressed) {
+                tray.keepAnim = behavior.prevAnim();
+            } else if (isRightPressed) {
+                tray.keepAnim=behavior.nextAnim();
+            }
+        }
+        return true;
     }
 
     @Override
     public boolean keyUp(int keycode) {
-        return false;
+        if (keycode == Input.Keys.CONTROL_LEFT || keycode == Input.Keys.CONTROL_RIGHT) {
+            isCtrlPressed = false;
+        }
+        if (keycode == Input.Keys.LEFT) {
+            isLeftPressed = false;
+        }
+        if (keycode == Input.Keys.RIGHT) {
+            isRightPressed = false;
+        }
+        return true;
     }
 
     @Override
