@@ -10,6 +10,7 @@ import cn.harryh.arkpets.platform.HWndCtrl;
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.transitions.TransitionVector2;
 import cn.harryh.arkpets.tray.MemberTrayImpl;
+import cn.harryh.arkpets.utils.InputComposer;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Plane;
 import com.badlogic.gdx.ApplicationAdapter;
@@ -44,14 +45,11 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
     private final String APP_TITLE;
     private final MouseStatus mouseStatus = new MouseStatus();
+    private final InputComposer inputComposer = new InputComposer();
     private int offsetY = 0;
     private boolean isFocused = false;
     private boolean isToolwindowStyle = false;
     private boolean isAlwaysTransparent = false;
-
-    private boolean isCtrlPressed;
-    private boolean isLeftPressed;
-    private boolean isRightPressed;
 
     public ArkPets(String title) {
         APP_TITLE = title;
@@ -67,6 +65,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
         Gdx.graphics.setForegroundFPS(config.display_fps);
         Logger.debug("App", "OpenGL version is " + Gdx.gl.glGetString(GL20.GL_VERSION));
         Logger.debug("App", "OpenGL vendor is " + Gdx.gl.glGetString(GL20.GL_VENDOR));
+        registerComposerKeyTyped();
 
         // 2.Character setup
         Logger.info("App", "Using model asset \"" + config.character_asset + "\"");
@@ -142,8 +141,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
         } else if (plane.getDropped()) { // If dropped, play the dropped anim.
             newAnim = behavior.dropped();
         } else if (tray.keepAnim != null) { // If action-mode is enabled.
-            if ( !isCtrlPressed && isLeftPressed) newAnim = behavior.walkAnim(-1);      // Left pressed
-            else if ( !isCtrlPressed && isRightPressed) newAnim = behavior.walkAnim(1); // Right pressed
+            if (inputComposer.isLeftPressed()) newAnim = behavior.walkAnim(-1);      // Left pressed
+            else if (inputComposer.isRightPressed()) newAnim = behavior.walkAnim(1); // Right pressed
         }
         changeAnimation(newAnim); // Apply the new anim.
 
@@ -286,20 +285,18 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        if (keycode == Input.Keys.CONTROL_LEFT || keycode == Input.Keys.CONTROL_RIGHT) {
-            isCtrlPressed = true;
-        }
-        if (keycode == Input.Keys.LEFT) {
-            isLeftPressed = true;
-        }
-        if (keycode == Input.Keys.RIGHT) {
-            isRightPressed = true;
-        }
-        if (tray.keepAnim != null && isCtrlPressed) { // Switch animation
-            if (isLeftPressed) {
-                tray.keepAnim = behavior.prevAnim();
-            } else if (isRightPressed) {
-                tray.keepAnim=behavior.nextAnim();
+        inputComposer.handleKeyDown(keycode);
+
+        if (tray.keepAnim != null) { // Switch animation in action mode
+            AnimData data;
+            if (inputComposer.isCtrlLeftPressed()) {
+                data = behavior.prevAnim();
+                tray.keepAnim = data;
+                Logger.debug("Animation","Switch to previous " + data);
+            } else if (inputComposer.isCtrlRightPressed()) {
+                data = behavior.nextAnim();
+                tray.keepAnim = data;
+                Logger.debug("Animation","Switch to next " + data);
             }
         }
         return true;
@@ -307,31 +304,14 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
     @Override
     public boolean keyUp(int keycode) {
-        if (keycode == Input.Keys.CONTROL_LEFT || keycode == Input.Keys.CONTROL_RIGHT) {
-            isCtrlPressed = false;
-        }
-        if (keycode == Input.Keys.LEFT) {
-            isLeftPressed = false;
-        }
-        if (keycode == Input.Keys.RIGHT) {
-            isRightPressed = false;
-        }
+        inputComposer.handleKeyUp(keycode);
         return true;
     }
 
     @Override
     public boolean keyTyped(char character) {
-        if (ArkChar.enableSnapshot && character == 'B') {
-            String name = "temp/snapshot-" + System.currentTimeMillis() + ".png";
-            Pixmap snapshot = Pixmap.createFromFrameBuffer(0, 0, cha.camera.getWidth(), cha.camera.getHeight());
-            PixmapIO.writePNG(new FileHandle(name), snapshot);
-            snapshot.dispose();
-            Logger.debug("App", "Snapshot saved to `" + name + "`");
-        } else {
-            Logger.debug("Plane Debug Msg", plane.getDebugMsg());
-            Logger.debug("Status Msg", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int) Math.ceil((Gdx.app.getJavaHeap() >> 10) / 1024f) + "MB");
-        }
-        return false;
+        inputComposer.handleKeyTyped(character);
+        return true;
     }
 
     @Override
@@ -565,5 +545,22 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
             //Logger.debug("Input", "Transfer mouse event " + msg + " to `" + hWndCtrl.windowText + "` @ " + relX + ", " + relY);
             hWndCtrl.updated().sendMouseEvent(msg, relX, relY);
         }
+    }
+
+    private void registerComposerKeyTyped() {
+        inputComposer.registerKeyTyped('B', () -> {
+            if (ArkChar.enableSnapshot) {
+                String name = "temp/snapshot-"+System.currentTimeMillis()+".png";
+                Pixmap snapshot = Pixmap.createFromFrameBuffer(0, 0, cha.camera.getWidth(), cha.camera.getHeight());
+                PixmapIO.writePNG(new FileHandle(name), snapshot);
+                snapshot.dispose();
+                Logger.debug("App", "Snapshot saved to `" + name + "`");
+            }
+        });
+
+        inputComposer.registerKeyTyped('D', () -> {
+            Logger.debug("Plane Debug Msg", plane.getDebugMsg());
+            Logger.debug("Status Msg", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int) Math.ceil((Gdx.app.getJavaHeap() >> 10) / 1024f) + "MB");
+        });
     }
 }
