@@ -3,6 +3,7 @@
  */
 package cn.harryh.arkpets;
 
+import cn.harryh.arkpets.animations.AnimClip;
 import cn.harryh.arkpets.animations.AnimData;
 import cn.harryh.arkpets.animations.GeneralBehavior;
 import cn.harryh.arkpets.concurrent.SocketClient;
@@ -290,11 +291,15 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
         if (tray.keepAnim != null) { // Switch animation in action mode
             AnimData data;
             if (inputComposer.isCtrlLeftPressed()) {
-                data = behavior.prevAnim();
+                do {
+                    data = behavior.prevAnim();
+                } while (data.animClip().type == AnimClip.AnimType.MOVE); // Skip Move Animation
                 tray.keepAnim = data;
                 Logger.debug("Animation","Switch to previous " + data);
             } else if (inputComposer.isCtrlRightPressed()) {
-                data = behavior.nextAnim();
+                do {
+                    data = behavior.nextAnim();
+                } while (data.animClip().type == AnimClip.AnimType.MOVE);
                 tray.keepAnim = data;
                 Logger.debug("Animation","Switch to next " + data);
             }
