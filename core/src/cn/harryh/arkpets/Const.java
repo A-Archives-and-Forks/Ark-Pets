@@ -12,6 +12,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -79,6 +81,12 @@ public final class Const {
             "^((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?):\\d{1,5}$");
     public static final Pattern hexColorRegex   = Pattern.compile(
             "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$");
+    public static final List<Pattern> titleBlacklist = Arrays.stream(new String[]{
+            "KeyShowView",       // Carnac
+            "keyviz",            // Keyviz
+            "KeyCastOW"          // KeyCastOW
+            // TODO: Add more blacklist here
+    }).map(Pattern::compile).toList();
 
     /** Paths presets definition class.
      */

@@ -26,6 +26,7 @@ import com.badlogic.gdx.graphics.PixmapIO;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import static cn.harryh.arkpets.Const.coreTitleManager;
 
@@ -391,6 +392,11 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
             int wndNum = coreTitleManager.getNumber(hWndCtrl);
             // Distinguish non-peer windows from peers.
             if (wndNum == -1) {
+                boolean isBlackListWindow = false;
+                for (Pattern pattern:Const.titleBlacklist) {
+                    isBlackListWindow = pattern.matcher(hWndCtrl.windowText).matches();
+                }
+                if (isBlackListWindow) continue;
                 if (hWndCtrl.posLeft <= myPos && myPos <= hWndCtrl.posRight) {
                     // This window and the app are share the same vertical line.
                     if (-hWndCtrl.posBottom < plane.borderTop() && -hWndCtrl.posTop > plane.borderBottom()) {
@@ -567,6 +573,12 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
         inputComposer.registerKeyTyped('D', () -> {
             Logger.debug("Plane Debug Msg", plane.getDebugMsg());
             Logger.debug("Status Msg", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int) Math.ceil((Gdx.app.getJavaHeap() >> 10) / 1024f) + "MB");
+        });
+
+        inputComposer.registerKeyTyped('W', () -> {
+            for (HWndCtrl hWndCtrl : WindowSystem.getWindowList(true)) {
+                Logger.debug("HWND Debug Msg", hWndCtrl.toString());
+            }
         });
     }
 }
