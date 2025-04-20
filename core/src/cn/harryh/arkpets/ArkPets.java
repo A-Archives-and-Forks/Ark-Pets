@@ -132,7 +132,8 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
                     newAnim = new AnimData(newAnim.animClip(), null, newAnim.isLoop(), newAnim.isStrict(), -newAnim.mobility());
                     tray.keepAnim = tray.keepAnim == null ? null : newAnim;
                 }
-                walkWindow(0.85f * cha.getPlaying().mobility());
+                float fac = inputComposer.isCtrlPressed() ? 1.85f : 0.85f;
+                walkWindow(fac * cha.getPlaying().mobility());
             }
         } else { // If dragging:
             newAnim = behavior.dragging();
@@ -290,13 +291,13 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
         if (tray.keepAnim != null) { // Switch animation in action mode
             AnimData data;
-            if (inputComposer.isCtrlLeftPressed()) {
+            if (inputComposer.isUpPressed()) {
                 do {
                     data = behavior.prevAnim();
                 } while (data.animClip().type == AnimClip.AnimType.MOVE); // Skip Move Animation
                 tray.keepAnim = data;
                 Logger.debug("Animation","Switch to previous " + data);
-            } else if (inputComposer.isCtrlRightPressed()) {
+            } else if (inputComposer.isDownPressed()) {
                 do {
                     data = behavior.nextAnim();
                 } while (data.animClip().type == AnimClip.AnimType.MOVE);

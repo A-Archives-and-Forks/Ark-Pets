@@ -8,6 +8,9 @@ public class InputComposer {
     private boolean isCtrlPressed;
     private boolean isLeftPressed;
     private boolean isRightPressed;
+    private boolean isUpPressed;
+    private boolean isDownPressed;
+
     private final IntMap<Runnable> keyMap = new IntMap<>();
 
     public void handleKeyDown(int keycode) {
@@ -20,6 +23,12 @@ public class InputComposer {
         if (keycode == Input.Keys.RIGHT) {
             isRightPressed = true;
         }
+        if (keycode == Input.Keys.UP) {
+            isUpPressed = true;
+        }
+        if (keycode == Input.Keys.DOWN) {
+            isDownPressed = true;
+        }
     }
 
     public void handleKeyUp(int keycode) {
@@ -31,6 +40,12 @@ public class InputComposer {
         }
         if (keycode == Input.Keys.RIGHT) {
             isRightPressed = false;
+        }
+        if (keycode == Input.Keys.UP) {
+            isUpPressed = false;
+        }
+        if (keycode == Input.Keys.DOWN) {
+            isDownPressed = false;
         }
     }
 
@@ -48,18 +63,26 @@ public class InputComposer {
     }
 
     public boolean isLeftPressed() {
-        return !isCtrlPressed && isLeftPressed;
+        return isLeftPressed;
     }
 
     public boolean isRightPressed() {
-        return !isCtrlPressed && isRightPressed;
+        return isRightPressed;
     }
 
-    public boolean isCtrlLeftPressed() {
-        return isCtrlPressed && isLeftPressed;
+    public boolean isUpPressed() {
+        return !isCtrlPressed && isUpPressed;
     }
 
-    public boolean isCtrlRightPressed() {
-        return isCtrlPressed && isRightPressed;
+    public boolean isDownPressed() {
+        return !isCtrlPressed && isDownPressed;
+    }
+
+    public boolean isCtrlUpPressed() {
+        return isCtrlPressed && isUpPressed;
+    }
+
+    public boolean isCtrlDownPressed() {
+        return isCtrlPressed && isDownPressed;
     }
 }
