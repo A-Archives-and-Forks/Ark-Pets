@@ -10,10 +10,7 @@ import cn.harryh.arkpets.concurrent.ProcessPool;
 import cn.harryh.arkpets.guitasks.CheckAppUpdateTask;
 import cn.harryh.arkpets.guitasks.DeleteTempFilesTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
-import cn.harryh.arkpets.utils.ArgPending;
-import cn.harryh.arkpets.utils.FXMLHelper;
-import cn.harryh.arkpets.utils.GuiPrefabs;
-import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.utils.*;
 import com.jfoenix.controls.*;
 import javafx.application.Platform;
 import javafx.concurrent.ScheduledService;
@@ -26,6 +23,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.SVGPath;
@@ -90,6 +88,9 @@ public final class RootModule implements Controller<ArkHomeFX> {
     @FXML
     private JFXButton titleCloseBtn;
 
+    @FXML
+    private HBox toast;
+
     private AnnounceDialog announceDialog;
 
     private ArkHomeFX app;
@@ -112,6 +113,7 @@ public final class RootModule implements Controller<ArkHomeFX> {
         app.config = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
         isNewcomer = app.config.isNewcomer();
         app.config.save();
+        app.toast = new GuiComponents.Toast(toast);
 
         initAnnoEntrance();
         initMenuButtons();

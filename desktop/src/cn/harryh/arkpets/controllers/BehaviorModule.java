@@ -5,6 +5,7 @@ package cn.harryh.arkpets.controllers;
 
 import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.ArkHomeFX;
+import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.transitions.EasingFunction;
 import cn.harryh.arkpets.utils.GuiComponents.*;
 import cn.harryh.arkpets.utils.GuiPrefabs;
@@ -314,6 +315,7 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
         configPhysicRestore.setOnMouseClicked(e -> {
             configPhysicRestoreEvent.handle(e);
             app.rootModule.moduleWrapperComposer.activate(1);
+            app.toast.showText("已恢复默认物理设置", Const.durationLong);
         });
     }
 

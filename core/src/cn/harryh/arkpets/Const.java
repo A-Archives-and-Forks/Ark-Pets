@@ -49,6 +49,7 @@ public final class Const {
     // Duration presets
     public static final Duration durationFast   = new Duration(150);
     public static final Duration durationNormal = new Duration(300);
+    public static final Duration durationLong   = new Duration(1500);
 
     // Encoding presets
     public static final String charsetDefault   = "UTF-8";
