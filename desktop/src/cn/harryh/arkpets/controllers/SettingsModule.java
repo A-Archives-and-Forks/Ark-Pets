@@ -154,13 +154,13 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
 
     private void initConfigDisplay() {
         new ComboBoxSetup<>(configDisplayScale).setItems(new NamedItem<>("x0.5", 0.5f),
-                new NamedItem<>("x0.75", 0.75f),
-                new NamedItem<>("x1.0", 1f),
-                new NamedItem<>("x1.25", 1.25f),
-                new NamedItem<>("x1.5", 1.5f),
-                new NamedItem<>("x2.0", 2f),
-                new NamedItem<>("x2.5", 2.5f),
-                new NamedItem<>("x3.0", 3.0f))
+                        new NamedItem<>("x0.75", 0.75f),
+                        new NamedItem<>("x1.0", 1f),
+                        new NamedItem<>("x1.25", 1.25f),
+                        new NamedItem<>("x1.5", 1.5f),
+                        new NamedItem<>("x2.0", 2f),
+                        new NamedItem<>("x2.5", 2.5f),
+                        new NamedItem<>("x3.0", 3.0f))
                 .selectValue(app.config.display_scale, "x" + app.config.display_scale + "（自定义）")
                 .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
                     app.config.display_scale = newValue.value();
@@ -168,10 +168,10 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     displayScaleHelpEntrance.refreshAndEnsureDisplayed();
                 });
         new ComboBoxSetup<>(configDisplayFps).setItems(new NamedItem<>("25", 25),
-                new NamedItem<>("30", 30),
-                new NamedItem<>("45", 45),
-                new NamedItem<>("60", 60),
-                new NamedItem<>("120", 120))
+                        new NamedItem<>("30", 30),
+                        new NamedItem<>("45", 45),
+                        new NamedItem<>("60", 60),
+                        new NamedItem<>("120", 120))
                 .selectValue(app.config.display_fps, app.config.display_fps + "（自定义）")
                 .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
                     app.config.display_fps = newValue.value();
@@ -179,10 +179,10 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     displayFpsHelpEntrance.refreshAndEnsureDisplayed();
                 });
         new ComboBoxSetup<>(configCanvasSize).setItems(new NamedItem<>("最宽", 4),
-                new NamedItem<>("较宽", 8),
-                new NamedItem<>("标准", 16),
-                new NamedItem<>("较窄", 32),
-                new NamedItem<>("最窄", 0))
+                        new NamedItem<>("较宽", 8),
+                        new NamedItem<>("标准", 16),
+                        new NamedItem<>("较窄", 32),
+                        new NamedItem<>("最窄", 0))
                 .selectValue(app.config.canvas_fitting_samples, "每" + app.config.canvas_fitting_samples + "帧采样（自定义）")
                 .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
                     app.config.canvas_fitting_samples = newValue.value();
@@ -191,7 +191,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         new HelpHandbookEntrance(app.body, configCanvasSizeHelp) {
             @Override
             public Handbook getHandbook() {
-                return new ControlHelpHandbook((Labeled)configCanvasSize.getParent().getChildrenUnmodifiable().get(0)) {
+                return new ControlHelpHandbook((Labeled) configCanvasSize.getParent().getChildrenUnmodifiable().get(0)) {
                     @Override
                     public String getContent() {
                         return "设置桌宠窗口边界的相对大小。更宽的边界能够防止动画溢出；更窄的边界能够防止鼠标误触。";

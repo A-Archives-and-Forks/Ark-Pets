@@ -251,7 +251,7 @@ public class DynamicOrthographicCamara extends OrthographicCamera {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            Insert insert = (Insert)o;
+            Insert insert = (Insert) o;
             return top == insert.top && bottom == insert.bottom && left == insert.left && right == insert.right;
         }
 

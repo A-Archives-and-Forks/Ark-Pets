@@ -259,12 +259,12 @@ public class ArkConfig implements Serializable {
             ArrayList<Monitor> list = new ArrayList<>();
             for (Object o : array)
                 if (o instanceof JSONObject)
-                    list.add(fromJSONObject((JSONObject)o));
+                    list.add(fromJSONObject((JSONObject) o));
             return list.toArray(new Monitor[0]);
         }
 
         public static JSONObject toJSONObject(Monitor monitor) {
-            return (JSONObject)JSON.toJSON(monitor);
+            return (JSONObject) JSON.toJSON(monitor);
         }
 
         public static JSONArray toJSONArray(Monitor[] monitors) {

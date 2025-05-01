@@ -3,8 +3,8 @@
  */
 package cn.harryh.arkpets;
 
-import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.platform.WindowSystem;
+import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
@@ -27,7 +27,7 @@ import static cn.harryh.arkpets.Const.*;
 public class EmbeddedLauncher {
     // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
 
-    public static void main (String[] args) {
+    public static void main(String[] args) {
         // Disable assistive technologies
         System.setProperty("javax.accessibility.assistive_technologies", "");
         ArgPending.argCache = args;
@@ -61,7 +61,7 @@ public class EmbeddedLauncher {
         new ArgPending("--load-lib", args) {
             @Override
             protected void process(String command, String addition) {
-                Logger.info("System", "Loading the specified library \"" + addition +"\"");
+                Logger.info("System", "Loading the specified library \"" + addition + "\"");
                 try {
                     System.load(addition);
                 } catch (UnsatisfiedLinkError e) {

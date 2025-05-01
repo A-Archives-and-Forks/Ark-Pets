@@ -376,7 +376,7 @@ public class GuiComponents {
         }
 
         protected double getWidth() {
-            Region region = (Region)container.getParent();
+            Region region = (Region) container.getParent();
             double regionWidth = region.getWidth() - region.getInsets().getLeft() - region.getInsets().getRight();
             return regionWidth * widthScale;
         }

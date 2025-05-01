@@ -22,6 +22,7 @@ public class NetUtils {
     private static final DecimalFormat df = new DecimalFormat("0.0");
 
     public static final ArrayList<Source> ghSources;
+
     static {
         ghSources = new ArrayList<>();
         ghSources.add(new GitHubSource("GitHub",
@@ -33,13 +34,14 @@ public class NetUtils {
     }
 
     public static final Map<Long, String> sizeMap;
+
     static {
         sizeMap = new HashMap<>();
         sizeMap.put(1L, "B");
-        sizeMap.put((long)k, "KB");
-        sizeMap.put((long)k * k, "MB");
-        sizeMap.put((long)k * k * k, "GB");
-        sizeMap.put((long)k * k * k * k, "TB");
+        sizeMap.put((long) k, "KB");
+        sizeMap.put((long) k * k, "MB");
+        sizeMap.put((long) k * k * k, "GB");
+        sizeMap.put((long) k * k * k * k, "TB");
     }
 
     /** Gets a formatted size string, e.g."{@code 114.5 MB}".
@@ -51,7 +53,7 @@ public class NetUtils {
             return "0";
         for (Long unitSize : sizeMap.keySet()) {
             if (unitSize <= byteSize && byteSize < unitSize * k)
-                return df.format((double)byteSize / unitSize) + " " + sizeMap.get(unitSize);
+                return df.format((double) byteSize / unitSize) + " " + sizeMap.get(unitSize);
         }
         return "Unknown size";
     }
@@ -95,7 +97,7 @@ public class NetUtils {
                 long start = System.currentTimeMillis();
                 socket.connect(address, timeoutMillis);
                 long stop = System.currentTimeMillis();
-                delayMillis = (int)(stop - start);
+                delayMillis = (int) (stop - start);
             } catch (IOException ignored) {
             }
             try {
@@ -117,7 +119,7 @@ public class NetUtils {
                 throws IOException {
             HttpsURLConnection connection = null;
             try {
-                connection = (HttpsURLConnection)url.openConnection();
+                connection = (HttpsURLConnection) url.openConnection();
                 if (trustAll) {
                     connection.setSSLSocketFactory(getTrustAnySSLSocketFactory());
                     connection.setHostnameVerifier(getTrustAnyHostnameVerifier());
@@ -306,7 +308,7 @@ public class NetUtils {
         public long lastErrorTime = -1;
 
         public Source(String tag, String preUrl) {
-            this.tag= tag;
+            this.tag = tag;
             this.preUrl = preUrl;
         }
 

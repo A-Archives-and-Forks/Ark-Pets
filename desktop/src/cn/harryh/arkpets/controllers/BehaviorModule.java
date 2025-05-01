@@ -178,8 +178,8 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
         DotPickerSetup setupDeployPosition = new DotPickerSetup(configDeployPosition);
         setupDeployPosition.setRelXY(app.config.initial_position_x, app.config.initial_position_y);
         setupDeployPosition.setOnDotPicked(e -> {
-            float x = (float)setupDeployPosition.getRelX();
-            float y = (float)setupDeployPosition.getRelY();
+            float x = (float) setupDeployPosition.getRelX();
+            float y = (float) setupDeployPosition.getRelY();
             Logger.debug("Config", "Specified deploy position to " + x + ", " + y);
             app.config.initial_position_x = x;
             app.config.initial_position_y = y;

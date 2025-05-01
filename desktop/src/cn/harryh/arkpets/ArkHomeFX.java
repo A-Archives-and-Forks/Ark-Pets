@@ -60,7 +60,7 @@ public class ArkHomeFX extends Application {
         // Load FXML for root node.
         LoadFXMLResult<ArkHomeFX> fxml0 = FXMLHelper.loadFXML(getClass().getResource("/UI/RootModule.fxml"));
         fxml0.initializeWith(this);
-        rootModule = (RootModule)fxml0.controller();
+        rootModule = (RootModule) fxml0.controller();
         body = rootModule.body;
 
         // Setup scene and primary stage.
