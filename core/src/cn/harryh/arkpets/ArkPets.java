@@ -290,7 +290,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     @Override
     public boolean keyTyped(char character) {
         if (ArkChar.enableSnapshot && character == 'B') {
-            String name = "temp/snapshot-"+System.currentTimeMillis()+".png";
+            String name = "temp/snapshot-" + System.currentTimeMillis() + ".png";
             Pixmap snapshot = Pixmap.createFromFrameBuffer(0, 0, cha.camera.getWidth(), cha.camera.getHeight());
             PixmapIO.writePNG(new FileHandle(name), snapshot);
             snapshot.dispose();

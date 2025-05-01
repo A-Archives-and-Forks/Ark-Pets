@@ -5,7 +5,10 @@ package cn.harryh.arkpets.utils;
 
 import cn.harryh.arkpets.Const;
 import com.jfoenix.controls.*;
-import javafx.animation.*;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.ScaleTransition;
+import javafx.animation.Timeline;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
 import javafx.beans.value.ChangeListener;

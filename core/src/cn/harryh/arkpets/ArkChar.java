@@ -91,8 +91,8 @@ public class ArkChar {
             String path2skel = assetLocation + separator + modelAssetAccessor.getFirstFileOf(".skel");
             // Load atlas
             FileHandle packFile = Gdx.files.internal(path2atlas);
-            TextureAtlas.TextureAtlasData atlasData = new TextureAtlas.TextureAtlasData(packFile,packFile.parent(),false);
-            if(config.enable_mipmap) {
+            TextureAtlas.TextureAtlasData atlasData = new TextureAtlas.TextureAtlasData(packFile, packFile.parent(), false);
+            if (config.enable_mipmap) {
                 for (TextureAtlas.TextureAtlasData.Page page : atlasData.getPages()) {
                     page.minFilter = Texture.TextureFilter.MipMapLinearLinear;
                     page.useMipMaps = true;
@@ -275,7 +275,7 @@ public class ArkChar {
 
     private ShaderProgram getShader(String path2vertex, String path2fragment, boolean gles30) {
         String ver = gles30 ? "gles30" : "gl21";
-        ShaderProgram shader = new ShaderProgram(Gdx.files.internal(String.format(path2vertex,ver)), Gdx.files.internal(String.format(path2fragment,ver)));
+        ShaderProgram shader = new ShaderProgram(Gdx.files.internal(String.format(path2vertex, ver)), Gdx.files.internal(String.format(path2fragment, ver)));
         if (!shader.isCompiled()) {
             Logger.error("Shader", "Shader program failed to compile.");
             Logger.error("Shader", "Shader source: " + path2vertex + " & " + path2fragment);
@@ -286,7 +286,7 @@ public class ArkChar {
     }
 
     private void adjustCanvas(AnimClipGroup animClips, int fittingSamples) {
-        float timePerSample = fittingSamples / (float)fpsDefault;
+        float timePerSample = fittingSamples / (float) fpsDefault;
         // Prepare a Frame Buffer Object
         camera.setInsertMaxed();
         camera.getFBO().begin();

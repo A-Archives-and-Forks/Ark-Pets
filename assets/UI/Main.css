@@ -583,6 +583,12 @@ ProgressBar:indeterminate>.bar {
     -fx-background-radius: 0 8px 0 0;
 }
 
+#Toast {
+    -fx-padding: 4px 8px;
+    -fx-background-color: white;
+    -fx-background-radius: 3px;
+}
+
 /*******************************************************************************
  *                                                                             *
  * 7. ScrollBar and ScrollPane                                                 *
@@ -668,10 +674,4 @@ ProgressBar:indeterminate>.bar {
 .flow-wrapper {
     -fx-hbar-policy: never;
     -fx-vbar-policy: as-needed;
-}
-
-#Toast {
-    -fx-background-color: white;
-    -fx-background-radius: 3px;
-    -fx-padding: 4px 8px;
 }

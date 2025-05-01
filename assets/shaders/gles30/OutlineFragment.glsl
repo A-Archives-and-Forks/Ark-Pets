@@ -24,7 +24,7 @@ const float c_seamCoef = 0.6;
 const float c_outlineOverstate = 10.0;
 const float c_shadowOffset = 2.0;
 
-const float gaussianNeighborKernel[25] = float[25] (
+const float gaussianNeighborKernel[25] = float[25](
 0.0035434, 0.0158805, 0.0261825, 0.0158805, 0.0035434,
 0.0158805, 0.0711714, 0.1173418, 0.0711714, 0.0158805,
 0.0261825, 0.1173418, 0.0      , 0.1173418, 0.0261825,
