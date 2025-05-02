@@ -143,7 +143,7 @@ public class ArkChar {
         stageInsertMap = new HashMap<>();
         for (AnimStage stage : animList.clusterByStage().keySet()) {
             // Figure out the suitable canvas size
-            adjustCanvas(animList.findAnimations(stage), config.canvas_fitting_samples);
+            adjustCanvas(stage, config.canvas_fitting_samples);
             if (!camera.isInsertMaxed()) {
                 // Succeeded
                 stageInsertMap.put(stage, camera.getInsert().clone());
@@ -226,7 +226,7 @@ public class ArkChar {
     /** Renders the character to the graphics.
      * The animation will be updated according to {@code Gdx.graphics.getDeltaTime()}.
      */
-    protected void renderToBatch() {
+    protected void render() {
         // Update skeleton position and geometry
         position.reset(camera.getWidth() >> 1, position.end().y, position.end().z);
         position.addProgress(Gdx.graphics.getDeltaTime());
@@ -273,6 +273,20 @@ public class ArkChar {
         batch.setShader(null);
     }
 
+    /** Renders the character to the graphics naively, ignoring delta time and additional shaders.
+     */
+    protected void renderNaive() {
+        position.reset(camera.getWidth() >> 1, position.end().y, position.end().z);
+        skeleton.setPosition(position.end().x, position.end().y + offsetY.end());
+        skeleton.setScaleX(position.end().z);
+        skeleton.updateWorldTransform();
+        animationState.apply(skeleton);
+        batch.getProjectionMatrix().set(camera.combined);
+        batch.begin();
+        renderer.draw(batch, skeleton);
+        batch.end();
+    }
+
     private ShaderProgram getShader(String path2vertex, String path2fragment, boolean gles30) {
         String ver = gles30 ? "gles30" : "gl21";
         ShaderProgram shader = new ShaderProgram(Gdx.files.internal(String.format(path2vertex, ver)), Gdx.files.internal(String.format(path2fragment, ver)));
@@ -285,14 +299,14 @@ public class ArkChar {
         return shader;
     }
 
-    private void adjustCanvas(AnimClipGroup animClips, int fittingSamples) {
+    private void adjustCanvas(AnimStage stage, int fittingSamples) {
         float timePerSample = fittingSamples / (float) fpsDefault;
         // Prepare a Frame Buffer Object
         camera.setInsertMaxed();
         camera.getFBO().begin();
         ScreenUtils.clear(0, 0, 0, 0, true);
         // Render all animations to the FBO
-        for (AnimClip animClip : animClips) {
+        for (AnimClip animClip : animList.findAnimations(stage)) {
             composer.reset();
             composer.offer(new AnimData(animClip));
             float totalTime = animationState.getCurrent(0).getAnimation().getDuration();
@@ -300,11 +314,11 @@ public class ArkChar {
                 if (timePerSample <= 0 || totalTime <= timePerSample * 2) {
                     // Render the middle frame as the only sample
                     animationState.update(totalTime / 2);
-                    renderAsSnapshot();
+                    renderNaive();
                 } else {
                     // Render each interval frame as samples
                     for (float t = 0; t < totalTime; t += timePerSample) {
-                        renderAsSnapshot();
+                        renderNaive();
                         animationState.update(timePerSample);
                     }
                 }
@@ -322,22 +336,12 @@ public class ArkChar {
             snapshot.drawLine(0, camera.getHeight() + insert.top, camera.getWidth(), camera.getHeight() + insert.top);
             snapshot.drawLine(-insert.left, 0, -insert.left, camera.getHeight());
             snapshot.drawLine(camera.getWidth() + insert.right, 0, camera.getWidth() + insert.right, camera.getHeight());
-            PixmapIO.writePNG(new FileHandle("temp/adjustCanvasSnapshot.png"), snapshot);
+            FileHandle dir = new FileHandle("temp/");
+            dir.mkdirs();
+            FileHandle file = dir.child("acSnapshot-" + skeleton.toString() + "-" + stage.id() + ".png");
+            PixmapIO.writePNG(file, snapshot);
         }
         camera.setInsert(insert);
         snapshot.dispose();
-    }
-
-    private void renderAsSnapshot() {
-        position.reset(camera.getWidth() >> 1, position.end().y, position.end().z);
-        skeleton.setPosition(position.end().x, position.end().y + offsetY.end());
-        skeleton.setScaleX(position.end().z);
-        skeleton.updateWorldTransform();
-        animationState.apply(skeleton);
-        batch.getProjectionMatrix().set(camera.combined);
-
-        batch.begin();
-        renderer.draw(batch, skeleton);
-        batch.end();
     }
 }

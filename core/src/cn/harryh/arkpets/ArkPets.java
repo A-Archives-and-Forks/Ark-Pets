@@ -6,10 +6,10 @@ package cn.harryh.arkpets;
 import cn.harryh.arkpets.animations.AnimData;
 import cn.harryh.arkpets.animations.GeneralBehavior;
 import cn.harryh.arkpets.concurrent.SocketClient;
-import cn.harryh.arkpets.transitions.TransitionVector2;
-import cn.harryh.arkpets.tray.MemberTrayImpl;
 import cn.harryh.arkpets.platform.HWndCtrl;
 import cn.harryh.arkpets.platform.WindowSystem;
+import cn.harryh.arkpets.transitions.TransitionVector2;
+import cn.harryh.arkpets.tray.MemberTrayImpl;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Plane;
 import com.badlogic.gdx.ApplicationAdapter;
@@ -113,7 +113,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     @Override
     public void render() {
         // 1.Render the next frame.
-        cha.renderToBatch();
+        cha.render();
 
         // 2.Select a new animation.
         AnimData newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime()); // AI anim.
