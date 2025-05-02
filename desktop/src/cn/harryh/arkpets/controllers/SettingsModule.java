@@ -20,7 +20,6 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
@@ -60,21 +59,15 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private JFXButton configCanvasSizeHelp;
 
     @FXML
+    private JFXTabPane configRenderTabPane;
+    @FXML
     private JFXComboBox<NamedItem<Integer>> configCanvasColor;
-    @FXML
-    private JFXButton toggleConfigRenderOutline;
-    @FXML
-    private HBox wrapperConfigRenderOutline;
     @FXML
     private JFXComboBox<NamedItem<Integer>> configRenderOutline;
     @FXML
     private JFXComboBox<NamedItem<Integer>> configRenderOutlineColor;
     @FXML
     private JFXComboBox<NamedItem<Float>> configRenderOutlineWidth;
-    @FXML
-    private JFXButton toggleConfigRenderOpacity;
-    @FXML
-    private HBox wrapperConfigRenderOpacity;
     @FXML
     private JFXSlider configRenderOpacityNormal;
     @FXML
@@ -84,15 +77,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     @FXML
     private Label configRenderOpacityDimValue;
     @FXML
-    private JFXButton toggleConfigRenderShadow;
-    @FXML
-    private HBox wrapperConfigRenderShadow;
-    @FXML
     private JFXComboBox<NamedItem<Integer>> configRenderShadowColor;
-    @FXML
-    private JFXButton toggleConfigRenderAdvanced;
-    @FXML
-    private HBox wrapperConfigRenderAdvanced;
     @FXML
     private JFXCheckBox configEnableAngle;
     @FXML
@@ -200,6 +185,8 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             }
         };
 
+        new TabPaneSetup(configRenderTabPane, durationFast).makeResponsive();
+
         new ComboBoxSetup<>(configCanvasColor).setItems(new NamedItem<>("透明", 0x00000000),
                         new NamedItem<>("绿色", 0x00FF00FF),
                         new NamedItem<>("蓝色", 0x0000FFFF),
@@ -210,7 +197,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     app.config.save();
                 });
 
-        GuiPrefabs.bindToggleAndWrapper(toggleConfigRenderOutline, wrapperConfigRenderOutline, durationFast);
         new ComboBoxSetup<>(configRenderOutline).setItems(new NamedItem<>("始终开启", ArkConfig.RenderOutline.ALWAYS.ordinal()),
                         new NamedItem<>("处于前台时", ArkConfig.RenderOutline.FOCUSED.ordinal()),
                         new NamedItem<>("点击时", ArkConfig.RenderOutline.PRESSING.ordinal()),
@@ -240,7 +226,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     app.config.save();
                 });
 
-        GuiPrefabs.bindToggleAndWrapper(toggleConfigRenderOpacity, wrapperConfigRenderOpacity, durationFast);
         final int minOpacity = 10;
         GuiComponents.SliderSetup<Integer> setupRenderOpacityDim = new GuiComponents.SimpleIntegerSliderSetup(configRenderOpacityDim);
         setupRenderOpacityDim
@@ -267,7 +252,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         setupRenderOpacityDim.setRange(minOpacity, setupRenderOpacityNormal.getValidatedValue());
         setupRenderOpacityDim.setDisable(minOpacity >= setupRenderOpacityNormal.getValidatedValue());
 
-        GuiPrefabs.bindToggleAndWrapper(toggleConfigRenderShadow, wrapperConfigRenderShadow, durationFast);
         new ComboBoxSetup<>(configRenderShadowColor).setItems(new NamedItem<>("禁用", 0x00000000),
                         new NamedItem<>("轻微", 0x00000077),
                         new NamedItem<>("标准", 0x000000BB),
@@ -278,7 +262,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     app.config.save();
                 });
 
-        GuiPrefabs.bindToggleAndWrapper(toggleConfigRenderAdvanced, wrapperConfigRenderAdvanced, durationFast);
         configEnableAngle.setSelected(app.config.enable_angle);
         configEnableAngle.setOnAction(e -> {
             app.config.enable_angle = configEnableAngle.isSelected();

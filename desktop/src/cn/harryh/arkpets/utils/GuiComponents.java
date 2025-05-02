@@ -276,6 +276,47 @@ public class GuiComponents {
     }
 
 
+    /** A useful tool to make a {@link TabPane} to be responsive to its content's height.
+     */
+    public static class TabPaneSetup {
+        private final TabPane tabPane;
+        private final Duration animDuration;
+        private final double tabHeaderHeight;
+
+        private final static double defaultTabHeaderHeight = 50.0;
+
+        public TabPaneSetup(TabPane tabPane, Duration animDuration) {
+            this(tabPane, animDuration, defaultTabHeaderHeight);
+        }
+
+        public TabPaneSetup(TabPane tabPane, Duration animDuration, double tabHeaderHeight) {
+            this.tabPane = tabPane;
+            this.animDuration = animDuration;
+            this.tabHeaderHeight = tabHeaderHeight;
+        }
+
+        public void makeResponsive() {
+            tabPane.getSelectionModel().clearSelection();
+            tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> responseTabHeight(newValue));
+        }
+
+        private void responseTabHeight(Tab tab) {
+            if (tab != null && tab.getContent() instanceof Region tabContent) {
+                tabContent.applyCss();
+                tabContent.layout();
+
+                double targetHeight = tabContent.prefHeight(-1) + tabHeaderHeight;
+
+                Timeline timeline = new Timeline(
+                        new KeyFrame(Duration.ZERO, new KeyValue(tabPane.prefHeightProperty(), tabPane.getHeight())),
+                        new KeyFrame(animDuration, new KeyValue(tabPane.prefHeightProperty(), targetHeight))
+                );
+                timeline.play();
+            }
+        }
+    }
+
+
     public static final class SimpleIntegerSliderSetup extends SliderSetup<Integer> {
         public SimpleIntegerSliderSetup(Slider slider) {
             super(slider);
