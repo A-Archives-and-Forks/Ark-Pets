@@ -68,6 +68,10 @@ public class ArkConfig implements Serializable {
     public boolean      display_multi_monitors;
     /** @since ArkPets 3.5 */ @JSONField(defaultValue = "0.3")
     public float        render_animation_mixture;
+    /** @since ArkPets 3.8 */ @JSONField(defaultValue = "false")
+    public boolean      render_enable_angle;
+    /** @since ArkPets 3.8 */ @JSONField(defaultValue = "true")
+    public boolean      render_enable_mipmap;
     /** @since ArkPets 3.3 */ @JSONField(defaultValue = "1")
     public int          render_outline;
     /** @since ArkPets 3.3 */ @JSONField(defaultValue = "#FFFF00FF")
@@ -110,10 +114,6 @@ public class ArkConfig implements Serializable {
     public boolean      window_style_toolwindow;
     /** @since ArkPets 3.2 */ @JSONField(defaultValue = "true")
     public boolean      window_style_topmost;
-    /** @since ArkPets 3.8 */ @JSONField(defaultValue = "false")
-    public boolean      enable_angle;
-    /** @since ArkPets 3.8 */ @JSONField(defaultValue = "true")
-    public boolean      enable_mipmap;
 
     private ArkConfig() {
     }

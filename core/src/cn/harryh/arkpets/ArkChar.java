@@ -72,8 +72,8 @@ public class ArkChar {
         renderer.setPremultipliedAlpha(true);
         /* Shader pedantic should be disabled to avoid uniform not-found error. */
         ShaderProgram.pedantic = false;
-        shader1 = getShader(pass1VShader, pass1FShader, config.enable_angle);
-        shader2 = getShader(pass2VShader, pass2FShader, config.enable_angle);
+        shader1 = getShader(pass1VShader, pass1FShader, config.render_enable_angle);
+        shader2 = getShader(pass2VShader, pass2FShader, config.render_enable_angle);
         Logger.debug("Shader", "Shader program compiled");
         // 2.Geometry setup
         EasingFunction easingFunction = ArkConfig.getEasingFunctionFrom(config.transition_type);
@@ -92,7 +92,7 @@ public class ArkChar {
             // Load atlas
             FileHandle packFile = Gdx.files.internal(path2atlas);
             TextureAtlas.TextureAtlasData atlasData = new TextureAtlas.TextureAtlasData(packFile, packFile.parent(), false);
-            if (config.enable_mipmap) {
+            if (config.render_enable_mipmap) {
                 for (TextureAtlas.TextureAtlasData.Page page : atlasData.getPages()) {
                     page.minFilter = Texture.TextureFilter.MipMapLinearLinear;
                     page.useMipMaps = true;
