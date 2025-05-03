@@ -29,11 +29,6 @@
                     <JFXComboBox fx:id="configDisplayFps" prefWidth="120.0"/>
                     <JFXButton fx:id="configDisplayFpsHelp"/>
                 </HBox>
-                <HBox>
-                    <Label text="窗口边界"/>
-                    <JFXComboBox fx:id="configCanvasSize" prefWidth="120.0"/>
-                    <JFXButton fx:id="configCanvasSizeHelp"/>
-                </HBox>
                 <Separator/>
                 <Label styleClass="config-group-title" text="渲染设置"/>
                 <JFXTabPane fx:id="configRenderTabPane" maxWidth="430.0" tabClosingPolicy="UNAVAILABLE">
@@ -42,6 +37,19 @@
                             <HBox>
                                 <Label text="背景颜色"/>
                                 <JFXComboBox fx:id="configCanvasColor" prefWidth="120.0"/>
+                            </HBox>
+                        </VBox>
+                    </Tab>
+                    <Tab text="窗口边界">
+                        <VBox>
+                            <HBox>
+                                <Label text="边界大小"/>
+                                <JFXComboBox fx:id="configCanvasCoverage" prefWidth="120.0"/>
+                                <JFXButton fx:id="configCanvasCoverageHelp"/>
+                            </HBox>
+                            <HBox>
+                                <Label text="边界计算方式"/>
+                                <JFXComboBox fx:id="configCanvasSamplingInterval" prefWidth="120.0"/>
                             </HBox>
                         </VBox>
                     </Tab>

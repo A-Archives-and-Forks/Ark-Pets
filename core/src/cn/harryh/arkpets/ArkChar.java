@@ -143,7 +143,7 @@ public class ArkChar {
         stageInsertMap = new HashMap<>();
         for (AnimStage stage : animList.clusterByStage().keySet()) {
             // Figure out the suitable canvas size
-            adjustCanvas(stage, config.canvas_fitting_samples);
+            adjustCanvas(stage, config.canvas_sampling_interval, config.canvas_coverage);
             if (!camera.isInsertMaxed()) {
                 // Succeeded
                 stageInsertMap.put(stage, camera.getInsert().clone());
@@ -243,6 +243,7 @@ public class ArkChar {
         // Render Pass 1: Render the skeleton
         camera.getFBO().begin();
         shader1.bind();
+        shader1.setUniformf("u_alpha", 1.0f);
         batch.setShader(shader1);
         ScreenUtils.clear(0, 0, 0, 0, true);
         batch.begin();
@@ -273,18 +274,23 @@ public class ArkChar {
         batch.setShader(null);
     }
 
-    /** Renders the character to the graphics naively, ignoring delta time and additional shaders.
+    /** Renders the character to the graphics additively, ignoring delta time and complex shaders.
+     * @param alpha The additive rendering alpha.
      */
-    protected void renderNaive() {
+    protected void renderAdditive(float alpha) {
         position.reset(camera.getWidth() >> 1, position.end().y, position.end().z);
         skeleton.setPosition(position.end().x, position.end().y + offsetY.end());
         skeleton.setScaleX(position.end().z);
         skeleton.updateWorldTransform();
         animationState.apply(skeleton);
         batch.getProjectionMatrix().set(camera.combined);
+        shader1.bind();
+        shader1.setUniformf("u_alpha", alpha);
+        batch.setShader(shader1);
         batch.begin();
         renderer.draw(batch, skeleton);
         batch.end();
+        batch.setShader(null);
     }
 
     private ShaderProgram getShader(String path2vertex, String path2fragment, boolean gles30) {
@@ -299,13 +305,27 @@ public class ArkChar {
         return shader;
     }
 
-    private void adjustCanvas(AnimStage stage, int fittingSamples) {
-        float timePerSample = fittingSamples / (float) fpsDefault;
+    private void adjustCanvas(AnimStage stage, int framePerSample, float coverage) {
+        // Pre stats total samples
+        float timePerSample = framePerSample / (float) fpsDefault;
+        int totalSamples = 0;
+        for (AnimClip animClip : animList.findAnimations(stage)) {
+            composer.reset();
+            composer.offer(new AnimData(animClip));
+            float totalTime = animationState.getCurrent(0).getAnimation().getDuration();
+            if (totalTime > 0) {
+                totalSamples += timePerSample <= 0 || totalTime <= timePerSample * 2
+                        ? 1 : (int) Math.floor(totalTime / timePerSample);
+            }
+        }
+        if (totalSamples <= 0)
+            return;
         // Prepare a Frame Buffer Object
         camera.setInsertMaxed();
         camera.getFBO().begin();
         ScreenUtils.clear(0, 0, 0, 0, true);
         // Render all animations to the FBO
+        float alphaPerSample = (float) Math.max(1.0 - 254.0 / 255.0, 1.0 - Math.pow(10.0, -4.0 / totalSamples));
         for (AnimClip animClip : animList.findAnimations(stage)) {
             composer.reset();
             composer.offer(new AnimData(animClip));
@@ -314,11 +334,11 @@ public class ArkChar {
                 if (timePerSample <= 0 || totalTime <= timePerSample * 2) {
                     // Render the middle frame as the only sample
                     animationState.update(totalTime / 2);
-                    renderNaive();
+                    renderAdditive(alphaPerSample);
                 } else {
                     // Render each interval frame as samples
                     for (float t = 0; t < totalTime; t += timePerSample) {
-                        renderNaive();
+                        renderAdditive(alphaPerSample);
                         animationState.update(timePerSample);
                     }
                 }
@@ -326,10 +346,19 @@ public class ArkChar {
         }
         // Take down the snapshot from the rendered FBO
         Pixmap snapshot = Pixmap.createFromFrameBuffer(0, 0, camera.getWidth(), camera.getHeight());
-        // PixmapIO.writePNG(new FileHandle("temp/temp.png"), snapshot);
         camera.getFBO().end();
         // Crop the canvas in order to fit the snapshot
-        Insert insert = camera.getFittedInsert(snapshot, false, true);
+        float alphaThreshold = Math.max(0f, Math.min(coverage, 1f));
+        Insert insert;
+        do {
+            insert = camera.getFittedInsert(snapshot, alphaThreshold, false, true);
+            if (!insert.equals(camera.getInsert()) || alphaThreshold < 0.75f)
+                break;
+            alphaThreshold *= 0.9375f;
+        } while (true);
+        if (alphaThreshold != coverage)
+            Logger.warn("Character", stage + " has inappropriate canvas coverage setting, auto adjusted to " + alphaThreshold);
+        // For debugging
         if (enableSnapshot) {
             snapshot.setColor(Color.RED);
             snapshot.drawLine(0, -insert.bottom, camera.getWidth(), -insert.bottom);
@@ -341,6 +370,7 @@ public class ArkChar {
             FileHandle file = dir.child("acSnapshot-" + skeleton.toString() + "-" + stage.id() + ".png");
             PixmapIO.writePNG(file, snapshot);
         }
+        // Complete
         camera.setInsert(insert);
         snapshot.dispose();
     }

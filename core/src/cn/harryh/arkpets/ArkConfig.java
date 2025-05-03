@@ -48,8 +48,10 @@ public class ArkConfig implements Serializable {
     public boolean      behavior_do_peer_repulsion;
     /** @since ArkPets 3.3 */ @JSONField(defaultValue = "#00000000")
     public String       canvas_color;
-    /** @since ArkPets 3.1 */ @JSONField(defaultValue = "16")
-    public int          canvas_fitting_samples;
+    /** @since ArkPets 3.8 */ @JSONField(defaultValue = "0.8")
+    public float        canvas_coverage;
+    /** @since ArkPets 3.8 */ @JSONField(defaultValue = "4")
+    public int          canvas_sampling_interval;
     /** @since ArkPets 2.0 */ @JSONField()
     public String       character_asset;
     /** @since ArkPets 3.5 */ @JSONField()
