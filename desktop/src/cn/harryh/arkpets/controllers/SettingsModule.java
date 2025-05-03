@@ -54,9 +54,11 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     @FXML
     private JFXButton configDisplayFpsHelp;
     @FXML
-    private JFXComboBox<NamedItem<Float>> configCanvasSize;
+    private JFXComboBox<NamedItem<Float>> configCanvasCoverage;
     @FXML
-    private JFXButton configCanvasSizeHelp;
+    private JFXButton configCanvasCoverageHelp;
+    @FXML
+    private JFXComboBox<NamedItem<Integer>> configCanvasSamplingInterval;
 
     @FXML
     private JFXTabPane configRenderTabPane;
@@ -163,7 +165,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     app.config.save();
                     displayFpsHelpEntrance.refreshAndEnsureDisplayed();
                 });
-        new ComboBoxSetup<>(configCanvasSize).setItems(new NamedItem<>("最宽", 0.45f),
+        new ComboBoxSetup<>(configCanvasCoverage).setItems(new NamedItem<>("最宽", 0.45f),
                         new NamedItem<>("较宽", 0.65f),
                         new NamedItem<>("标准", 0.8f),
                         new NamedItem<>("较窄", 0.9f),
@@ -173,10 +175,10 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     app.config.canvas_coverage = newValue.value();
                     app.config.save();
                 });
-        new HelpHandbookEntrance(app.body, configCanvasSizeHelp) {
+        new HelpHandbookEntrance(app.body, configCanvasCoverageHelp) {
             @Override
             public Handbook getHandbook() {
-                return new ControlHelpHandbook((Labeled) configCanvasSize.getParent().getChildrenUnmodifiable().get(0)) {
+                return new ControlHelpHandbook((Labeled) configCanvasCoverage.getParent().getChildrenUnmodifiable().get(0)) {
                     @Override
                     public String getContent() {
                         return "设置桌宠窗口边界的相对大小。更宽的边界能够防止动画溢出；更窄的边界能够防止鼠标误触。";
@@ -184,6 +186,15 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 };
             }
         };
+        new ComboBoxSetup<>(configCanvasSamplingInterval).setItems(new NamedItem<>("极精确", 1),
+                        new NamedItem<>("精确", 4),
+                        new NamedItem<>("粗略", 16),
+                        new NamedItem<>("极粗略", 64))
+                .selectValue(app.config.canvas_sampling_interval, "间隔" + app.config.canvas_sampling_interval + "帧（自定义）")
+                .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
+                    app.config.canvas_sampling_interval = newValue.value();
+                    app.config.save();
+                });
 
         new TabPaneSetup(configRenderTabPane, durationFast).makeResponsive();
 
