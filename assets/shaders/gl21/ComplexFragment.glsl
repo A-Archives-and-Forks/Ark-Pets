@@ -1,13 +1,11 @@
-#version 300 es
-precision mediump float;
+#version 120
 /** Copyright (c) 2022-2024, Harry Huang
  * At GPL-3.0 License
  */
 
-// Gap Seaming and Ouline Effect Fragment Shader for TwoColorPolygonBatch.
+// Complex fragment shader for TwoColorPolygonBatch with outline and box shadow effect.
 
-
-in vec2 v_texCoords;       // From VS
+varying vec2 v_texCoords;       // From VS
 uniform sampler2D u_texture;    // From TCPB
 uniform vec4 u_outlineColor;    // Required
 uniform float u_outlineWidth;   // Required
@@ -15,8 +13,6 @@ uniform float u_outlineAlpha;   // Required
 uniform vec4 u_shadowColor;     // Required
 uniform ivec2 u_textureSize;    // Required
 uniform float u_alpha;          // Required
-
-out vec4 fragColor;
 
 const float c_alphaLow = 0.1;
 const float c_alphaHigh = 0.9;
@@ -40,7 +36,7 @@ vec4[24] getGaussianNeighbors(vec2 unitLength) {
         for (int x = -2; x <= 2; x++) {
             if (!(y == 0 && x == 0)) {
                 vec2 offset = vec2(x, y) * unitLength;
-                neighbors[ni] = texture(u_texture, v_texCoords + offset) * gaussianNeighborKernel[ki];
+                neighbors[ni] = texture2D(u_texture, v_texCoords + offset) * gaussianNeighborKernel[ki];
                 ni++;
             }
             ki++;
@@ -59,9 +55,9 @@ vec4 getGaussianNeighborsSum(vec2 unitLength) {
 }
 
 vec4 getOutlined() {
-    vec4 texColor = texture(u_texture, v_texCoords);
+    vec4 texColor = texture2D(u_texture, v_texCoords);
     if (u_outlineColor.a > 0.0 && u_outlineWidth > 0.0 && u_outlineAlpha > 0.0) {
-        vec2 relOutlineWidth = vec2(1.0) / vec2(u_textureSize) * u_outlineWidth;
+        vec2 relOutlineWidth = vec2(1.0) / u_textureSize * u_outlineWidth;
         vec4 neighbor = getGaussianNeighborsSum(relOutlineWidth) * c_outlineOverstate;
         if (neighbor.a > c_alphaLow) {
             texColor.rgb = u_outlineColor.rgb;
@@ -75,13 +71,13 @@ vec4 getBoxShadow() {
     if (u_shadowColor.a <= 0.0) {
         return vec4(0.0);
     }
-    vec2 relShadowOffset = vec2(c_shadowOffset) / vec2(u_textureSize);
+    vec2 relShadowOffset = vec2(c_shadowOffset) / u_textureSize;
     vec4 shadowSum = getGaussianNeighborsSum(relShadowOffset);
     return vec4(u_shadowColor.rgb, u_shadowColor.a * sqrt(shadowSum.a));
 }
 
 void main() {
-    vec4 texColor = texture(u_texture, v_texCoords);
+    vec4 texColor = texture2D(u_texture, v_texCoords);
 
     if (texColor.a < c_alphaHigh) {
         if (texColor.a < c_alphaLow) {
@@ -95,6 +91,6 @@ void main() {
     }
 
     // Ultimate composing
-    fragColor = texColor;
-    fragColor.a *= u_alpha;
+    gl_FragColor = texColor;
+    gl_FragColor.a *= u_alpha;
 }

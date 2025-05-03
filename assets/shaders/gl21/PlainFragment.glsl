@@ -1,10 +1,9 @@
+#version 120
 /** Copyright (c) 2013-2023, Esoteric Software LLC
  * At Spine Runtimes License
  */
 
-// Common Fragment Shader for TwoColorPolygonBatch.
-
-#version 120
+// Plain fragment shader for TwoColorPolygonBatch.
 
 #ifdef GL_ES
     #define LOWP lowp
