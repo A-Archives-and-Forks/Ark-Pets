@@ -32,7 +32,7 @@ public class ArkConfig implements Serializable {
     private static boolean isNewcomer = false;
 
     // Config items and default values:
-    /** @since ArkPets 1.0 */ @JSONField(defaultValue = "8")
+    /** @since ArkPets 1.0 */ @JSONField(defaultValue = "4")
     public int          behavior_ai_activation;
     /** @since ArkPets 1.0 */ @JSONField(defaultValue = "true")
     public boolean      behavior_allow_interact;
@@ -60,7 +60,7 @@ public class ArkConfig implements Serializable {
     public JSONObject   character_files;
     /** @since ArkPets 2.0 */ @JSONField()
     public String       character_label;
-    /** @since ArkPets 1.0 */ @JSONField(defaultValue = "30")
+    /** @since ArkPets 1.0 */ @JSONField(defaultValue = "60")
     public int          display_fps;
     /** @since ArkPets 1.0 */ @JSONField(defaultValue = "0")
     public int          display_margin_bottom;
