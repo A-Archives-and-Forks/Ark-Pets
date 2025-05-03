@@ -56,6 +56,8 @@ public class EmbeddedLauncher {
         new ArgPending(LogConfig.debugArg, args) {
             protected void process(String command, String addition) {
                 Logger.setLevel(Logger.DEBUG);
+                Logger.info("System", "Enable the debug feature");
+                isDebugEnabled = true;
             }
         };
         new ArgPending("--load-lib", args) {
@@ -69,21 +71,14 @@ public class EmbeddedLauncher {
                 }
             }
         };
-        new ArgPending("--enable-snapshot", args) {
-            @Override
-            protected void process(String command, String addition) {
-                Logger.info("System", "Enable the snapshot feature");
-                ArkChar.enableSnapshot = true;
-                File temp = new File(PathConfig.tempDirPath);
-                if (!(temp.exists() || temp.mkdir())) {
-                    Logger.error("System", "Failed to create the temporary directory.");
-                }
-            }
-        };
         Logger.info("System", "Entering the app of EmbeddedLauncher");
         Logger.info("System", "ArkPets version is " + appVersion);
         Logger.debug("System", "Default charset is " + Charset.defaultCharset());
-
+        // Init temp folder
+        File temp = new File(PathConfig.tempDirPath);
+        if (!(temp.exists() || temp.mkdir())) {
+            Logger.error("System", "Failed to create the temporary directory.");
+        }
         try {
             WindowSystem.init();
             Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();

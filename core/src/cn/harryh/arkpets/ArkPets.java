@@ -560,25 +560,25 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     }
 
     private void registerComposerKeyTyped() {
-        inputComposer.registerKeyTyped('B', () -> {
-            if (ArkChar.enableSnapshot) {
-                String name = "temp/snapshot-"+System.currentTimeMillis()+".png";
+        if (Const.isDebugEnabled) {
+            inputComposer.registerKeyTyped('B', () -> {
+                String name = "temp/snapshot-" + System.currentTimeMillis() + ".png";
                 Pixmap snapshot = Pixmap.createFromFrameBuffer(0, 0, cha.camera.getWidth(), cha.camera.getHeight());
                 PixmapIO.writePNG(new FileHandle(name), snapshot);
                 snapshot.dispose();
                 Logger.debug("App", "Snapshot saved to `" + name + "`");
-            }
-        });
+            });
 
-        inputComposer.registerKeyTyped('D', () -> {
-            Logger.debug("Plane Debug Msg", plane.getDebugMsg());
-            Logger.debug("Status Msg", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int) Math.ceil((Gdx.app.getJavaHeap() >> 10) / 1024f) + "MB");
-        });
+            inputComposer.registerKeyTyped('D', () -> {
+                Logger.debug("Plane Debug Msg", plane.getDebugMsg());
+                Logger.debug("Status Msg", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int) Math.ceil((Gdx.app.getJavaHeap() >> 10) / 1024f) + "MB");
+            });
 
-        inputComposer.registerKeyTyped('W', () -> {
-            for (HWndCtrl hWndCtrl : WindowSystem.getWindowList(true)) {
-                Logger.debug("HWND Debug Msg", hWndCtrl.toString());
-            }
-        });
+            inputComposer.registerKeyTyped('W', () -> {
+                for (HWndCtrl hWndCtrl : WindowSystem.getWindowList(true)) {
+                    Logger.debug("HWND Debug Msg", hWndCtrl.toString());
+                }
+            });
+        }
     }
 }

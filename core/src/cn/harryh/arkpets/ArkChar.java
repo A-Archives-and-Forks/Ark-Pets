@@ -359,7 +359,7 @@ public class ArkChar {
         if (alphaThreshold != coverage)
             Logger.warn("Character", stage + " has inappropriate canvas coverage setting, auto adjusted to " + alphaThreshold);
         // For debugging
-        if (enableSnapshot) {
+        if (isDebugEnabled) {
             snapshot.setColor(Color.RED);
             snapshot.drawLine(0, -insert.bottom, camera.getWidth(), -insert.bottom);
             snapshot.drawLine(0, camera.getHeight() + insert.top, camera.getWidth(), camera.getHeight() + insert.top);

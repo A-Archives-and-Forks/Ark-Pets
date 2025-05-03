@@ -70,6 +70,7 @@ public final class Const {
     public static boolean isHttpsTrustAll       = false;
     public static boolean isUpdateAvailable     = false;
     public static boolean isNewcomer            = false;
+    public static boolean isDebugEnabled        = false;
 
     // Socket C/S constants
     public static final String serverHost           = "localhost";
