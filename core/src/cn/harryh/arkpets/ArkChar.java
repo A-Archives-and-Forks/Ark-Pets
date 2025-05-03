@@ -243,6 +243,7 @@ public class ArkChar {
         // Render Pass 1: Render the skeleton
         camera.getFBO().begin();
         shader1.bind();
+        shader1.setUniformf("u_alpha", 1.0f);
         batch.setShader(shader1);
         ScreenUtils.clear(0, 0, 0, 0, true);
         batch.begin();
