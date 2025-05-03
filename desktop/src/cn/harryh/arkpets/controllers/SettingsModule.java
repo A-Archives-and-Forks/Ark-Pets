@@ -54,7 +54,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     @FXML
     private JFXButton configDisplayFpsHelp;
     @FXML
-    private JFXComboBox<NamedItem<Integer>> configCanvasSize;
+    private JFXComboBox<NamedItem<Float>> configCanvasSize;
     @FXML
     private JFXButton configCanvasSizeHelp;
 
@@ -163,14 +163,14 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     app.config.save();
                     displayFpsHelpEntrance.refreshAndEnsureDisplayed();
                 });
-        new ComboBoxSetup<>(configCanvasSize).setItems(new NamedItem<>("最宽", 4),
-                        new NamedItem<>("较宽", 8),
-                        new NamedItem<>("标准", 16),
-                        new NamedItem<>("较窄", 32),
-                        new NamedItem<>("最窄", 0))
-                .selectValue(app.config.canvas_fitting_samples, "每" + app.config.canvas_fitting_samples + "帧采样（自定义）")
+        new ComboBoxSetup<>(configCanvasSize).setItems(new NamedItem<>("最宽", 0.45f),
+                        new NamedItem<>("较宽", 0.65f),
+                        new NamedItem<>("标准", 0.8f),
+                        new NamedItem<>("较窄", 0.9f),
+                        new NamedItem<>("最窄", 0.95f))
+                .selectValue(app.config.canvas_coverage, app.config.canvas_coverage * 100f + "% 覆盖率（自定义）")
                 .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
-                    app.config.canvas_fitting_samples = newValue.value();
+                    app.config.canvas_coverage = newValue.value();
                     app.config.save();
                 });
         new HelpHandbookEntrance(app.body, configCanvasSizeHelp) {
