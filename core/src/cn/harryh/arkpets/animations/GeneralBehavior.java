@@ -95,6 +95,31 @@ public class GeneralBehavior extends Behavior {
     }
 
     @Override
+    public AnimData walkAnim(int mobility) {
+        return stageAnimList.getLoopAnimData(AnimType.MOVE).derive(mobility);
+    }
+
+    @Override
+    public AnimData nextAnim() {
+        if (idxRec >= action_list.length - 1) {
+            idxRec = 0;
+        } else {
+            idxRec += 1;
+        }
+        return action_list[idxRec].anim();
+    }
+
+    @Override
+    public AnimData prevAnim() {
+        if (idxRec == 0) {
+            idxRec = action_list.length - 1;
+        } else {
+            idxRec -= 1;
+        }
+        return action_list[idxRec].anim();
+    }
+
+    @Override
     public AnimData clickEnd() {
         AnimData a1 = stageAnimList.getStreamedAnimData(AnimType.ATTACK);
         AnimData a2 = stageAnimList.getStreamedAnimData(AnimType.INTERACT);

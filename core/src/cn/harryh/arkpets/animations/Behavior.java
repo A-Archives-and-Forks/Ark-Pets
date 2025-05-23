@@ -48,7 +48,7 @@ abstract public class Behavior {
 
     /** Resets the random animation getter.
      */
-    protected final void autoCtrlReset() {
+    public final void autoCtrlReset() {
         timeRec = 0;
         duraRec = 0;
         idxRec = 0;
@@ -79,6 +79,28 @@ abstract public class Behavior {
      * @return AnimData object.
      */
     public AnimData defaultAnim() {
+        return new AnimData(null);
+    }
+
+    /** Gets the walk animation.
+     * @param mobility 1=GoRight, -1=GoLeft.
+     * @return AnimData object.
+     */
+    public AnimData walkAnim(int mobility) {
+        return new AnimData(null);
+    }
+
+    /** Selects the next animation.
+     * @return AnimData object.
+     */
+    public AnimData nextAnim() {
+        return new AnimData(null);
+    }
+
+    /** Selects the previous animation.
+     * @return AnimData object.
+     */
+    public AnimData prevAnim() {
         return new AnimData(null);
     }
 

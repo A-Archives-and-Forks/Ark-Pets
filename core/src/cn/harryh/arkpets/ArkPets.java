@@ -3,6 +3,7 @@
  */
 package cn.harryh.arkpets;
 
+import cn.harryh.arkpets.animations.AnimClip;
 import cn.harryh.arkpets.animations.AnimData;
 import cn.harryh.arkpets.animations.GeneralBehavior;
 import cn.harryh.arkpets.concurrent.SocketClient;
@@ -10,6 +11,7 @@ import cn.harryh.arkpets.platform.HWndCtrl;
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.transitions.TransitionVector2;
 import cn.harryh.arkpets.tray.MemberTrayImpl;
+import cn.harryh.arkpets.utils.InputComposer;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Plane;
 import com.badlogic.gdx.ApplicationAdapter;
@@ -24,6 +26,7 @@ import com.badlogic.gdx.graphics.PixmapIO;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import static cn.harryh.arkpets.Const.coreTitleManager;
 
@@ -43,7 +46,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     private List<? extends HWndCtrl> hWndList;
 
     private final String APP_TITLE;
-    private final MouseStatus mouseStatus = new MouseStatus();
+    private final InputComposer inputComposer = new InputComposer();
     private int offsetY = 0;
     private boolean isFocused = false;
     private boolean isToolwindowStyle = false;
@@ -63,6 +66,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
         Gdx.graphics.setForegroundFPS(config.display_fps);
         Logger.debug("App", "OpenGL version is " + Gdx.gl.glGetString(GL20.GL_VERSION));
         Logger.debug("App", "OpenGL vendor is " + Gdx.gl.glGetString(GL20.GL_VENDOR));
+        registerComposerKeyTyped();
 
         // 2.Character setup
         Logger.info("App", "Using model asset \"" + config.character_asset + "\"");
@@ -116,17 +120,20 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
         cha.render();
 
         // 2.Select a new animation.
-        AnimData newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime()); // AI anim.
-        if (!mouseStatus.dragging) { // If no dragging:
+        AnimData newAnim;
+        if (tray.keepAnim == null) newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime()); // AI anim.
+        else newAnim = tray.keepAnim;
+        if (!inputComposer.isMouseDragging()) { // If no dragging:
             plane.updatePosition(Gdx.graphics.getDeltaTime());
             if (cha.getPlaying().mobility() != 0) {
-                if (willReachBorder(cha.getPlaying().mobility())) {
+                if (tray.keepAnim == null && willReachBorder(cha.getPlaying().mobility())) {
                     // Turn around if auto-walk cause the collision from screen border.
                     newAnim = cha.getPlaying();
                     newAnim = new AnimData(newAnim.animClip(), null, newAnim.isLoop(), newAnim.isStrict(), -newAnim.mobility());
                     tray.keepAnim = tray.keepAnim == null ? null : newAnim;
                 }
-                walkWindow(0.85f * cha.getPlaying().mobility());
+                float fac = inputComposer.isCtrlPressed() ? 1.85f : 0.85f;
+                walkWindow(fac * cha.getPlaying().mobility());
             }
         } else { // If dragging:
             newAnim = behavior.dragging();
@@ -135,8 +142,9 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
             newAnim = behavior.defaultAnim();
         } else if (plane.getDropped()) { // If dropped, play the dropped anim.
             newAnim = behavior.dropped();
-        } else if (tray.keepAnim != null) { // If keep-anim is enabled.
-            newAnim = tray.keepAnim;
+        } else if (tray.keepAnim != null) { // If action-mode is enabled.
+            if (inputComposer.isLeftPressed()) newAnim = behavior.walkAnim(-1);      // Left pressed
+            else if (inputComposer.isRightPressed()) newAnim = behavior.walkAnim(1); // Right pressed
         }
         changeAnimation(newAnim); // Apply the new anim.
 
@@ -149,9 +157,9 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
         // 4.Outline.
         ArkConfig.RenderOutline renderOutline = ArkConfig.getRenderOutlineFrom(config.render_outline);
         cha.setOutlineAlpha(renderOutline == ArkConfig.RenderOutline.ALWAYS ||
-                mouseStatus.mouseDown && renderOutline == ArkConfig.RenderOutline.PRESSING ||
+                inputComposer.isMouseDown() && renderOutline == ArkConfig.RenderOutline.PRESSING ||
                 isFocused && renderOutline == ArkConfig.RenderOutline.FOCUSED ||
-                mouseStatus.dragging && renderOutline == ArkConfig.RenderOutline.DRAGGING
+                inputComposer.isMouseDragging() && renderOutline == ArkConfig.RenderOutline.DRAGGING
                 ? 1f : 0f);
     }
 
@@ -195,8 +203,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         Logger.debug("Input", "Click+ Btn " + button + " @ " + screenX + ", " + screenY);
         if (pointer <= 0) {
-            mouseStatus.mouseDown = true;
-            mouseStatus.updatePosition(screenX, screenY, button);
+            inputComposer.updateMouseDown(screenX, screenY, button);
             if (!isMouseAtSolidPixel()) {
                 // Transfer mouse event
                 RelativeWindowPosition rwp = getRelativeWindowPositionAt(screenX, screenY);
@@ -225,12 +232,12 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         //Logger.debug("Input", "Dragged to " + screenX + ", " + screenY);
         if (pointer <= 0) {
-            if (mouseStatus.button != Input.Buttons.RIGHT && isMouseAtSolidPixel()) {
-                mouseStatus.dragging = true;
-                mouseStatus.updateIntentionX(screenX);
+            if (inputComposer.getMouseButton() != Input.Buttons.RIGHT && isMouseAtSolidPixel()) {
+                inputComposer.setMouseDragging(true);
+                inputComposer.updateIntentionX(screenX);
                 // Update window position
-                int x = (int) (windowPosition.now().x + screenX - mouseStatus.x);
-                int y = (int) (windowPosition.now().y + screenY - mouseStatus.y);
+                int x = (int) (windowPosition.now().x + screenX - inputComposer.getMouseX());
+                int y = (int) (windowPosition.now().y + screenY - inputComposer.getMouseY());
                 plane.changePosition(Gdx.graphics.getDeltaTime(), x, -(cha.camera.getHeight() + y));
                 windowPosition.setToEnd();
                 tray.hideDialog();
@@ -244,18 +251,17 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         Logger.debug("Input", "Click- Btn " + button + " @ " + screenX + ", " + screenY);
         if (pointer <= 0) {
-            mouseStatus.mouseDown = false;
-            mouseStatus.updatePosition(screenX, screenY, button);
-            if (mouseStatus.dragging) {
+            inputComposer.updateMouseUp(screenX, screenY, button);
+            if (inputComposer.isMouseDragging()) {
                 // Update the z-axis of the character
-                cha.position.reset(cha.position.end().x, cha.position.end().y, mouseStatus.intentionX);
+                cha.position.reset(cha.position.end().x, cha.position.end().y, inputComposer.getMouseIntention());
                 if (cha.getPlaying() != null && cha.getPlaying().mobility() != 0) {
                     AnimData anim = cha.getPlaying();
-                    cha.setAnimation(anim.derive(Math.abs(anim.mobility()) * mouseStatus.intentionX));
+                    cha.setAnimation(anim.derive(Math.abs(anim.mobility()) * inputComposer.getMouseIntention()));
                 }
                 if (tray.keepAnim != null && tray.keepAnim.mobility() != 0) {
                     AnimData anim = tray.keepAnim;
-                    tray.keepAnim = anim.derive(Math.abs(anim.mobility()) * mouseStatus.intentionX);
+                    tray.keepAnim = anim.derive(Math.abs(anim.mobility()) * inputComposer.getMouseIntention());
                 }
             } else if (!isMouseAtSolidPixel()) {
                 // Transfer mouse event
@@ -273,38 +279,48 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
                 tray.hideDialog();
             }
         }
-        mouseStatus.dragging = false;
+        inputComposer.setMouseDragging(false);
         return true;
     }
 
     @Override
     public boolean keyDown(int keycode) {
-        return false;
+        inputComposer.handleKeyDown(keycode);
+
+        if (tray.keepAnim != null) { // Switch animation in action mode
+            AnimData data;
+            if (inputComposer.isUpPressed()) {
+                do {
+                    data = behavior.prevAnim();
+                } while (data.animClip().type == AnimClip.AnimType.MOVE); // Skip Move Animation
+                tray.keepAnim = data;
+                Logger.debug("Animation", "Switch to previous " + data);
+            } else if (inputComposer.isDownPressed()) {
+                do {
+                    data = behavior.nextAnim();
+                } while (data.animClip().type == AnimClip.AnimType.MOVE);
+                tray.keepAnim = data;
+                Logger.debug("Animation", "Switch to next " + data);
+            }
+        }
+        return true;
     }
 
     @Override
     public boolean keyUp(int keycode) {
-        return false;
+        inputComposer.handleKeyUp(keycode);
+        return true;
     }
 
     @Override
     public boolean keyTyped(char character) {
-        if (ArkChar.enableSnapshot && character == 'B') {
-            String name = "temp/snapshot-" + System.currentTimeMillis() + ".png";
-            Pixmap snapshot = Pixmap.createFromFrameBuffer(0, 0, cha.camera.getWidth(), cha.camera.getHeight());
-            PixmapIO.writePNG(new FileHandle(name), snapshot);
-            snapshot.dispose();
-            Logger.debug("App", "Snapshot saved to `" + name + "`");
-        } else {
-            Logger.debug("Plane Debug Msg", plane.getDebugMsg());
-            Logger.debug("Status Msg", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int) Math.ceil((Gdx.app.getJavaHeap() >> 10) / 1024f) + "MB");
-        }
-        return false;
+        inputComposer.handleKeyTyped(character);
+        return true;
     }
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
-        mouseStatus.updatePosition(screenX, screenY);
+        inputComposer.updatePosition(screenX, screenY);
         if (!isMouseAtSolidPixel()) {
             // Transfer mouse event
             RelativeWindowPosition rwp = getRelativeWindowPositionAt(screenX, screenY);
@@ -320,7 +336,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     }
 
     private boolean isMouseAtSolidPixel() {
-        int pixel = cha.getPixel(mouseStatus.x, cha.camera.getHeight() - mouseStatus.y - 1);
+        int pixel = cha.getPixel(inputComposer.getMouseX(), cha.camera.getHeight() - inputComposer.getMouseY() - 1);
         return (pixel & 0x000000FF) > 0;
     }
 
@@ -373,6 +389,11 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
             int wndNum = coreTitleManager.getNumber(hWndCtrl);
             // Distinguish non-peer windows from peers.
             if (wndNum == -1) {
+                boolean isBlackListWindow = false;
+                for (Pattern pattern : Const.titleBlacklist) {
+                    isBlackListWindow = pattern.matcher(hWndCtrl.windowText).matches();
+                }
+                if (isBlackListWindow) continue;
                 if (hWndCtrl.posLeft <= myPos && myPos <= hWndCtrl.posRight) {
                     // This window and the app are share the same vertical line.
                     if (-hWndCtrl.posBottom < plane.borderTop() && -hWndCtrl.posTop > plane.borderBottom()) {
@@ -499,39 +520,34 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     }
 
 
-    private static class MouseStatus {
-        private int x = 0;
-        private int y = 0;
-        private int button = 0;
-        private int intentionX = 0;
-        private boolean dragging = false;
-        private boolean mouseDown = false;
-
-        public MouseStatus() {
-        }
-
-        public void updateIntentionX(int newX) {
-            int t = (int) Math.signum(newX - x);
-            intentionX = t == 0 ? intentionX : t;
-        }
-
-        public void updatePosition(int newX, int newY) {
-            x = newX;
-            y = newY;
-        }
-
-        public void updatePosition(int newX, int newY, int button) {
-            updatePosition(newX, newY);
-            this.button = button;
-        }
-    }
-
-
     private record RelativeWindowPosition(HWndCtrl hWndCtrl, int relX, int relY) {
         public void sendMouseEvent(HWndCtrl.MouseEvent msg) {
             if (msg == HWndCtrl.MouseEvent.EMPTY) return;
             //Logger.debug("Input", "Transfer mouse event " + msg + " to `" + hWndCtrl.windowText + "` @ " + relX + ", " + relY);
             hWndCtrl.updated().sendMouseEvent(msg, relX, relY);
+        }
+    }
+
+    private void registerComposerKeyTyped() {
+        if (Const.isDebugEnabled) {
+            inputComposer.registerKeyTyped('B', () -> {
+                String name = "temp/snapshot-" + System.currentTimeMillis() + ".png";
+                Pixmap snapshot = Pixmap.createFromFrameBuffer(0, 0, cha.camera.getWidth(), cha.camera.getHeight());
+                PixmapIO.writePNG(new FileHandle(name), snapshot);
+                snapshot.dispose();
+                Logger.debug("App", "Snapshot saved to `" + name + "`");
+            });
+
+            inputComposer.registerKeyTyped('D', () -> {
+                Logger.debug("Plane Debug Msg", plane.getDebugMsg());
+                Logger.debug("Status Msg", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int) Math.ceil((Gdx.app.getJavaHeap() >> 10) / 1024f) + "MB");
+            });
+
+            inputComposer.registerKeyTyped('W', () -> {
+                for (HWndCtrl hWndCtrl : WindowSystem.getWindowList(true)) {
+                    Logger.debug("HWND Debug Msg", hWndCtrl.toString());
+                }
+            });
         }
     }
 }
