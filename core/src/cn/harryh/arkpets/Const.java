@@ -86,7 +86,6 @@ public final class Const {
             "KeyShowView",       // Carnac
             "keyviz",            // Keyviz
             "KeyCastOW"          // KeyCastOW
-            // TODO: Add more blacklist here
     }).map(Pattern::compile).toList();
 
     /** Paths presets definition class.

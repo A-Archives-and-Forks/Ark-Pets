@@ -90,14 +90,14 @@ abstract public class Behavior {
         return new AnimData(null);
     }
 
-    /** Select the next animation.
+    /** Selects the next animation.
      * @return AnimData object.
      */
     public AnimData nextAnim() {
         return new AnimData(null);
     }
 
-    /** Select the previous animation.
+    /** Selects the previous animation.
      * @return AnimData object.
      */
     public AnimData prevAnim() {

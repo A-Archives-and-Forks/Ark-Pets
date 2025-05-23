@@ -56,8 +56,6 @@ public class ArkChar {
     protected final AnimClipGroup animList;
     protected final HashMap<AnimStage, Insert> stageInsertMap;
 
-    public static boolean enableSnapshot;
-
     /** Initializes an ArkPets character.
      * @param config The ArkPets Config instance which contains the asset's information and other essential settings.
      * @param scale The scale of the skeleton.
