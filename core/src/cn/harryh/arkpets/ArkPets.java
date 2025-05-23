@@ -46,7 +46,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     private List<? extends HWndCtrl> hWndList;
 
     private final String APP_TITLE;
-    private final MouseStatus mouseStatus = new MouseStatus();
     private final InputComposer inputComposer = new InputComposer();
     private int offsetY = 0;
     private boolean isFocused = false;
@@ -124,7 +123,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
         AnimData newAnim;
         if (tray.keepAnim == null) newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime()); // AI anim.
         else newAnim = tray.keepAnim;
-        if (!mouseStatus.dragging) { // If no dragging:
+        if (!inputComposer.isMouseDragging()) { // If no dragging:
             plane.updatePosition(Gdx.graphics.getDeltaTime());
             if (cha.getPlaying().mobility() != 0) {
                 if (tray.keepAnim == null && willReachBorder(cha.getPlaying().mobility())) {
@@ -158,9 +157,9 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
         // 4.Outline.
         ArkConfig.RenderOutline renderOutline = ArkConfig.getRenderOutlineFrom(config.render_outline);
         cha.setOutlineAlpha(renderOutline == ArkConfig.RenderOutline.ALWAYS ||
-                mouseStatus.mouseDown && renderOutline == ArkConfig.RenderOutline.PRESSING ||
+                inputComposer.isMouseDown() && renderOutline == ArkConfig.RenderOutline.PRESSING ||
                 isFocused && renderOutline == ArkConfig.RenderOutline.FOCUSED ||
-                mouseStatus.dragging && renderOutline == ArkConfig.RenderOutline.DRAGGING
+                inputComposer.isMouseDragging() && renderOutline == ArkConfig.RenderOutline.DRAGGING
                 ? 1f : 0f);
     }
 
@@ -204,8 +203,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         Logger.debug("Input", "Click+ Btn " + button + " @ " + screenX + ", " + screenY);
         if (pointer <= 0) {
-            mouseStatus.mouseDown = true;
-            mouseStatus.updatePosition(screenX, screenY, button);
+            inputComposer.updateMouseDown(screenX, screenY, button);
             if (!isMouseAtSolidPixel()) {
                 // Transfer mouse event
                 RelativeWindowPosition rwp = getRelativeWindowPositionAt(screenX, screenY);
@@ -234,12 +232,12 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     public boolean touchDragged(int screenX, int screenY, int pointer) {
         //Logger.debug("Input", "Dragged to " + screenX + ", " + screenY);
         if (pointer <= 0) {
-            if (mouseStatus.button != Input.Buttons.RIGHT && isMouseAtSolidPixel()) {
-                mouseStatus.dragging = true;
-                mouseStatus.updateIntentionX(screenX);
+            if (inputComposer.getMouseButton() != Input.Buttons.RIGHT && isMouseAtSolidPixel()) {
+                inputComposer.setMouseDragging(true);
+                inputComposer.updateIntentionX(screenX);
                 // Update window position
-                int x = (int) (windowPosition.now().x + screenX - mouseStatus.x);
-                int y = (int) (windowPosition.now().y + screenY - mouseStatus.y);
+                int x = (int) (windowPosition.now().x + screenX - inputComposer.getMouseX());
+                int y = (int) (windowPosition.now().y + screenY - inputComposer.getMouseY());
                 plane.changePosition(Gdx.graphics.getDeltaTime(), x, -(cha.camera.getHeight() + y));
                 windowPosition.setToEnd();
                 tray.hideDialog();
@@ -253,18 +251,17 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         Logger.debug("Input", "Click- Btn " + button + " @ " + screenX + ", " + screenY);
         if (pointer <= 0) {
-            mouseStatus.mouseDown = false;
-            mouseStatus.updatePosition(screenX, screenY, button);
-            if (mouseStatus.dragging) {
+            inputComposer.updateMouseUp(screenX, screenY, button);
+            if (inputComposer.isMouseDragging()) {
                 // Update the z-axis of the character
-                cha.position.reset(cha.position.end().x, cha.position.end().y, mouseStatus.intentionX);
+                cha.position.reset(cha.position.end().x, cha.position.end().y, inputComposer.getMouseIntention());
                 if (cha.getPlaying() != null && cha.getPlaying().mobility() != 0) {
                     AnimData anim = cha.getPlaying();
-                    cha.setAnimation(anim.derive(Math.abs(anim.mobility()) * mouseStatus.intentionX));
+                    cha.setAnimation(anim.derive(Math.abs(anim.mobility()) * inputComposer.getMouseIntention()));
                 }
                 if (tray.keepAnim != null && tray.keepAnim.mobility() != 0) {
                     AnimData anim = tray.keepAnim;
-                    tray.keepAnim = anim.derive(Math.abs(anim.mobility()) * mouseStatus.intentionX);
+                    tray.keepAnim = anim.derive(Math.abs(anim.mobility()) * inputComposer.getMouseIntention());
                 }
             } else if (!isMouseAtSolidPixel()) {
                 // Transfer mouse event
@@ -282,7 +279,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
                 tray.hideDialog();
             }
         }
-        mouseStatus.dragging = false;
+        inputComposer.setMouseDragging(false);
         return true;
     }
 
@@ -297,13 +294,13 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
                     data = behavior.prevAnim();
                 } while (data.animClip().type == AnimClip.AnimType.MOVE); // Skip Move Animation
                 tray.keepAnim = data;
-                Logger.debug("Animation","Switch to previous " + data);
+                Logger.debug("Animation", "Switch to previous " + data);
             } else if (inputComposer.isDownPressed()) {
                 do {
                     data = behavior.nextAnim();
                 } while (data.animClip().type == AnimClip.AnimType.MOVE);
                 tray.keepAnim = data;
-                Logger.debug("Animation","Switch to next " + data);
+                Logger.debug("Animation", "Switch to next " + data);
             }
         }
         return true;
@@ -323,7 +320,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
-        mouseStatus.updatePosition(screenX, screenY);
+        inputComposer.updatePosition(screenX, screenY);
         if (!isMouseAtSolidPixel()) {
             // Transfer mouse event
             RelativeWindowPosition rwp = getRelativeWindowPositionAt(screenX, screenY);
@@ -339,7 +336,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
     }
 
     private boolean isMouseAtSolidPixel() {
-        int pixel = cha.getPixel(mouseStatus.x, cha.camera.getHeight() - mouseStatus.y - 1);
+        int pixel = cha.getPixel(inputComposer.getMouseX(), cha.camera.getHeight() - inputComposer.getMouseY() - 1);
         return (pixel & 0x000000FF) > 0;
     }
 
@@ -393,7 +390,7 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
             // Distinguish non-peer windows from peers.
             if (wndNum == -1) {
                 boolean isBlackListWindow = false;
-                for (Pattern pattern:Const.titleBlacklist) {
+                for (Pattern pattern : Const.titleBlacklist) {
                     isBlackListWindow = pattern.matcher(hWndCtrl.windowText).matches();
                 }
                 if (isBlackListWindow) continue;
@@ -519,34 +516,6 @@ public class ArkPets extends ApplicationAdapter implements InputProcessor {
             } else {
                 return false;
             }
-        }
-    }
-
-
-    private static class MouseStatus {
-        private int x = 0;
-        private int y = 0;
-        private int button = 0;
-        private int intentionX = 0;
-        private boolean dragging = false;
-        private boolean mouseDown = false;
-
-        public MouseStatus() {
-        }
-
-        public void updateIntentionX(int newX) {
-            int t = (int) Math.signum(newX - x);
-            intentionX = t == 0 ? intentionX : t;
-        }
-
-        public void updatePosition(int newX, int newY) {
-            x = newX;
-            y = newY;
-        }
-
-        public void updatePosition(int newX, int newY, int button) {
-            updatePosition(newX, newY);
-            this.button = button;
         }
     }
 
