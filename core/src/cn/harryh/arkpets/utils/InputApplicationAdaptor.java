@@ -4,9 +4,10 @@
 package cn.harryh.arkpets.utils;
 
 import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.utils.IntMap;
+
+import java.util.HashMap;
 
 
 abstract public class InputApplicationAdaptor extends ApplicationAdapter implements InputProcessor {
@@ -29,7 +30,7 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
     private boolean isUpPressed = false;
     private boolean isDownPressed = false;
 
-    private final IntMap<Runnable> keyHandlerMap = new IntMap<>();
+    private final HashMap<Character, Runnable> keyHandlerMap = new HashMap<>();
 
     abstract protected void onMouseDown();
 
@@ -88,7 +89,7 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
     }
 
     public final void registerKeyTyped(char character, Runnable handler) {
-        keyHandlerMap.put(character, handler);
+        keyHandlerMap.put(Character.toLowerCase(character), handler);
     }
 
     public final boolean isAltPressed() {
@@ -184,16 +185,16 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
     @Override
     public boolean keyDown(int keycode) {
         switch (keycode) {
-            case Input.Keys.ALT_LEFT -> isAltPressed |= 0b10;
-            case Input.Keys.ALT_RIGHT -> isAltPressed |= 0b01;
-            case Input.Keys.CONTROL_LEFT -> isCtrlPressed |= 0b10;
-            case Input.Keys.CONTROL_RIGHT -> isCtrlPressed |= 0b01;
-            case Input.Keys.SHIFT_LEFT -> isShiftPressed |= 0b10;
-            case Input.Keys.SHIFT_RIGHT -> isShiftPressed |= 0b01;
-            case Input.Keys.LEFT -> isLeftPressed = true;
-            case Input.Keys.RIGHT -> isRightPressed = true;
-            case Input.Keys.UP -> isUpPressed = true;
-            case Input.Keys.DOWN -> isDownPressed = true;
+            case Keys.ALT_LEFT -> isAltPressed |= 0b10;
+            case Keys.ALT_RIGHT -> isAltPressed |= 0b01;
+            case Keys.CONTROL_LEFT -> isCtrlPressed |= 0b10;
+            case Keys.CONTROL_RIGHT -> isCtrlPressed |= 0b01;
+            case Keys.SHIFT_LEFT -> isShiftPressed |= 0b10;
+            case Keys.SHIFT_RIGHT -> isShiftPressed |= 0b01;
+            case Keys.LEFT -> isLeftPressed = true;
+            case Keys.RIGHT -> isRightPressed = true;
+            case Keys.UP -> isUpPressed = true;
+            case Keys.DOWN -> isDownPressed = true;
         }
         onKeyDown(keycode);
         return true;
@@ -203,16 +204,16 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
     @Override
     public boolean keyUp(int keycode) {
         switch (keycode) {
-            case Input.Keys.ALT_LEFT -> isAltPressed &= 0b01;
-            case Input.Keys.ALT_RIGHT -> isAltPressed &= 0b10;
-            case Input.Keys.CONTROL_LEFT -> isCtrlPressed &= 0b01;
-            case Input.Keys.CONTROL_RIGHT -> isCtrlPressed &= 0b10;
-            case Input.Keys.SHIFT_LEFT -> isShiftPressed &= 0b01;
-            case Input.Keys.SHIFT_RIGHT -> isShiftPressed &= 0b10;
-            case Input.Keys.LEFT -> isLeftPressed = false;
-            case Input.Keys.RIGHT -> isRightPressed = false;
-            case Input.Keys.UP -> isUpPressed = false;
-            case Input.Keys.DOWN -> isDownPressed = false;
+            case Keys.ALT_LEFT -> isAltPressed &= 0b01;
+            case Keys.ALT_RIGHT -> isAltPressed &= 0b10;
+            case Keys.CONTROL_LEFT -> isCtrlPressed &= 0b01;
+            case Keys.CONTROL_RIGHT -> isCtrlPressed &= 0b10;
+            case Keys.SHIFT_LEFT -> isShiftPressed &= 0b01;
+            case Keys.SHIFT_RIGHT -> isShiftPressed &= 0b10;
+            case Keys.LEFT -> isLeftPressed = false;
+            case Keys.RIGHT -> isRightPressed = false;
+            case Keys.UP -> isUpPressed = false;
+            case Keys.DOWN -> isDownPressed = false;
         }
         onKeyUp(keycode);
         return true;
@@ -221,7 +222,7 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
     @Deprecated
     @Override
     public boolean keyTyped(char character) {
-        Runnable handler = keyHandlerMap.get(character);
+        Runnable handler = keyHandlerMap.get(Character.toLowerCase(character));
         if (handler != null)
             handler.run();
         return true;

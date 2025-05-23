@@ -61,9 +61,7 @@ public class ArkPets extends InputApplicationAdaptor {
         config = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
         Gdx.input.setInputProcessor(this);
         Gdx.graphics.setForegroundFPS(config.display_fps);
-        Logger.debug("App", "OpenGL version is " + Gdx.gl.glGetString(GL20.GL_VERSION));
-        Logger.debug("App", "OpenGL vendor is " + Gdx.gl.glGetString(GL20.GL_VENDOR));
-        registerComposerKeyTyped();
+        registerDebugger();
 
         // 2.Character setup
         Logger.info("App", "Using model asset \"" + config.character_asset + "\"");
@@ -489,25 +487,27 @@ public class ArkPets extends InputApplicationAdaptor {
         }
     }
 
-    private void registerComposerKeyTyped() {
+
+    private void registerDebugger() {
+        Logger.debug("App", "OpenGL version is " + Gdx.gl.glGetString(GL20.GL_VERSION));
+        Logger.debug("App", "OpenGL vendor is " + Gdx.gl.glGetString(GL20.GL_VENDOR));
         if (Const.isDebugEnabled) {
-            registerKeyTyped('B', () -> {
+            registerKeyTyped('D', () -> {
+                int heap = (int) Math.ceil((Gdx.app.getJavaHeap() >> 10) / 1024f);
+                Logger.debug("Debugger", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + heap + "MB");
+            });
+            registerKeyTyped('P', () -> Logger.debug("Debugger", "Showing plane info\n" + plane.getDebugMsg()));
+            registerKeyTyped('S', () -> {
                 String name = "temp/snapshot-" + System.currentTimeMillis() + ".png";
                 Pixmap snapshot = Pixmap.createFromFrameBuffer(0, 0, cha.camera.getWidth(), cha.camera.getHeight());
                 PixmapIO.writePNG(new FileHandle(name), snapshot);
                 snapshot.dispose();
-                Logger.debug("App", "Snapshot saved to `" + name + "`");
+                Logger.debug("Debugger", "Snapshot saved to `" + name + "`");
             });
-
-            registerKeyTyped('D', () -> {
-                Logger.debug("Plane Debug Msg", plane.getDebugMsg());
-                Logger.debug("Status Msg", "FPS" + Gdx.graphics.getFramesPerSecond() + ", Heap" + (int) Math.ceil((Gdx.app.getJavaHeap() >> 10) / 1024f) + "MB");
-            });
-
             registerKeyTyped('W', () -> {
-                for (HWndCtrl hWndCtrl : WindowSystem.getWindowList(true)) {
-                    Logger.debug("HWND Debug Msg", hWndCtrl.toString());
-                }
+                StringBuilder builder = new StringBuilder("Showing window list\n");
+                WindowSystem.getWindowList(true).forEach(hWndCtrl -> builder.append(hWndCtrl).append("\n"));
+                Logger.debug("Debugger", builder.toString());
             });
         }
     }
