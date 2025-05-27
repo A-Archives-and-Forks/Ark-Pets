@@ -142,7 +142,6 @@ public class MemberTrayImpl extends MemberTray {
     public void onKeepAnimEn() {
         Logger.info("MemberTray", "Action-Mode enabled");
         keepAnim = arkPets.behavior.defaultAnim();
-        arkPets.behavior.autoCtrlReset();
         popMenu.remove(optKeepAnimEn);
         popMenu.add(optKeepAnimDis, 1);
     }

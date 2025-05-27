@@ -49,7 +49,7 @@ public class GeneralBehavior extends Behavior {
         stageCur = stageItr.next();
         stageAnimList = stageAnimMap.get(stageCur);
         actionList = stageAnimWeightMap.get(stageCur);
-        autoCtrlReset();
+        actionAutoGetter.reset();
     }
 
     public Set<AnimStage> getStages() {

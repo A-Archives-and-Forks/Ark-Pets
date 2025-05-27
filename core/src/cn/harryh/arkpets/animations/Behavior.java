@@ -4,12 +4,13 @@
 package cn.harryh.arkpets.animations;
 
 
+import cn.harryh.arkpets.utils.Cached;
+
+
 abstract public class Behavior {
-    protected AnimDataWeight[] actionList;
     protected AnimClipGroup animList;
-    protected float deltaMin;
-    protected float timeRec;
-    protected float duraRec;
+    protected AnimDataWeight[] actionList;
+    protected Cached<AnimData> actionAutoGetter;
     protected int idxRec;
 
     /** Character Behavior Controller Instance.
@@ -18,35 +19,22 @@ abstract public class Behavior {
     public Behavior(AnimClipGroup animList) {
         actionList = null;
         this.animList = animList;
-        deltaMin = 0.5f;
-        autoCtrlReset();
-    }
-
-    /** Gets a random animation.
-     * @param deltaTime The delta time.
-     * @return AnimData object.
-     */
-    public final AnimData autoCtrl(float deltaTime) {
-        duraRec += deltaTime;
-        timeRec += deltaTime;
-        if (timeRec >= deltaMin) {
-            timeRec = 0f;
-            if (duraRec >= actionList[idxRec].duration()) {
-                // Now try to change action
-                duraRec = 0f;
+        actionAutoGetter = new Cached<>() {
+            @Override
+            protected AnimData produce() {
                 idxRec = getRandomAction();
                 return actionList[idxRec].anim();
             }
-        }
-        return null;
+        };
     }
 
-    /** Resets the random animation getter.
+    /** Gets a random animation.
+     * @return AnimData object.
      */
-    public final void autoCtrlReset() {
-        timeRec = 0;
-        duraRec = 0;
-        idxRec = 0;
+    public final AnimData autoCtrl() {
+        AnimData value = actionAutoGetter.get();
+        actionAutoGetter.setCacheAge(Math.max(0.5f, value.animClip().duration));
+        return value;
     }
 
     /** Selects an action to play randomly.

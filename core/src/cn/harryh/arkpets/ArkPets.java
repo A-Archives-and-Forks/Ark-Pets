@@ -11,6 +11,7 @@ import cn.harryh.arkpets.platform.HWndCtrl;
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.transitions.TransitionVector2;
 import cn.harryh.arkpets.tray.MemberTrayImpl;
+import cn.harryh.arkpets.utils.Cached;
 import cn.harryh.arkpets.utils.InputApplicationAdaptor;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Plane;
@@ -40,8 +41,8 @@ public class ArkPets extends InputApplicationAdaptor {
 
     private HWndCtrl hWndMine;
     private HWndCtrl hWndTopmost;
-    private LoopCtrl getHWndLoopCtrl;
     private List<? extends HWndCtrl> hWndList;
+    private Cached<Object> hWndListGetter;
 
     private final String APP_TITLE;
     private int offsetY = 0;
@@ -86,7 +87,17 @@ public class ArkPets extends InputApplicationAdaptor {
         );
 
         // 4.Window position setup
-        getHWndLoopCtrl = new LoopCtrl(1f / config.display_fps * 4);
+        hWndListGetter = new Cached<>() {
+            @Override
+            protected Object produce() {
+                refreshMonitorInfo();
+                hWndTopmost = refreshWindowIndex();
+                hWndMine.setTransparent(isAlwaysTransparent);
+                isFocused = hWndMine.isForeground();
+                return null;
+            }
+        };
+        hWndListGetter.setCacheAge(1f / config.display_fps * 4);
         windowPosition = new TransitionVector2(
                 ArkConfig.getEasingFunctionFrom(config.transition_type),
                 Math.max(0, config.transition_duration)
@@ -116,7 +127,7 @@ public class ArkPets extends InputApplicationAdaptor {
 
         // 2.Select a new animation.
         AnimData newAnim;
-        if (tray.keepAnim == null) newAnim = behavior.autoCtrl(Gdx.graphics.getDeltaTime()); // AI anim.
+        if (tray.keepAnim == null) newAnim = behavior.autoCtrl(); // AI anim.
         else newAnim = tray.keepAnim;
         if (!isMouseDragging()) { // If no dragging:
             plane.updatePosition(Gdx.graphics.getDeltaTime());
@@ -302,13 +313,7 @@ public class ArkPets extends InputApplicationAdaptor {
     /* WINDOW OPERATIONS */
     private void setWindowPos() {
         if (hWndMine == null) return;
-        if (getHWndLoopCtrl.isExecutable(Gdx.graphics.getDeltaTime())) {
-            refreshMonitorInfo();
-            HWndCtrl new_hwnd_topmost = refreshWindowIndex();
-            hWndTopmost = new_hwnd_topmost != hWndTopmost ? new_hwnd_topmost : hWndTopmost;
-            hWndMine.setTransparent(isAlwaysTransparent);
-            isFocused = hWndMine.isForeground();
-        }
+        hWndListGetter.get();
         hWndMine.setWindowPosition(hWndTopmost,
                 (int) windowPosition.now().x, (int) windowPosition.now().y,
                 cha.camera.getWidth(), cha.camera.getHeight());
@@ -452,33 +457,6 @@ public class ArkPets extends InputApplicationAdaptor {
 
 
     /* UTILS */
-    private static class LoopCtrl {
-        private final float minIntervalTime;
-        private float accumTime;
-
-        /** Loop Controller instance.
-         * @param minIntervalTime The minimal interval time for each loop.
-         */
-        public LoopCtrl(float minIntervalTime) {
-            this.minIntervalTime = minIntervalTime;
-            this.accumTime = minIntervalTime;
-        }
-
-        /** Returns true if the loop is executable now.
-         * @param deltaTime The updated delta time.
-         */
-        public boolean isExecutable(float deltaTime) {
-            accumTime += deltaTime;
-            if (accumTime >= minIntervalTime) {
-                accumTime = 0;
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }
-
-
     private record RelativeWindowPosition(HWndCtrl hWndCtrl, int relX, int relY) {
         public void sendMouseEvent(HWndCtrl.MouseEvent msg) {
             if (msg == HWndCtrl.MouseEvent.EMPTY) return;
