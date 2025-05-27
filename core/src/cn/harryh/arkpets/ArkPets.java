@@ -60,7 +60,7 @@ public class ArkPets extends InputApplicationAdaptor {
 
             @Override
             protected double cacheAge() {
-                return getHeavyOperationCacheAge();
+                return 4.0 / getReducedFPS();
             }
         };
 
@@ -72,7 +72,7 @@ public class ArkPets extends InputApplicationAdaptor {
 
             @Override
             protected double cacheAge() {
-                return getHeavyOperationCacheAge();
+                return 4.0 / getReducedFPS();
             }
         };
     }
@@ -135,6 +135,7 @@ public class ArkPets extends InputApplicationAdaptor {
     public void render() {
         // 1.Render the next frame.
         cha.render();
+        Gdx.graphics.setForegroundFPS((int) getReducedFPS());
 
         // 2.Select a new animation.
         AnimData newAnim;
@@ -471,18 +472,11 @@ public class ArkPets extends InputApplicationAdaptor {
 
 
     /* UTILS */
-    private record RelativeWindowPosition(HWndCtrl hWndCtrl, int relX, int relY) {
-        public void sendMouseEvent(HWndCtrl.MouseEvent msg) {
-            if (msg == HWndCtrl.MouseEvent.EMPTY) return;
-            //Logger.debug("Input", "Transfer mouse event " + msg + " to `" + hWndCtrl.windowText + "` @ " + relX + ", " + relY);
-            hWndCtrl.updated().sendMouseEvent(msg, relX, relY);
-        }
+    private double getReducedFPS() {
+        double t = getLastActiveDeltaTime() / 60.0;
+        double k = 1.0 + 0.5 * (Math.exp(-0.5 * t + 0.5) - 1.0);
+        return Math.max(0.0, Math.min(1.0, k)) * config.display_fps;
     }
-
-    private double getHeavyOperationCacheAge() {
-        return 1.0 / config.display_fps * 4;
-    }
-
 
     private void registerDebugger() {
         Logger.debug("App", "OpenGL version is " + Gdx.gl.glGetString(GL20.GL_VERSION));
@@ -505,6 +499,14 @@ public class ArkPets extends InputApplicationAdaptor {
                 WindowSystem.getWindowList(true).forEach(hWndCtrl -> builder.append(hWndCtrl).append("\n"));
                 Logger.debug("Debugger", builder.toString());
             });
+        }
+    }
+
+    private record RelativeWindowPosition(HWndCtrl hWndCtrl, int relX, int relY) {
+        public void sendMouseEvent(HWndCtrl.MouseEvent msg) {
+            if (msg == HWndCtrl.MouseEvent.EMPTY) return;
+            //Logger.debug("Input", "Transfer mouse event " + msg + " to `" + hWndCtrl.windowText + "` @ " + relX + ", " + relY);
+            hWndCtrl.updated().sendMouseEvent(msg, relX, relY);
         }
     }
 }

@@ -32,6 +32,8 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
 
     private final HashMap<Character, Runnable> keyHandlerMap = new HashMap<>();
 
+    private long lastActiveNanoTime = System.nanoTime();
+
     abstract protected void onMouseDown();
 
     abstract protected void onMouseDrag();
@@ -80,6 +82,10 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
         return mouseIntention;
     }
 
+    public final double getLastActiveDeltaTime() {
+        return (System.nanoTime() - lastActiveNanoTime) / 1_000_000_000.0;
+    }
+
     public final boolean isMouseDragging() {
         return isMouseDragging;
     }
@@ -123,6 +129,7 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
     @Deprecated
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        lastActiveNanoTime = System.nanoTime();
         if (pointer <= 0) {
             Logger.debug("Input", "Click+ Btn " + button + " @ " + screenX + ", " + screenY);
             mouseX = screenX;
@@ -139,6 +146,7 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
     @Deprecated
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+        lastActiveNanoTime = System.nanoTime();
         if (pointer <= 0) {
             Logger.debug("Input", "Click- Btn " + button + " @ " + screenX + ", " + screenY);
             mouseX = screenX;
@@ -156,6 +164,7 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
     @Deprecated
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
+        lastActiveNanoTime = System.nanoTime();
         if (pointer <= 0) {
             mouseDeltaX = screenX - mouseX;
             mouseDeltaY = screenY - mouseY;
@@ -184,6 +193,7 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
     @Deprecated
     @Override
     public boolean keyDown(int keycode) {
+        lastActiveNanoTime = System.nanoTime();
         switch (keycode) {
             case Keys.ALT_LEFT -> isAltPressed |= 0b10;
             case Keys.ALT_RIGHT -> isAltPressed |= 0b01;
@@ -203,6 +213,7 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
     @Deprecated
     @Override
     public boolean keyUp(int keycode) {
+        lastActiveNanoTime = System.nanoTime();
         switch (keycode) {
             case Keys.ALT_LEFT -> isAltPressed &= 0b01;
             case Keys.ALT_RIGHT -> isAltPressed &= 0b10;
@@ -222,6 +233,7 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
     @Deprecated
     @Override
     public boolean keyTyped(char character) {
+        lastActiveNanoTime = System.nanoTime();
         Runnable handler = keyHandlerMap.get(Character.toLowerCase(character));
         if (handler != null)
             handler.run();
