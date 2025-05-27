@@ -102,26 +102,6 @@ public class GeneralBehavior extends Behavior {
     }
 
     @Override
-    public AnimData nextAnim() {
-        if (idxRec >= actionList.length - 1) {
-            idxRec = 0;
-        } else {
-            idxRec += 1;
-        }
-        return actionList[idxRec].anim();
-    }
-
-    @Override
-    public AnimData prevAnim() {
-        if (idxRec == 0) {
-            idxRec = actionList.length - 1;
-        } else {
-            idxRec -= 1;
-        }
-        return actionList[idxRec].anim();
-    }
-
-    @Override
     public AnimData clickEnd() {
         AnimData a1 = stageAnimList.getStreamedAnimData(AnimType.ATTACK);
         AnimData a2 = stageAnimList.getStreamedAnimData(AnimType.INTERACT);

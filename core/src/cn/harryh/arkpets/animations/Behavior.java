@@ -3,15 +3,18 @@
  */
 package cn.harryh.arkpets.animations;
 
-
 import cn.harryh.arkpets.utils.Cached;
+
+import java.util.Arrays;
 
 
 abstract public class Behavior {
     protected AnimClipGroup animList;
     protected AnimDataWeight[] actionList;
     protected Cached<AnimData> actionAutoGetter;
-    protected int idxRec;
+    private int idxRec;
+
+    private static final double minAnimCacheAge = 0.5;
 
     /** Character Behavior Controller Instance.
      * @param animList The animation clip list.
@@ -22,40 +25,58 @@ abstract public class Behavior {
         actionAutoGetter = new Cached<>() {
             @Override
             protected AnimData produce() {
-                idxRec = getRandomAction();
-                return actionList[idxRec].anim();
+                return getRandomAction();
             }
         };
+        idxRec = 0;
     }
 
     /** Gets a random animation.
      * @return AnimData object.
      */
-    public final AnimData autoCtrl() {
+    public final AnimData autoAnim() {
         AnimData value = actionAutoGetter.get();
-        actionAutoGetter.setCacheAge(Math.max(0.5f, value.animClip().duration));
+        actionAutoGetter.setCacheAge(Math.max(minAnimCacheAge, value.animClip().duration));
         return value;
     }
 
-    /** Selects an action to play randomly.
-     * @return The index of the action.
+    /** Gets the next animation.
+     * @return AnimData object.
      */
-    protected final int getRandomAction() {
-        // Calculate the sum of all action's weight
-        int weight_sum = 0;
-        for (AnimDataWeight i : actionList) {
-            weight_sum += i.weight();
+    public final AnimData nextAnim() {
+        if (actionList.length > 0) {
+            idxRec = idxRec >= actionList.length - 1 ? 0 : idxRec + 1;
+            return actionList[idxRec].anim();
         }
-        // Random select a weight
-        int weight_select = (int) Math.ceil(Math.random() * weight_sum);
-        // Figure out which action the weight referred
-        weight_sum = 0;
-        for (int j = 0; j < actionList.length; j++) {
-            weight_sum += actionList[j].weight();
-            if (weight_select <= weight_sum)
-                return j;
+        return new AnimData(null);
+    }
+
+    /** Gets the previous animation.
+     * @return AnimData object.
+     */
+    public final AnimData prevAnim() {
+        if (actionList.length > 0) {
+            idxRec = idxRec <= 0 ? actionList.length - 1 : idxRec - 1;
+            return actionList[idxRec].anim();
         }
-        return -1;
+        return new AnimData(null);
+    }
+
+    private AnimData getRandomAction() {
+        if (actionList.length > 0) {
+            // Calculate the sum of all action's weight
+            int weightSum = Arrays.stream(actionList).mapToInt(AnimDataWeight::weight).sum();
+            // Random select a weight
+            int weightSelect = (int) Math.ceil(Math.random() * weightSum);
+            // Figure out which action is selected
+            int weight = 0;
+            for (AnimDataWeight animDataWeight : actionList) {
+                weight += animDataWeight.weight();
+                if (weightSelect <= weight)
+                    return animDataWeight.anim();
+            }
+        }
+        return new AnimData(null);
     }
 
     /** Gets the default animation.
@@ -70,20 +91,6 @@ abstract public class Behavior {
      * @return AnimData object.
      */
     public AnimData walkAnim(int mobility) {
-        return new AnimData(null);
-    }
-
-    /** Selects the next animation.
-     * @return AnimData object.
-     */
-    public AnimData nextAnim() {
-        return new AnimData(null);
-    }
-
-    /** Selects the previous animation.
-     * @return AnimData object.
-     */
-    public AnimData prevAnim() {
         return new AnimData(null);
     }
 

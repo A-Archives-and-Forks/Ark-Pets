@@ -34,8 +34,6 @@ public abstract class Cached<T> {
                     cacheTimestampNanos = now;
                 }
             }
-        } else {
-            System.out.println("Ca");
         }
         return cachedValue;
     }

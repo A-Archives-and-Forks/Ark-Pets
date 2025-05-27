@@ -127,7 +127,7 @@ public class ArkPets extends InputApplicationAdaptor {
 
         // 2.Select a new animation.
         AnimData newAnim;
-        if (tray.keepAnim == null) newAnim = behavior.autoCtrl(); // AI anim.
+        if (tray.keepAnim == null) newAnim = behavior.autoAnim(); // AI anim.
         else newAnim = tray.keepAnim;
         if (!isMouseDragging()) { // If no dragging:
             plane.updatePosition(Gdx.graphics.getDeltaTime());
