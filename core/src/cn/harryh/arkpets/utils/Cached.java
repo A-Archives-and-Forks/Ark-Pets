@@ -5,27 +5,25 @@ package cn.harryh.arkpets.utils;
 
 
 /** The abstract class that provides a thread-safe caching mechanism for value production.
- * @implNote Subclasses should implement the {@code produce()} method to provide the actual value.
  * @param <T> The type of the produced and cached value.
  */
 public abstract class Cached<T> {
     protected T cachedValue;
-    protected long cacheAgeNanos;
-    protected long cacheTimestampNanos;
+    private long cacheTimestampNanos;
     private final Object lock;
 
     public Cached() {
         cachedValue = null;
-        cacheAgeNanos = 0L;
         cacheTimestampNanos = 0L;
         lock = new Object();
     }
 
     /** Returns the cached value. If the cache has expired or is empty,
-     * a new value is produced using {@code produce()}.
+     * a new value is produced using {@link #produce}.
      * @return The cached or newly produced value.
      */
-    public T get() {
+    public final T getValue() {
+        long cacheAgeNanos = (long) (cacheAge() * 1_000_000_000L);
         if (cachedValue == null || System.nanoTime() > cacheAgeNanos + cacheTimestampNanos) {
             synchronized (lock) {
                 long now = System.nanoTime();
@@ -38,21 +36,19 @@ public abstract class Cached<T> {
         return cachedValue;
     }
 
+    /** Returns the cached value, regardless of whether it has expired or not.
+     * @return The cached value (which may be null, indicating no value is cached).
+     */
+    public final T getCachedValue() {
+        return cachedValue;
+    }
+
     /** Resets the cache immediately.
      */
-    public void reset() {
+    public final void reset() {
         synchronized (lock) {
             cachedValue = null;
             cacheTimestampNanos = 0L;
-        }
-    }
-
-    /** Sets the maximum age for the cached value in seconds.
-     * @param value The cache age in seconds.
-     */
-    public void setCacheAge(double value) {
-        synchronized (lock) {
-            this.cacheAgeNanos = (long) (value * 1_000_000_000L);
         }
     }
 
@@ -60,4 +56,9 @@ public abstract class Cached<T> {
      * @return The newly produced value.
      */
     protected abstract T produce();
+
+    /** Returns the cache age which will be applied to the {@link #getValue} request.
+     * @return The cache age in second.
+     */
+    protected abstract double cacheAge();
 }

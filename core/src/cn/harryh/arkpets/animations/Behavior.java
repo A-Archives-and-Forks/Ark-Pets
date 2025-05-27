@@ -27,6 +27,13 @@ abstract public class Behavior {
             protected AnimData produce() {
                 return getRandomAction();
             }
+
+            @Override
+            protected double cacheAge() {
+                if (getCachedValue() == null)
+                    return minAnimCacheAge;
+                return Math.max(minAnimCacheAge, getCachedValue().animClip().duration);
+            }
         };
         idxRec = 0;
     }
@@ -35,9 +42,7 @@ abstract public class Behavior {
      * @return AnimData object.
      */
     public final AnimData autoAnim() {
-        AnimData value = actionAutoGetter.get();
-        actionAutoGetter.setCacheAge(Math.max(minAnimCacheAge, value.animClip().duration));
-        return value;
+        return actionAutoGetter.getValue();
     }
 
     /** Gets the next animation.

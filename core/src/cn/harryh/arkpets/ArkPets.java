@@ -96,8 +96,12 @@ public class ArkPets extends InputApplicationAdaptor {
                 isFocused = hWndMine.isForeground();
                 return null;
             }
+
+            @Override
+            protected double cacheAge() {
+                return 1f / config.display_fps * 4;
+            }
         };
-        hWndListGetter.setCacheAge(1f / config.display_fps * 4);
         windowPosition = new TransitionVector2(
                 ArkConfig.getEasingFunctionFrom(config.transition_type),
                 Math.max(0, config.transition_duration)
@@ -313,7 +317,7 @@ public class ArkPets extends InputApplicationAdaptor {
     /* WINDOW OPERATIONS */
     private void setWindowPos() {
         if (hWndMine == null) return;
-        hWndListGetter.get();
+        hWndListGetter.getValue();
         hWndMine.setWindowPosition(hWndTopmost,
                 (int) windowPosition.now().x, (int) windowPosition.now().y,
                 cha.camera.getWidth(), cha.camera.getHeight());
