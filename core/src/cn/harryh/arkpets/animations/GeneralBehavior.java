@@ -13,6 +13,7 @@ import static cn.harryh.arkpets.Const.behaviorBaseWeight;
 
 
 public class GeneralBehavior extends Behavior {
+    protected ArkConfig config;
     protected AnimStage stageCur;
     protected AnimClipGroup stageAnimList;
     protected Iterator<AnimStage> stageItr;
@@ -21,9 +22,10 @@ public class GeneralBehavior extends Behavior {
     protected final HashMap<AnimStage, AnimDataWeight[]> stageAnimWeightMap;
 
     public GeneralBehavior(ArkConfig config, AnimClipGroup animList) {
-        super(config, animList);
+        super(animList);
 
-        stageAnimMap = anim_list.clusterByStage();
+        this.config = config;
+        stageAnimMap = this.animList.clusterByStage();
         stageAnimWeightMap = new HashMap<>();
         for (AnimStage key : stageAnimMap.keySet()) {
             AnimDataWeight[] temp = getActionList(stageAnimMap.get(key));
@@ -37,7 +39,7 @@ public class GeneralBehavior extends Behavior {
             throw new NoSuchElementException("Animation stage map was empty because no animation's name was matched.");
         stageItr = stageList.iterator();
 
-        action_list = new AnimDataWeight[0];
+        actionList = new AnimDataWeight[0];
         nextStage();
     }
 
@@ -46,7 +48,7 @@ public class GeneralBehavior extends Behavior {
             stageItr = stageList.iterator();
         stageCur = stageItr.next();
         stageAnimList = stageAnimMap.get(stageCur);
-        action_list = stageAnimWeightMap.get(stageCur);
+        actionList = stageAnimWeightMap.get(stageCur);
         autoCtrlReset();
     }
 
@@ -101,22 +103,22 @@ public class GeneralBehavior extends Behavior {
 
     @Override
     public AnimData nextAnim() {
-        if (idxRec >= action_list.length - 1) {
+        if (idxRec >= actionList.length - 1) {
             idxRec = 0;
         } else {
             idxRec += 1;
         }
-        return action_list[idxRec].anim();
+        return actionList[idxRec].anim();
     }
 
     @Override
     public AnimData prevAnim() {
         if (idxRec == 0) {
-            idxRec = action_list.length - 1;
+            idxRec = actionList.length - 1;
         } else {
             idxRec -= 1;
         }
-        return action_list[idxRec].anim();
+        return actionList[idxRec].anim();
     }
 
     @Override

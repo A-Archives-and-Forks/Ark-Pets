@@ -3,26 +3,21 @@
  */
 package cn.harryh.arkpets.animations;
 
-import cn.harryh.arkpets.ArkConfig;
-
 
 abstract public class Behavior {
-    protected AnimDataWeight[] action_list;
-    protected AnimClipGroup anim_list;
-    protected ArkConfig config;
+    protected AnimDataWeight[] actionList;
+    protected AnimClipGroup animList;
     protected float deltaMin;
     protected float timeRec;
     protected float duraRec;
     protected int idxRec;
 
     /** Character Behavior Controller Instance.
-     * @param config ArkConfig object.
-     * @param animList The animation name list.
+     * @param animList The animation clip list.
      */
-    public Behavior(ArkConfig config, AnimClipGroup animList) {
-        action_list = null;
-        anim_list = animList;
-        this.config = config;
+    public Behavior(AnimClipGroup animList) {
+        actionList = null;
+        this.animList = animList;
         deltaMin = 0.5f;
         autoCtrlReset();
     }
@@ -36,11 +31,11 @@ abstract public class Behavior {
         timeRec += deltaTime;
         if (timeRec >= deltaMin) {
             timeRec = 0f;
-            if (duraRec >= action_list[idxRec].duration()) {
+            if (duraRec >= actionList[idxRec].duration()) {
                 // Now try to change action
                 duraRec = 0f;
                 idxRec = getRandomAction();
-                return action_list[idxRec].anim();
+                return actionList[idxRec].anim();
             }
         }
         return null;
@@ -60,15 +55,15 @@ abstract public class Behavior {
     protected final int getRandomAction() {
         // Calculate the sum of all action's weight
         int weight_sum = 0;
-        for (AnimDataWeight i : action_list) {
+        for (AnimDataWeight i : actionList) {
             weight_sum += i.weight();
         }
         // Random select a weight
         int weight_select = (int) Math.ceil(Math.random() * weight_sum);
         // Figure out which action the weight referred
         weight_sum = 0;
-        for (int j = 0; j < action_list.length; j++) {
-            weight_sum += action_list[j].weight();
+        for (int j = 0; j < actionList.length; j++) {
+            weight_sum += actionList[j].weight();
             if (weight_select <= weight_sum)
                 return j;
         }
