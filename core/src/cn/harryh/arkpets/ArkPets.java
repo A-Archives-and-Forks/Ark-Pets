@@ -40,18 +40,41 @@ public class ArkPets extends InputApplicationAdaptor {
     public TransitionVector2 windowPosition; // Window Position Easing
 
     private HWndCtrl hWndMine;
-    private HWndCtrl hWndTopmost;
     private List<? extends HWndCtrl> hWndList;
-    private Cached<Object> hWndListGetter;
+    private final Cached<HWndCtrl> hWndTopmostGetter;
 
     private final String APP_TITLE;
     private int offsetY = 0;
-    private boolean isFocused = false;
     private boolean isToolwindowStyle = false;
     private boolean isAlwaysTransparent = false;
+    private final Cached<Boolean> isFocused;
 
     public ArkPets(String title) {
         APP_TITLE = title;
+
+        hWndTopmostGetter = new Cached<>() {
+            @Override
+            protected HWndCtrl produce() {
+                return refreshWindowIndex();
+            }
+
+            @Override
+            protected double cacheAge() {
+                return getHeavyOperationCacheAge();
+            }
+        };
+
+        isFocused = new Cached<>() {
+            @Override
+            protected Boolean produce() {
+                return hWndMine.isForeground();
+            }
+
+            @Override
+            protected double cacheAge() {
+                return getHeavyOperationCacheAge();
+            }
+        };
     }
 
     @Override
@@ -87,35 +110,19 @@ public class ArkPets extends InputApplicationAdaptor {
         );
 
         // 4.Window position setup
-        hWndListGetter = new Cached<>() {
-            @Override
-            protected Object produce() {
-                refreshMonitorInfo();
-                hWndTopmost = refreshWindowIndex();
-                hWndMine.setTransparent(isAlwaysTransparent);
-                isFocused = hWndMine.isForeground();
-                return null;
-            }
-
-            @Override
-            protected double cacheAge() {
-                return 1f / config.display_fps * 4;
-            }
-        };
         windowPosition = new TransitionVector2(
                 ArkConfig.getEasingFunctionFrom(config.transition_type),
                 Math.max(0, config.transition_duration)
         );
         windowPosition.reset(plane.getX(), -(cha.camera.getHeight() + plane.getY()) + offsetY);
         windowPosition.setToEnd();
-        setWindowPos();
 
         // 5.Window style setup
         hWndMine = WindowSystem.findWindow(null, APP_TITLE);
         hWndMine.setLayered(true);
         if (config.window_style_topmost)
             hWndMine.setTopmost(true);
-        promiseToolwindowStyle(1000);
+        updateWindow();
 
         // 6.Tray icon setup
         tray = new MemberTrayImpl(this, new SocketClient());
@@ -161,16 +168,17 @@ public class ArkPets extends InputApplicationAdaptor {
         // 3.Window properties.
         windowPosition.reset(plane.getX(), -(cha.camera.getHeight() + plane.getY()) + offsetY);
         windowPosition.addProgress(Gdx.graphics.getDeltaTime());
-        setWindowPos();
-        promiseToolwindowStyle(1);
+        updateWindow();
 
         // 4.Outline.
-        ArkConfig.RenderOutline renderOutline = ArkConfig.getRenderOutlineFrom(config.render_outline);
-        cha.setOutlineAlpha(renderOutline == ArkConfig.RenderOutline.ALWAYS ||
-                isMouseDown() && renderOutline == ArkConfig.RenderOutline.PRESSING ||
-                isFocused && renderOutline == ArkConfig.RenderOutline.FOCUSED ||
-                isMouseDragging() && renderOutline == ArkConfig.RenderOutline.DRAGGING
-                ? 1f : 0f);
+        boolean renderOutline = switch (ArkConfig.getRenderOutlineFrom(config.render_outline)) {
+            case ALWAYS -> true;
+            case PRESSING -> isMouseDown();
+            case FOCUSED -> isFocused.getValue();
+            case DRAGGING -> isMouseDragging();
+            default -> false;
+        };
+        cha.setOutlineAlpha(renderOutline ? 1f : 0f);
     }
 
     @Override
@@ -315,10 +323,26 @@ public class ArkPets extends InputApplicationAdaptor {
     }
 
     /* WINDOW OPERATIONS */
-    private void setWindowPos() {
-        if (hWndMine == null) return;
-        hWndListGetter.getValue();
-        hWndMine.setWindowPosition(hWndTopmost,
+    private void updateWindow() {
+        if (hWndMine == null)
+            return;
+        // Tool window style
+        if (config.window_style_toolwindow && !isToolwindowStyle) {
+            // Make sure ArkPets has been set as foreground window once
+            for (int i = 0; i < 1; i++) {
+                if (hWndMine.isForeground()) {
+                    hWndMine.setTaskbar(false);
+                    Logger.info("Window", "SetForegroundWindow succeeded");
+                    isToolwindowStyle = true;
+                    break;
+                }
+                hWndMine.setForeground();
+            }
+        }
+        // Transparent style
+        hWndMine.setTransparent(isAlwaysTransparent);
+        // Window position
+        hWndMine.setWindowPosition(hWndTopmostGetter.getValue(),
                 (int) windowPosition.now().x, (int) windowPosition.now().y,
                 cha.camera.getWidth(), cha.camera.getHeight());
     }
@@ -341,6 +365,7 @@ public class ArkPets extends InputApplicationAdaptor {
     }
 
     private HWndCtrl refreshWindowIndex() {
+        refreshMonitorInfo();
         hWndList = WindowSystem.getWindowList(true);
         HWndCtrl minWindow = null;
         HashMap<Integer, HWndCtrl> line = new HashMap<>();
@@ -423,21 +448,6 @@ public class ArkPets extends InputApplicationAdaptor {
         return monitors[0];
     }
 
-    private void promiseToolwindowStyle(int maxRetries) {
-        if (config.window_style_toolwindow && !isToolwindowStyle) {
-            // Make sure ArkPets has been set as foreground window once
-            for (int i = 0; i < maxRetries; i++) {
-                if (hWndMine.isForeground()) {
-                    hWndMine.setTaskbar(false);
-                    Logger.info("Window", "SetForegroundWindow succeeded");
-                    isToolwindowStyle = true;
-                    break;
-                }
-                hWndMine.setForeground();
-            }
-        }
-    }
-
     /* WINDOW WALKING RELATED */
     private void walkWindow(float len) {
         float expectedLen = len * config.display_scale * (30f / config.display_fps);
@@ -467,6 +477,10 @@ public class ArkPets extends InputApplicationAdaptor {
             //Logger.debug("Input", "Transfer mouse event " + msg + " to `" + hWndCtrl.windowText + "` @ " + relX + ", " + relY);
             hWndCtrl.updated().sendMouseEvent(msg, relX, relY);
         }
+    }
+
+    private double getHeavyOperationCacheAge() {
+        return 1.0 / config.display_fps * 4;
     }
 
 

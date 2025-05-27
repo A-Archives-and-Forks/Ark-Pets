@@ -9,11 +9,13 @@ package cn.harryh.arkpets.utils;
  */
 public abstract class Cached<T> {
     protected T cachedValue;
+    private boolean cacheEmpty;
     private long cacheTimestampNanos;
     private final Object lock;
 
     public Cached() {
         cachedValue = null;
+        cacheEmpty = true;
         cacheTimestampNanos = 0L;
         lock = new Object();
     }
@@ -24,11 +26,12 @@ public abstract class Cached<T> {
      */
     public final T getValue() {
         long cacheAgeNanos = (long) (cacheAge() * 1_000_000_000L);
-        if (cachedValue == null || System.nanoTime() > cacheAgeNanos + cacheTimestampNanos) {
+        if (cacheEmpty || System.nanoTime() > cacheAgeNanos + cacheTimestampNanos) {
             synchronized (lock) {
                 long now = System.nanoTime();
-                if (cachedValue == null || now > cacheAgeNanos + cacheAgeNanos) {
+                if (cacheEmpty || now > cacheAgeNanos + cacheAgeNanos) {
                     cachedValue = produce();
+                    cacheEmpty = false;
                     cacheTimestampNanos = now;
                 }
             }
@@ -48,6 +51,7 @@ public abstract class Cached<T> {
     public final void reset() {
         synchronized (lock) {
             cachedValue = null;
+            cacheEmpty = true;
             cacheTimestampNanos = 0L;
         }
     }
