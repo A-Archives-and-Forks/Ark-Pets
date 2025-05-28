@@ -115,6 +115,9 @@
                     <JFXCheckBox fx:id="configWindowToolwindow" mnemonicParsing="false" text="桌宠作为后台程序启动"/>
                     <JFXButton fx:id="configWindowToolwindowHelp"/>
                 </HBox>
+                <HBox>
+                    <JFXCheckBox fx:id="configEcoMode" mnemonicParsing="false" text="长时间未交互时降低帧率"/>
+                </HBox>
                 <Separator/>
                 <HBox>
                     <Label text="日志级别"/>

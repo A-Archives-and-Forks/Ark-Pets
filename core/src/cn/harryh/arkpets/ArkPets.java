@@ -473,6 +473,8 @@ public class ArkPets extends InputApplicationAdaptor {
 
     /* UTILS */
     private double getReducedFPS() {
+        if (!config.eco_mode)
+            return config.display_fps;
         double t = getLastActiveDeltaTime() / 60.0;
         double k = 1.0 + 0.5 * (Math.exp(-0.5 * t + 0.5) - 1.0);
         return Math.max(0.0, Math.min(1.0, k)) * config.display_fps;

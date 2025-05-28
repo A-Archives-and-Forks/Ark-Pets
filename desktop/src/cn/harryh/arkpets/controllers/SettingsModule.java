@@ -53,17 +53,17 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private JFXComboBox<NamedItem<Integer>> configDisplayFps;
     @FXML
     private JFXButton configDisplayFpsHelp;
+
+    @FXML
+    private JFXTabPane configRenderTabPane;
+    @FXML
+    private JFXComboBox<NamedItem<Integer>> configCanvasColor;
     @FXML
     private JFXComboBox<NamedItem<Float>> configCanvasCoverage;
     @FXML
     private JFXButton configCanvasCoverageHelp;
     @FXML
     private JFXComboBox<NamedItem<Integer>> configCanvasSamplingInterval;
-
-    @FXML
-    private JFXTabPane configRenderTabPane;
-    @FXML
-    private JFXComboBox<NamedItem<Integer>> configCanvasColor;
     @FXML
     private JFXComboBox<NamedItem<Integer>> configRenderOutline;
     @FXML
@@ -108,6 +108,8 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     @FXML
     private JFXButton configWindowToolwindowHelp;
     @FXML
+    private JFXCheckBox configEcoMode;
+    @FXML
     private Label exportLatestLog;
 
     @FXML
@@ -132,6 +134,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         initNoticeBox();
         initHandbookEntrance();
         initConfigDisplay();
+        initConfigRendering();
         initConfigAdvanced();
         initAbout();
         initScheduledListener();
@@ -165,6 +168,21 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     app.config.save();
                     displayFpsHelpEntrance.refreshAndEnsureDisplayed();
                 });
+    }
+
+    private void initConfigRendering() {
+        new TabPaneSetup(configRenderTabPane, durationFast).makeResponsive();
+
+        new ComboBoxSetup<>(configCanvasColor).setItems(new NamedItem<>("透明", 0x00000000),
+                        new NamedItem<>("绿色", 0x00FF00FF),
+                        new NamedItem<>("蓝色", 0x0000FFFF),
+                        new NamedItem<>("品红色", 0xFF00FFFF))
+                .selectValue(Color.rgba8888(ArkConfig.getGdxColorFrom(app.config.canvas_color)), app.config.canvas_color + "（自定义）")
+                .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
+                    app.config.canvas_color = String.format("#%08X", newValue.value());
+                    app.config.save();
+                });
+
         new ComboBoxSetup<>(configCanvasCoverage).setItems(new NamedItem<>("最宽", 0.45f),
                         new NamedItem<>("较宽", 0.65f),
                         new NamedItem<>("标准", 0.8f),
@@ -193,18 +211,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 .selectValue(app.config.canvas_sampling_interval, "间隔" + app.config.canvas_sampling_interval + "帧（自定义）")
                 .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
                     app.config.canvas_sampling_interval = newValue.value();
-                    app.config.save();
-                });
-
-        new TabPaneSetup(configRenderTabPane, durationFast).makeResponsive();
-
-        new ComboBoxSetup<>(configCanvasColor).setItems(new NamedItem<>("透明", 0x00000000),
-                        new NamedItem<>("绿色", 0x00FF00FF),
-                        new NamedItem<>("蓝色", 0x0000FFFF),
-                        new NamedItem<>("品红色", 0xFF00FFFF))
-                .selectValue(Color.rgba8888(ArkConfig.getGdxColorFrom(app.config.canvas_color)), app.config.canvas_color + "（自定义）")
-                .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
-                    app.config.canvas_color = String.format("#%08X", newValue.value());
                     app.config.save();
                 });
 
@@ -273,6 +279,24 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     app.config.save();
                 });
 
+        configEnableMipMap.setSelected(app.config.render_enable_mipmap);
+        configEnableMipMap.setOnAction(e -> {
+            app.config.render_enable_mipmap = configEnableMipMap.isSelected();
+            app.config.save();
+        });
+        new HelpHandbookEntrance(app.body, configEnableMipMapHelp) {
+            @Override
+            protected Handbook getHandbook() {
+                return new ControlHelpHandbook((Labeled) configEnableMipMap.getParent().getChildrenUnmodifiable().get(0)) {
+                    @Override
+                    public String getContent() {
+                        return "启用时，将会使用 MipMap 技术来消除由于纹理缩放导致的锯齿，但是会略微增加显存占用。\n" +
+                                "禁用时，桌宠在小分辨率渲染时可能会产生锯齿。";
+                    }
+                };
+            }
+        };
+
         configEnableAngle.setSelected(app.config.render_enable_angle);
         configEnableAngle.setOnAction(e -> {
             app.config.render_enable_angle = configEnableAngle.isSelected();
@@ -290,24 +314,6 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                         else apiText = "";
                         return "启用时，桌宠将使用实验性 " + apiText + " 进行渲染，这可能会在一定程度上提高性能，并解决某些渲染问题（如背景黑色等）。\n" +
                                 "禁用时，桌宠将使用 OpenGL 进行渲染，在某些情况下可能会遇到兼容问题。";
-                    }
-                };
-            }
-        };
-
-        configEnableMipMap.setSelected(app.config.render_enable_mipmap);
-        configEnableMipMap.setOnAction(e -> {
-            app.config.render_enable_mipmap = configEnableMipMap.isSelected();
-            app.config.save();
-        });
-        new HelpHandbookEntrance(app.body, configEnableMipMapHelp) {
-            @Override
-            protected Handbook getHandbook() {
-                return new ControlHelpHandbook((Labeled) configEnableMipMap.getParent().getChildrenUnmodifiable().get(0)) {
-                    @Override
-                    public String getContent() {
-                        return "启用时，将会使用 MipMap 技术来消除由于纹理缩放导致的锯齿，但是会略微增加显存占用。\n" +
-                                "禁用时，桌宠在小分辨率渲染时可能会产生锯齿。";
                     }
                 };
             }
@@ -429,6 +435,12 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 };
             }
         };
+
+        configEcoMode.setSelected(app.config.eco_mode);
+        configEcoMode.setOnAction(e -> {
+            app.config.eco_mode = configEcoMode.isSelected();
+            app.config.save();
+        });
 
         exportLatestLog.setOnMouseClicked(e -> exportLatestLog());
     }
