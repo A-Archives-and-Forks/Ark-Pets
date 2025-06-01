@@ -3,10 +3,12 @@
  */
 package cn.harryh.arkpets.guitasks;
 
+import cn.harryh.arkpets.network.Connections;
+import cn.harryh.arkpets.network.NetworkUtils;
+import cn.harryh.arkpets.network.Source;
+import cn.harryh.arkpets.network.Source.GitHubSource;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
-import cn.harryh.arkpets.utils.NetUtils;
-import cn.harryh.arkpets.utils.NetUtils.GitHubSource;
 import cn.harryh.arkpets.utils.StringUtils;
 import javafx.concurrent.Task;
 import javafx.scene.layout.StackPane;
@@ -42,8 +44,8 @@ abstract public class FetchGitHubRemoteTask extends GuiTask {
             protected Boolean call() throws Exception {
                 this.updateMessage("正在选择最佳线路");
                 Logger.info("Network", "Testing real delay");
-                GitHubSource.sortByOverallAvailability(NetUtils.ghSources);
-                selectedSource = (GitHubSource) NetUtils.ghSources.get(0);
+                Source.sortByOverallAvailability(GitHubSource.ghSources);
+                selectedSource = (GitHubSource) GitHubSource.ghSources.get(0);
 
                 Logger.info("Network", "Selected the most available " + selectedSource);
                 String remotePathPrefix = isArchive ? selectedSource.archivePreUrl : selectedSource.rawPreUrl;
@@ -52,8 +54,8 @@ abstract public class FetchGitHubRemoteTask extends GuiTask {
                 Logger.info("Network", "Fetching " + remotePath + " to " + destPath);
                 this.updateMessage("正在尝试与 " + selectedSource.tag + " 建立连接");
 
-                NetUtils.BufferLog log = new NetUtils.BufferLog(httpBufferSizeDefault);
-                HttpsURLConnection connection = NetUtils.ConnectionUtil.createHttpsConnection(new URL(remotePath),
+                NetworkUtils.BufferLog log = new NetworkUtils.BufferLog(httpBufferSizeDefault);
+                HttpsURLConnection connection = Connections.createHttpsConnection(new URL(remotePath),
                         httpTimeoutDefault,
                         httpTimeoutDefault,
                         isHttpsTrustAll);

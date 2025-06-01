@@ -8,9 +8,13 @@ import cn.harryh.arkpets.ArkHomeFX;
 import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.guitasks.CheckAppUpdateTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
+import cn.harryh.arkpets.network.NetworkUtils;
 import cn.harryh.arkpets.platform.StartupConfig;
-import cn.harryh.arkpets.utils.*;
+import cn.harryh.arkpets.utils.ArgPending;
+import cn.harryh.arkpets.utils.GuiComponents;
 import cn.harryh.arkpets.utils.GuiComponents.*;
+import cn.harryh.arkpets.utils.GuiPrefabs;
+import cn.harryh.arkpets.utils.Logger;
 import com.badlogic.gdx.graphics.Color;
 import com.jfoenix.controls.*;
 import javafx.application.Platform;
@@ -338,11 +342,11 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 configNetworkAgentStatus.setText("未使用代理");
                 configNetworkAgentStatus.setTextFill(GuiPrefabs.COLOR_LIGHT_GRAY);
                 Logger.info("Network", "Set proxy to none");
-                NetUtils.setProxy("", "");
+                NetworkUtils.setProxy("", "");
             } else {
                 if (ipPortRegex.matcher(newValue).matches()) {
                     String[] ipPort = newValue.split(":");
-                    NetUtils.setProxy(ipPort[0], ipPort[1]);
+                    NetworkUtils.setProxy(ipPort[0], ipPort[1]);
                     configNetworkAgentStatus.setText("代理生效中");
                     configNetworkAgentStatus.setTextFill(GuiPrefabs.COLOR_SUCCESS);
                     Logger.info("Network", "Set proxy to host " + ipPort[0] + ", port " + ipPort[1]);

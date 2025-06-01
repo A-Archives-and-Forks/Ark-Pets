@@ -3,9 +3,10 @@
  */
 package cn.harryh.arkpets.guitasks;
 
+import cn.harryh.arkpets.network.Connections;
+import cn.harryh.arkpets.network.NetworkUtils;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
-import cn.harryh.arkpets.utils.NetUtils;
 import cn.harryh.arkpets.utils.StringUtils;
 import javafx.concurrent.Task;
 import javafx.scene.layout.StackPane;
@@ -39,8 +40,8 @@ abstract public class FetchRemoteTask extends GuiTask {
                 Logger.info("Network", "Fetching " + remotePath + " to " + destPath);
                 this.updateMessage("正在尝试建立连接");
 
-                NetUtils.BufferLog log = new NetUtils.BufferLog(httpBufferSizeDefault);
-                HttpsURLConnection connection = NetUtils.ConnectionUtil.createHttpsConnection(new URL(remotePath),
+                NetworkUtils.BufferLog log = new NetworkUtils.BufferLog(httpBufferSizeDefault);
+                HttpsURLConnection connection = Connections.createHttpsConnection(new URL(remotePath),
                         httpTimeoutDefault,
                         httpTimeoutDefault,
                         isHttpsTrustAll);

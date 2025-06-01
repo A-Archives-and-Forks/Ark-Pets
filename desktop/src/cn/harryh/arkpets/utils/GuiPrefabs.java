@@ -7,6 +7,7 @@ import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.concurrent.ProcessPool;
 import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.guitasks.ZipTask;
+import cn.harryh.arkpets.network.Connections;
 import com.jfoenix.controls.*;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
@@ -358,7 +359,7 @@ public class GuiPrefabs {
                 h3.setText("桌宠运行时异常退出。您可以稍后重试或查看日志文件。");
             } else if (e instanceof FileNotFoundException) {
                 h3.setText("未找到指定的文件或目录，请稍后重试。详细信息：");
-            } else if (e instanceof NetUtils.HttpResponseCodeException ex) {
+            } else if (e instanceof Connections.HttpResponseCodeException ex) {
                 h2.setText("神经递质接收异常");
                 switch (ex.getType()) {
                     case REDIRECTION -> h3.setText("请求的网络地址被重定向转移。详细信息：");
