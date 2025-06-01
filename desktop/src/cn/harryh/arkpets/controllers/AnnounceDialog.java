@@ -10,6 +10,7 @@ import cn.harryh.arkpets.guitasks.GuiTask.GuiTaskStyle;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.NetUtils;
+import cn.harryh.arkpets.utils.StringUtils;
 import cn.harryh.arkpets.utils.markdown.FxmlConvertor;
 import cn.harryh.arkpets.utils.markdown.FxmlDocumentController;
 import com.alibaba.fastjson.JSONObject;
@@ -29,9 +30,6 @@ import javafx.scene.shape.SVGPath;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Objects;
@@ -42,11 +40,11 @@ import java.util.stream.Collectors;
 import static cn.harryh.arkpets.Const.durationFast;
 
 
-public final class AnnounceDialog implements Controller<ArkHomeFX> {
+public final class AnnounceDialog implements DialogController<ArkHomeFX> {
     @FXML
-    public AnchorPane dialog;
+    private AnchorPane dialog;
     @FXML
-    public JFXButton dialogReturn;
+    private JFXButton dialogReturn;
 
     @FXML
     private JFXListView<JFXListCell<AnnounceItem>> annoListView;
@@ -84,6 +82,16 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
         annoRefetch.setOnAction(e -> this.fetchAnnounce(true, () -> {}));
 
         announceReadHandler = new AnnounceReadHandler(app.config);
+    }
+
+    @Override
+    public AnchorPane getDialogPane() {
+        return dialog;
+    }
+
+    @Override
+    public JFXButton getReturnButton() {
+        return dialogReturn;
     }
 
     public void fetchAnnounce(boolean doPopNotice, Runnable onNeedImmediateShow) {
@@ -160,7 +168,8 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
             case WARN -> "重要公告";
             case DANGER -> "紧急公告";
         });
-        GuiPrefabs.replaceTextAutoVisibility(annoDate, anno.getFormattedDate(DateTimeFormatter.ISO_DATE));
+        GuiPrefabs.replaceTextAutoVisibility(annoDate,
+                anno.date != null && !anno.date.isEmpty() ? StringUtils.getSimpleTimeString(anno.getParsedDate()) : "");
         GuiPrefabs.replaceTextAutoVisibility(annoGotoOrigin, anno.source != null ? "查看原文" : null);
         annoGotoOrigin.setOnMouseClicked(e -> NetUtils.browseWebpage(anno.source));
         // Display announcement
@@ -256,12 +265,6 @@ public final class AnnounceDialog implements Controller<ArkHomeFX> {
         @JSONField(deserialize = false)
         public String getAnnoId() {
             return String.format("%08x", hashCode());
-        }
-
-        @JSONField(deserialize = false)
-        public String getFormattedDate(DateTimeFormatter format) {
-            Instant parsedDate = getParsedDate();
-            return parsedDate != null ? LocalDate.ofInstant(parsedDate, ZoneId.systemDefault()).format(format) : null;
         }
 
         @JSONField(deserialize = false)
