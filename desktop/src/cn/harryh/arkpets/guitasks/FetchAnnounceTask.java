@@ -4,7 +4,7 @@
 package cn.harryh.arkpets.guitasks;
 
 import cn.harryh.arkpets.Const;
-import cn.harryh.arkpets.controllers.AnnounceDialog;
+import cn.harryh.arkpets.network.api.AppQueryAnnouncement;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
@@ -14,16 +14,16 @@ import javafx.scene.layout.StackPane;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.PathConfig;
+import static cn.harryh.arkpets.network.api.AppQueryAnnouncement.AnnounceItem;
 
 
 public class FetchAnnounceTask extends FetchRemoteTask {
-    protected ObservableList<AnnounceDialog.AnnounceItem> acceptor;
+    protected ObservableList<AnnounceItem> acceptor;
 
-    public FetchAnnounceTask(StackPane parent, GuiTaskStyle style, ObservableList<AnnounceDialog.AnnounceItem> acceptor) {
+    public FetchAnnounceTask(StackPane parent, GuiTaskStyle style, ObservableList<AnnounceItem> acceptor) {
         super(parent,
                 style,
                 PathConfig.urlApi + "?type=queryAnnouncement",
@@ -49,13 +49,14 @@ public class FetchAnnounceTask extends FetchRemoteTask {
         // When finished downloading the latest app ver-info:
         try {
             // Try to parse the latest app ver-info
-            JSONObject queryAnnounceResult = Objects.requireNonNull(JSONObject.parseObject(IOUtils.FileUtil.readByte(new File(PathConfig.tempQueryAnnounceCachePath))));
-            if (queryAnnounceResult.getString("msg").equals("success")) {
-                // If the response status is "success":
-                ArrayList<AnnounceDialog.AnnounceItem> arrayList = new ArrayList<>();
-                queryAnnounceResult.getJSONObject("data").getJSONArray("contents")
-                        .forEach(o -> arrayList.add(((JSONObject) o).toJavaObject(AnnounceDialog.AnnounceItem.class)));
-                acceptor.setAll(arrayList);
+            AppQueryAnnouncement queryAnnounceResult = Objects.requireNonNull(
+                    JSONObject.parseObject(
+                            IOUtils.FileUtil.readByte(new File(PathConfig.tempQueryAnnounceCachePath)),
+                            AppQueryAnnouncement.class
+                    )
+            );
+            if (queryAnnounceResult.code == 0) {
+                acceptor.setAll(Objects.requireNonNull(queryAnnounceResult.data.contents));
             } else {
                 // On API failed:
                 Logger.warn("Announce", "Announcement fetching failed (api failed)");

@@ -4,6 +4,7 @@
 package cn.harryh.arkpets.guitasks;
 
 import cn.harryh.arkpets.Const;
+import cn.harryh.arkpets.network.api.AppQueryVersion;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
@@ -45,12 +46,15 @@ public class CheckAppUpdateTask extends FetchRemoteTask {
         // When finished downloading the latest app ver-info:
         try {
             // Try to parse the latest app ver-info
-            JSONObject queryVersionResult = Objects.requireNonNull(JSONObject.parseObject(IOUtils.FileUtil.readByte(new File(PathConfig.tempQueryVersionCachePath))));
+            AppQueryVersion queryVersionResult = Objects.requireNonNull(
+                    JSONObject.parseObject(
+                            IOUtils.FileUtil.readByte(new File(PathConfig.tempQueryVersionCachePath)),
+                            AppQueryVersion.class
+                    )
+            );
             // TODO show in-test version
-            if (queryVersionResult.getString("msg").equals("success")) {
-                // If the response status is "success":
-                int[] stableVersionResult = queryVersionResult.getJSONObject("data").getObject("stableVersion", int[].class);
-                Version stableVersion = new Version(stableVersionResult);
+            if (queryVersionResult.code == 0) {
+                Version stableVersion = Objects.requireNonNull(queryVersionResult.getStableVersion());
                 if (appVersion.lessThan(stableVersion)) {
                     // On update is available:
                     Const.isUpdateAvailable = true;

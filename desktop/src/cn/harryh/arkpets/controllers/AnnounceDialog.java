@@ -13,7 +13,6 @@ import cn.harryh.arkpets.utils.StringUtils;
 import cn.harryh.arkpets.utils.markdown.FxmlConvertor;
 import cn.harryh.arkpets.utils.markdown.FxmlDocumentController;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
 import com.jfoenix.controls.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -27,16 +26,14 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 
-import java.io.Serializable;
 import java.time.Instant;
-import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static cn.harryh.arkpets.Const.durationFast;
+import static cn.harryh.arkpets.network.api.AppQueryAnnouncement.AnnounceItem;
 
 
 public final class AnnounceDialog implements DialogController<ArkHomeFX> {
@@ -241,59 +238,6 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
                 Logger.info("Announce", "Removed " + delta + " legacy local announcement records");
                 config.save();
             }
-        }
-    }
-
-
-    public static class AnnounceItem implements Serializable {
-        /** @since ArkPets 3.7 */ @JSONField
-        public String title;
-        /** @since ArkPets 3.7 */ @JSONField
-        public String date;
-        /** @since ArkPets 3.7 */ @JSONField
-        public String group;
-        /** @since ArkPets 3.7 */ @JSONField
-        public String markdown;
-        /** @since ArkPets 3.7 */ @JSONField
-        public String source;
-
-        @JSONField(deserialize = false)
-        public String getAnnoId() {
-            return String.format("%08x", hashCode());
-        }
-
-        @JSONField(deserialize = false)
-        public Instant getParsedDate() {
-            try {
-                return date != null ? Instant.parse(date) : null;
-            } catch (DateTimeParseException e) {
-                Logger.warn("Announce", "Unrecognized date string \"" + date + "\"");
-                return null;
-            }
-        }
-
-        @JSONField(deserialize = false)
-        public AnnounceGroup getParsedGroup() {
-            try {
-                return group != null ? AnnounceGroup.valueOf(group) : null;
-            } catch (IllegalArgumentException e) {
-                Logger.warn("Announce", "Unrecognized group string \"" + group + "\"");
-                return AnnounceGroup.DEFAULT;
-            }
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            AnnounceItem that = (AnnounceItem) o;
-            return Objects.equals(title, that.title) && Objects.equals(date, that.date)
-                    && Objects.equals(markdown, that.markdown) && Objects.equals(source, that.source);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(title, date, group, markdown, source);
         }
     }
 }
