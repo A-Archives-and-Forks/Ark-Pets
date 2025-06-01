@@ -35,6 +35,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 
+import static cn.harryh.arkpets.Const.LogConfig.logDir;
+
 
 public final class LogDialog implements DialogController<ArkHomeFX> {
     @FXML
@@ -83,16 +85,7 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
         prepareInfoPane();
 
         logRefetch.setOnAction(e -> refreshTable());
-        logExplore.setOnAction(e -> {
-            // Only available in Windows OS
-            try {
-                Logger.debug("LogDialog", "Request to explore the log dir");
-                Runtime.getRuntime().exec("explorer logs");
-            } catch (IOException ex) {
-                Logger.warn("LogDialog", "Exploring log dir failed");
-            }
-            logView.requestFocus();
-        });
+        logExplore.setOnAction(e -> app.popBrowser(new File(logDir).toURI()));
     }
 
     @Override
@@ -110,12 +103,12 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
         logView.getSelectionModel().clearSelection();
         loadLogFiles(
                 desktopLogList,
-                new File("logs"),
+                new File(logDir),
                 (dir, name) -> name.startsWith("desktop") && name.endsWith(".log")
         );
         loadLogFiles(
                 coreLogList,
-                new File("logs"),
+                new File(logDir),
                 (dir, name) -> name.startsWith("core") && name.endsWith(".log")
         );
         resizeTable();

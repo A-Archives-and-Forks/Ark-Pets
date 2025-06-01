@@ -9,7 +9,10 @@ import cn.harryh.arkpets.assets.ModelItemGroup;
 import cn.harryh.arkpets.assets.ModelsDataset;
 import cn.harryh.arkpets.guitasks.*;
 import cn.harryh.arkpets.utils.GuiComponents.NoticeBar;
-import cn.harryh.arkpets.utils.*;
+import cn.harryh.arkpets.utils.GuiPrefabs;
+import cn.harryh.arkpets.utils.IOUtils;
+import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.utils.Version;
 import com.alibaba.fastjson.JSONObject;
 import com.jfoenix.controls.*;
 import javafx.application.Platform;
@@ -314,7 +317,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
 
             @Override
             protected void onClick(MouseEvent event) {
-                NetUtils.browseWebpage(PathConfig.urlDownload);
+                app.popBrowser(urlDownload);
             }
         };
 
@@ -409,7 +412,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             }
         });
 
-        modelHelp.setOnMouseClicked(e -> NetUtils.browseWebpage(urlHelp));
+        modelHelp.setOnMouseClicked(e -> app.popBrowser(urlHelp));
     }
 
     private void initModelFavorite() {

@@ -115,8 +115,9 @@ public final class Const {
         public static final int logCoreMaxKeep      = 32;
         public static final int logDesktopMaxKeep   = 8;
 
-        public static final String logCorePath      = "logs/core";
-        public static final String logDesktopPath   = "logs/desktop";
+        public static final String logDir           = "logs/";
+        public static final String logCorePath      = logDir + "core";
+        public static final String logDesktopPath   = logDir + "desktop";
 
         public static final String error    = "ERROR";
         public static final String warn     = "WARN";

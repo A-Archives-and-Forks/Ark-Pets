@@ -9,7 +9,6 @@ import cn.harryh.arkpets.guitasks.FetchAnnounceTask;
 import cn.harryh.arkpets.guitasks.GuiTask.GuiTaskStyle;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
-import cn.harryh.arkpets.utils.NetUtils;
 import cn.harryh.arkpets.utils.StringUtils;
 import cn.harryh.arkpets.utils.markdown.FxmlConvertor;
 import cn.harryh.arkpets.utils.markdown.FxmlDocumentController;
@@ -171,7 +170,7 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
         GuiPrefabs.replaceTextAutoVisibility(annoDate,
                 anno.date != null && !anno.date.isEmpty() ? StringUtils.getSimpleTimeString(anno.getParsedDate()) : "");
         GuiPrefabs.replaceTextAutoVisibility(annoGotoOrigin, anno.source != null ? "查看原文" : null);
-        annoGotoOrigin.setOnMouseClicked(e -> NetUtils.browseWebpage(anno.source));
+        annoGotoOrigin.setOnMouseClicked(e -> app.popBrowser(anno.source));
         // Display announcement
         GuiPrefabs.fadeOutNode(annoContainer, durationFast, e -> {
             GuiPrefabs.disableScrollPaneCache(annoScroll);
@@ -179,11 +178,7 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
             annoContainer.getChildren().clear();
             FxmlDocumentController document = FxmlConvertor.toFxmlController(anno.markdown);
             document.getBodyNode().setMaxWidth(annoScroll.getWidth());
-            document.setHyperlinkConsumer(string -> {
-                if (string.startsWith("https://") || string.startsWith("http://")) {
-                    NetUtils.browseWebpage(string);
-                }
-            });
+            document.setHyperlinkConsumer(string -> app.popBrowser(string));
             annoContainer.getChildren().add(document.getBodyNode());
             GuiPrefabs.fadeInNode(annoContainer, durationFast, null);
         });

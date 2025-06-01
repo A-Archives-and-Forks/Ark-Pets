@@ -27,6 +27,12 @@ import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import javafx.util.Duration;
 
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -141,6 +147,38 @@ public class ArkHomeFX extends Application {
 
     public void popLoading(EventHandler<ActionEvent> handler) {
         rootModule.popLoading(handler);
+    }
+
+    public void popBrowser(URI uri) {
+        Logger.info("Launcher", "Request to open URI: " + uri);
+        try {
+            if ("file".equalsIgnoreCase(uri.getScheme())) {
+                // File URI
+                File localFile = new File(uri);
+                if (!localFile.isDirectory())
+                    throw new IOException("Given file URI should be a directory");
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        Desktop.getDesktop().open(localFile);
+                    } catch (IOException e) {
+                        Logger.error("Launcher", "Failed to open the file URI, details see below.", e);
+                    }
+                });
+            } else {
+                // Other types of URI (like HTTP/HTTPS)
+                Desktop.getDesktop().browse(uri);
+            }
+        } catch (IOException e) {
+            Logger.error("Launcher", "Failed to open the URI, details see below.", e);
+        }
+    }
+
+    public void popBrowser(String uri) {
+        try {
+            popBrowser(new URI(uri));
+        } catch (URISyntaxException e) {
+            Logger.error("Launcher", "Failed to open URI due to bad URI syntax: " + uri);
+        }
     }
 
     public Window getWindow() {

@@ -429,9 +429,9 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             /* Foreground check app update */
             new CheckAppUpdateTask(app.body, GuiTask.GuiTaskStyle.COMMON, "manual").start();
         });
-        aboutVisitWebsite.setOnMouseClicked (e -> NetUtils.browseWebpage(Const.PathConfig.urlOfficial));
-        aboutReadme.setOnMouseClicked       (e -> NetUtils.browseWebpage(Const.PathConfig.urlReadme));
-        aboutGitHub.setOnMouseClicked       (e -> NetUtils.browseWebpage(Const.PathConfig.urlLicense));
+        aboutVisitWebsite.setOnMouseClicked (e -> app.popBrowser(Const.PathConfig.urlOfficial));
+        aboutReadme.setOnMouseClicked       (e -> app.popBrowser(Const.PathConfig.urlReadme));
+        aboutGitHub.setOnMouseClicked       (e -> app.popBrowser(Const.PathConfig.urlLicense));
     }
 
     private void initNoticeBox() {
@@ -458,7 +458,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
 
             @Override
             protected void onClick(MouseEvent event) {
-                NetUtils.browseWebpage(Const.PathConfig.urlDownload);
+                app.popBrowser(Const.PathConfig.urlDownload);
             }
         };
         diskFreeSpaceNotice = new NoticeBar(noticeBox) {

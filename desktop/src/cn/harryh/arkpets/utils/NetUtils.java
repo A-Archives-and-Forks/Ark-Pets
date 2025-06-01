@@ -4,7 +4,6 @@
 package cn.harryh.arkpets.utils;
 
 import javax.net.ssl.*;
-import java.awt.*;
 import java.io.IOException;
 import java.net.*;
 import java.security.KeyManagementException;
@@ -29,18 +28,6 @@ public class NetUtils {
         ghSources.add(new GitHubSource("GHProxy",
                 "https://ghproxy.harryh.cn/https://raw.githubusercontent.com/",
                 "https://ghproxy.harryh.cn/https://github.com/"));
-    }
-
-    /** Opens the given URL in the user's browser.
-     * @param url The URL to browse.
-     */
-    public static void browseWebpage(String url) {
-        try {
-            Logger.debug("Network", "Opening the URL " + url + " in the browser");
-            Desktop.getDesktop().browse(URI.create(url));
-        } catch (IOException e) {
-            Logger.error("Network", "Failed to open the URL in the browser, details see below.", e);
-        }
     }
 
     /** Sets the system's proxy property, applying on both HTTP and HTTPS.
