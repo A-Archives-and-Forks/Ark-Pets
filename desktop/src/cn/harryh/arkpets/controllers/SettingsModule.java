@@ -334,7 +334,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             level = Const.LogConfig.debug;
         configLoggingLevel.getSelectionModel().select(level);
 
-        exportLog.setOnMouseClicked(e -> app.rootModule.popLogDialog(false));
+        exportLog.setOnMouseClicked(e -> app.dialogs.popDialog("logDialog"));
 
         configNetworkAgent.setPromptText("示例：0.0.0.0:0");
         configNetworkAgent.textProperty().addListener((observable, oldValue, newValue) -> {

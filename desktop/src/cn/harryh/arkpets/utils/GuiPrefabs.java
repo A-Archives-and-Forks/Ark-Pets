@@ -25,6 +25,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import javafx.util.Duration;
@@ -477,6 +478,46 @@ public class GuiPrefabs {
             button.setStyle("-fx-font-size:13px;-fx-background-color:" + toWebColor(COLOR_WARNING));
             button.setOnAction(e -> disposeDialog(dialog));
             return button;
+        }
+    }
+
+
+    public static class Tables {
+        public static <T> void autoExpandRows(TreeTableView<T> treeTable) {
+            TreeItem<T> root = treeTable.getRoot();
+            if (root != null)
+                root.getChildren().forEach(child -> child.setExpanded(true));
+        }
+
+        public static <T> void autoResizeColumns(TreeTableView<T> treeTable, double paddingX) {
+            double totalMaxWidth = 0;
+            Map<TreeTableColumn<T, ?>, Double> columnMaxWidthMap = new HashMap<>();
+            Text tempText = new Text();
+
+            for (TreeTableColumn<T, ?> column : treeTable.getColumns()) {
+                tempText.setText(column.getText());
+                double max = tempText.getLayoutBounds().getWidth();
+                for (TreeItem<T> item : treeTable.getRoot().getChildren()) {
+                    Object cellData = column.getCellData(item);
+                    if (cellData != null) {
+                        tempText.setText(cellData.toString());
+                        double width = tempText.getLayoutBounds().getWidth();
+                        max = Math.max(width, max);
+                    }
+                }
+                columnMaxWidthMap.put(column, max);
+                totalMaxWidth += max;
+            }
+
+            double tableWidth = Math.max(treeTable.getPrefWidth(), treeTable.getWidth()) - paddingX;
+            if (totalMaxWidth == 0 || tableWidth == 0)
+                return;
+
+            for (TreeTableColumn<T, ?> column : treeTable.getColumns()) {
+                double colMax = columnMaxWidthMap.get(column);
+                double percent = colMax / totalMaxWidth;
+                column.setPrefWidth(tableWidth * percent);
+            }
         }
     }
 

@@ -6,6 +6,7 @@ package cn.harryh.arkpets.controllers;
 import cn.harryh.arkpets.ArkHomeFX;
 import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.guitasks.ZipTask;
+import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.IOUtils.FileUtil;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.StringUtils;
@@ -20,7 +21,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.util.Callback;
 
@@ -86,6 +86,8 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
 
         logRefetch.setOnAction(e -> refreshTable());
         logExplore.setOnAction(e -> app.popBrowser(new File(logDir).toURI()));
+
+        dialog.parentProperty().addListener(observable -> refreshTable());
     }
 
     @Override
@@ -111,8 +113,8 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
                 new File(logDir),
                 (dir, name) -> name.startsWith("core") && name.endsWith(".log")
         );
-        resizeTable();
-        logView.getRoot().getChildren().forEach(child -> child.setExpanded(true));
+        GuiPrefabs.Tables.autoResizeColumns(logView, 20.0);
+        GuiPrefabs.Tables.autoExpandRows(logView);
         logView.refresh();
     }
 
@@ -159,37 +161,6 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
         logView.getColumns().add(modifiedTimeCol);
         logView.getSelectionModel().setCellSelectionEnabled(false);
         logView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-    }
-
-    private void resizeTable() {
-        double totalMaxWidth = 0;
-        Map<TreeTableColumn<LogItem, ?>, Double> columnMaxWidthMap = new HashMap<>();
-        Text tempText = new Text();
-
-        for (TreeTableColumn<LogItem, ?> column : logView.getColumns()) {
-            tempText.setText(column.getText());
-            double max = tempText.getLayoutBounds().getWidth();
-            for (TreeItem<LogItem> item : logView.getRoot().getChildren()) {
-                Object cellData = column.getCellData(item);
-                if (cellData != null) {
-                    tempText.setText(cellData.toString());
-                    double width = tempText.getLayoutBounds().getWidth();
-                    max = Math.max(width, max);
-                }
-            }
-            columnMaxWidthMap.put(column, max);
-            totalMaxWidth += max;
-        }
-
-        double tableWidth = Math.max(logView.getPrefWidth(), logView.getWidth()) - 20;
-        if (totalMaxWidth == 0 || tableWidth == 0)
-            return;
-
-        for (TreeTableColumn<LogItem, ?> column : logView.getColumns()) {
-            double colMax = columnMaxWidthMap.get(column);
-            double percent = colMax / totalMaxWidth;
-            column.setPrefWidth(tableWidth * percent);
-        }
     }
 
     private void loadLogFiles(ObservableList<LogItem> targetList, File directory, FilenameFilter filter) {
@@ -241,15 +212,15 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
         });
 
         quickSelectAll.setOnAction(e -> {
+            GuiPrefabs.Tables.autoExpandRows(logView);
             logView.requestFocus();
-            logView.getRoot().getChildren().forEach(child -> child.setExpanded(true));
             selections.selectAll();
             logView.scrollTo(0);
         });
 
         quickSelectRecent.setOnAction(e -> {
+            GuiPrefabs.Tables.autoExpandRows(logView);
             logView.requestFocus();
-            logView.getRoot().getChildren().forEach(child -> child.setExpanded(true));
             selections.selectAll();
             Instant threshold = Instant.now().minusSeconds(3600); // 1h
             List<? extends TreeItem<LogItem>> treeItemList = selections.getSelectedItems().stream()

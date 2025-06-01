@@ -36,6 +36,8 @@ public interface DialogController<T extends Application> extends Controller<T> {
     /** Triggers the action handler of the return event.
      */
     default void triggerReturnActionHandler(Event event) {
-        getReturnButton().getOnAction().handle(new ActionEvent(event.getSource(), event.getTarget()));
+        EventHandler<ActionEvent> handler = getReturnButton().getOnAction();
+        if (handler != null)
+            handler.handle(new ActionEvent(event.getSource(), event.getTarget()));
     }
 }

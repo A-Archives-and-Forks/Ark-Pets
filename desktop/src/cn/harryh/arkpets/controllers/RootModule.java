@@ -10,17 +10,21 @@ import cn.harryh.arkpets.concurrent.ProcessPool;
 import cn.harryh.arkpets.guitasks.CheckAppUpdateTask;
 import cn.harryh.arkpets.guitasks.DeleteTempFilesTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
-import cn.harryh.arkpets.utils.*;
+import cn.harryh.arkpets.utils.ArgPending;
+import cn.harryh.arkpets.utils.DialogComposer;
+import cn.harryh.arkpets.utils.GuiComponents.Handbook;
+import cn.harryh.arkpets.utils.GuiComponents.Toast;
+import cn.harryh.arkpets.utils.GuiPrefabs;
+import cn.harryh.arkpets.utils.Logger;
 import com.jfoenix.controls.*;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -32,7 +36,6 @@ import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,7 +44,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import static cn.harryh.arkpets.Const.*;
-import static cn.harryh.arkpets.utils.GuiComponents.Handbook;
 
 
 public final class RootModule implements Controller<ArkHomeFX> {
@@ -93,9 +95,6 @@ public final class RootModule implements Controller<ArkHomeFX> {
     @FXML
     private HBox toast;
 
-    private AnnounceDialog announceDialog;
-    private LogDialog logDialog;
-
     private ArkHomeFX app;
     private double xOffset;
     private double yOffset;
@@ -116,21 +115,18 @@ public final class RootModule implements Controller<ArkHomeFX> {
         app.config = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
         isNewcomer = app.config.isNewcomer();
         app.config.save();
-        app.toast = new GuiComponents.Toast(toast);
+
+        // Load misc.
+        app.toast = new Toast(toast);
+        app.dialogs = new DialogComposer<>(app);
+        List<Node> backgroundNodes = List.of(sidebar, wrapper1, wrapper2, wrapper3);
+        app.dialogs.registerDialog("announceDialog", body, backgroundNodes, "/UI/AnnounceDialog.fxml");
+        app.dialogs.registerDialog("logDialog", body, backgroundNodes, "/UI/LogDialog.fxml");
 
         initAnnoEntrance();
-        initLogDialog();
         initMenuButtons();
         initLaunchButton();
         initLaunchingStatusListener();
-    }
-
-    /** Pops up the log dialog.
-     * @param autoExport Whether to auto trigger the export action.
-     */
-    public void popLogDialog(boolean autoExport) {
-        popDialog(logDialog, () -> logDialog.clearTable());
-        logDialog.refreshTable();
     }
 
     /** Pops up the splash screen in the GUI.
@@ -268,33 +264,6 @@ public final class RootModule implements Controller<ArkHomeFX> {
                 this::exit).show();
     }
 
-    private void popDialog(DialogController<ArkHomeFX> dialogController, Runnable onClosed) {
-        // Blur out background nodes
-        List<Pane> panesBelow = List.of(sidebar, wrapper1, wrapper2, wrapper3);
-        panesBelow.forEach(pane -> GuiPrefabs.blurNode(pane, durationNormal, null));
-        // Setup and show popup
-        JFXDialog popup = new JFXDialog(body, dialogController.getDialogPane(), JFXDialog.DialogTransition.TOP, false);
-        popup.setOnDialogOpened(ev -> popup.setOnMouseClicked(eve -> {
-            popup.setOnMouseClicked(null);
-            // Transfer overlay close
-            dialogController.triggerReturnActionHandler(eve);
-        }));
-        popup.show();
-        // Bind return actions
-        dialogController.setReturnActionHandler(ev -> {
-            dialogController.setReturnActionHandler(null);
-            // Register post-close procedure
-            BooleanProperty observer = new SimpleBooleanProperty();
-            observer.addListener((observable, oldValue, newValue) -> {
-                if (newValue && onClosed != null)
-                    onClosed.run();
-            });
-            // Close popup
-            popup.close();
-            panesBelow.forEach(pane -> GuiPrefabs.deblurNode(pane, durationNormal, eve -> observer.set(true)));
-        });
-    }
-
     private void initLaunchButton() {
         // Set handler for internal start button.
         launchBtn.setOnAction(e -> {
@@ -320,39 +289,13 @@ public final class RootModule implements Controller<ArkHomeFX> {
     }
 
     private void initAnnoEntrance() {
-        // Load the fxml of announce dialog
-        try {
-            FXMLHelper.LoadFXMLResult<ArkHomeFX> fxml = FXMLHelper.loadFXML("/UI/AnnounceDialog.fxml");
-            announceDialog = (AnnounceDialog) fxml.initializeWith(app);
-        } catch (IOException e) {
-            Logger.error("Launcher", "Failed to load announcement dialog, details see below.", e);
-            throw new RuntimeException(e);
-        }
-        // Entrance button logic
-        annoEntrance.setOnAction(e -> {
-            if (annoEntrance.isDisable())
-                return;
-            annoEntrance.setDisable(true);
-            popDialog(announceDialog, () -> annoEntrance.setDisable(false));
-        });
-        // Fetch once on app initialized
-        announceDialog.fetchAnnounce(false, () -> {
+        annoEntrance.setOnAction(e -> app.dialogs.popDialog("announceDialog"));
+        ((AnnounceDialog) app.dialogs.getDialogController("announceDialog")).fetchAnnounce(false, () -> {
             Logger.info("Announce", "Need immediate show");
             annoEntrance.getOnAction().handle(
                     new ActionEvent(this, Event.NULL_SOURCE_TARGET)
             );
         });
-    }
-
-    private void initLogDialog() {
-        // Load the fxml of log dialog
-        try {
-            FXMLHelper.LoadFXMLResult<ArkHomeFX> fxml = FXMLHelper.loadFXML("/UI/LogDialog.fxml");
-            logDialog = (LogDialog) fxml.initializeWith(app);
-        } catch (IOException e) {
-            Logger.error("Launcher", "Failed to load log dialog, details see below.", e);
-            throw new RuntimeException(e);
-        }
     }
 
     private void initMenuButtons() {
