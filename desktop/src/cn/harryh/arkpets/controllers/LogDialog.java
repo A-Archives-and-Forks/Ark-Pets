@@ -86,8 +86,6 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
 
         logRefetch.setOnAction(e -> refreshTable());
         logExplore.setOnAction(e -> app.popBrowser(new File(logDir).toURI()));
-
-        dialog.parentProperty().addListener(observable -> refreshTable());
     }
 
     @Override
@@ -98,6 +96,16 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
     @Override
     public JFXButton getReturnButton() {
         return dialogReturn;
+    }
+
+    @Override
+    public void notifyDialogOpened(Object data) {
+        refreshTable();
+    }
+
+    @Override
+    public void notifyDialogClosed() {
+        clearTable();
     }
 
     public void refreshTable() {

@@ -24,18 +24,29 @@ public interface DialogController<T extends Application> extends Controller<T> {
     /** Returns the return button of this dialog.
      * @return The button.
      */
-    Button getReturnButton();
+    ButtonBase getReturnButton();
+
+    /** Notifies the dialog controller that the dialog is opened.
+     * @param data The optional data to be transferred to the dialog.
+     */
+    default void notifyDialogOpened(Object data) {
+    }
+
+    /** Notifies the dialog controller that the dialog is closed.
+     */
+    default void notifyDialogClosed() {
+    }
 
     /** Sets the action handler of the return event.
      * @param handler The new handler.
      */
-    default void setReturnActionHandler(EventHandler<ActionEvent> handler) {
+    default void setReturnActionCallback(EventHandler<ActionEvent> handler) {
         getReturnButton().setOnAction(handler);
     }
 
     /** Triggers the action handler of the return event.
      */
-    default void triggerReturnActionHandler(Event event) {
+    default void triggerReturnActionCallback(Event event) {
         EventHandler<ActionEvent> handler = getReturnButton().getOnAction();
         if (handler != null)
             handler.handle(new ActionEvent(event.getSource(), event.getTarget()));

@@ -36,24 +36,32 @@ public class DialogComposer<T extends Application> {
         return dialogs.get(dialogId).dialogController();
     }
 
-    public void popDialog(String dialogId, Runnable onClosed) {
+    /** Pops up a dialog with the specified identifier, passing data to it and executing a callback when closed.
+     * @param dialogId The unique identifier of the dialog to be displayed.
+     * @param data The data object to be passed to the dialog for processing.
+     * @param onClosed A runnable callback that is executed after the dialog is closed.
+     */
+    public void popDialog(String dialogId, Object data, Runnable onClosed) {
         DialogRecord<T> dialogRecord = dialogs.get(dialogId);
+        // Avoid duplicated popup
         if (activatedDialogs.contains(dialogRecord))
             return;
         activatedDialogs.add(dialogRecord);
         // Blur out background nodes
         dialogRecord.backgroundNodes().forEach(node -> GuiPrefabs.blurNode(node, durationNormal, null));
         // Setup popup
-        JFXDialog popup = createPopup(dialogRecord.parent(), dialogRecord.dialogController());
+        DialogController<T> controller = dialogRecord.dialogController();
+        JFXDialog popup = createPopup(dialogRecord.parent(), controller);
         // Bind return actions
-        dialogRecord.dialogController().setReturnActionHandler(e -> {
-            dialogRecord.dialogController().setReturnActionHandler(null);
+        controller.setReturnActionCallback(e -> {
+            controller.setReturnActionCallback(null);
             popup.setOnDialogOpened(null);
             // Register post-close procedure
             BooleanProperty observer = new SimpleBooleanProperty();
             observer.addListener((observable, oldValue, newValue) -> {
                 if (newValue && onClosed != null)
                     onClosed.run();
+                controller.notifyDialogClosed();
                 activatedDialogs.remove(dialogRecord);
             });
             // Close popup and deblur background nodes
@@ -63,8 +71,20 @@ public class DialogComposer<T extends Application> {
         });
         // Show popup
         popup.show();
+        controller.notifyDialogOpened(data);
     }
 
+    /** Pops up a dialog with the specified identifier, passing data to it.
+     * @param dialogId The unique identifier of the dialog to be displayed.
+     * @param data The data object to be passed to the dialog for processing.
+     */
+    public void popDialog(String dialogId, Object data) {
+        popDialog(dialogId, data, null);
+    }
+
+    /** Pops up a dialog with the specified identifier.
+     * @param dialogId The unique identifier of the dialog to be displayed.
+     */
     public void popDialog(String dialogId) {
         popDialog(dialogId, null);
     }
@@ -105,14 +125,17 @@ public class DialogComposer<T extends Application> {
     private static <T extends Application> JFXDialog createPopup(StackPane parent, DialogController<T> controller) {
         JFXDialog popup = new JFXDialog(parent, controller.getDialogPane(), JFXDialog.DialogTransition.TOP, false);
         popup.setOnDialogOpened(e -> {
+            popup.requestFocus();
+            // Listen overlay-close action
             popup.setOnMouseClicked(ev -> {
                 popup.setOnMouseClicked(null);
-                controller.triggerReturnActionHandler(ev);
+                controller.triggerReturnActionCallback(ev);
             });
-            popup.setOnKeyTyped(ev -> {
+            // Listen the escape key action
+            popup.setOnKeyPressed(ev -> {
                 if (ev.getCode() == KeyCode.ESCAPE) {
                     popup.setOnMouseClicked(null);
-                    controller.triggerReturnActionHandler(ev);
+                    controller.triggerReturnActionCallback(ev);
                 }
             });
         });
