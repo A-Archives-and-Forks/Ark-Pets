@@ -3,7 +3,6 @@
  */
 package cn.harryh.arkpets.guitasks;
 
-import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
@@ -25,7 +24,6 @@ public class CheckModelUpdateTask extends FetchGitHubRemoteTask {
                 style,
                 PathConfig.urlModelsData,
                 PathConfig.tempDirPath + PathConfig.fileModelsDataPath,
-                Const.isHttpsTrustAll,
                 false);
 
         try {

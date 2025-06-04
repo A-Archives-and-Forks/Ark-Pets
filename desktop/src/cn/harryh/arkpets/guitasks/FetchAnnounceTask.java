@@ -3,7 +3,6 @@
  */
 package cn.harryh.arkpets.guitasks;
 
-import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.network.api.AppQueryAnnouncement;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.IOUtils;
@@ -27,8 +26,7 @@ public class FetchAnnounceTask extends FetchRemoteTask {
         super(parent,
                 style,
                 PathConfig.urlApi + "?type=queryAnnouncement",
-                PathConfig.tempQueryAnnounceCachePath,
-                Const.isHttpsTrustAll);
+                PathConfig.tempQueryAnnounceCachePath);
         this.acceptor = acceptor;
 
         try {

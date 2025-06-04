@@ -3,7 +3,6 @@
  */
 package cn.harryh.arkpets.guitasks;
 
-import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.utils.Logger;
 import javafx.scene.layout.StackPane;
 
@@ -20,7 +19,6 @@ public class DownloadModelsTask extends FetchGitHubRemoteTask {
                 style,
                 PathConfig.urlModelsZip,
                 PathConfig.tempModelsZipCachePath,
-                Const.isHttpsTrustAll,
                 true);
 
         try {

@@ -45,8 +45,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.zip.ZipException;
 
-import static cn.harryh.arkpets.Const.durationNormal;
-
 
 @SuppressWarnings("unused")
 public class GuiPrefabs {
@@ -400,7 +398,8 @@ public class GuiPrefabs {
                 h3.setText("SSL证书错误，请检查代理设置。您也可以尝试[信任]所有证书后重试刚才的操作。");
                 JFXButton apply = Dialogs.getTrustButton(dialog);
                 apply.setOnAction(ev -> {
-                    Const.isHttpsTrustAll = true;
+                    Logger.warn("ErrorDialog", "Set SLL trust all to true");
+                    Connections.trustAllUnsafe = true;
                     Dialogs.disposeDialog(dialog);
                 });
                 Dialogs.attachAction(dialog, apply, 0);
@@ -591,7 +590,7 @@ public class GuiPrefabs {
 
             private void activateNode(Node node) {
                 node.setManaged(true);
-                fadeInNode(node, durationNormal, null);
+                fadeInNode(node, Const.durationNormal, null);
             }
 
             private void suppressNode(Node node) {

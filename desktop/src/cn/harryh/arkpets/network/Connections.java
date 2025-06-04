@@ -10,20 +10,21 @@ import java.net.URL;
 
 
 public class Connections {
+    public static boolean trustAllUnsafe = false;
+
     /** Creates an HTTPS connection of the given URL, and then try to connect it.
      * @param url The URL to connect.
      * @param connectTimeout The timeout of the connection (ms).
      * @param readTimeout The timeout of the reading operation (ms).
-     * @param trustAll Whether to ignore SSL verification (unsafe).
      * @return The connection instance which has finished connecting.
      * @throws IOException If I/O error occurs. Typically, when a timeout occurred or the response code wasn't like 2XX.
      */
-    public static HttpsURLConnection createHttpsConnection(URL url, int connectTimeout, int readTimeout, boolean trustAll)
+    public static HttpsURLConnection createHttpsConnection(URL url, int connectTimeout, int readTimeout)
             throws IOException {
         HttpsURLConnection connection = null;
         try {
             connection = (HttpsURLConnection) url.openConnection();
-            if (trustAll) {
+            if (trustAllUnsafe) {
                 connection.setSSLSocketFactory(TrustUtils.getTrustAnySSLSocketFactory());
                 connection.setHostnameVerifier(TrustUtils.getTrustAnyHostnameVerifier());
             }

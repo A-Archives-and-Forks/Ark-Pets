@@ -25,8 +25,7 @@ public class CheckAppUpdateTask extends FetchRemoteTask {
         super(parent,
                 style,
                 PathConfig.urlApi + "?type=queryVersion&cliVer=" + appVersion + "&source=" + sourceStr,
-                PathConfig.tempQueryVersionCachePath,
-                Const.isHttpsTrustAll);
+                PathConfig.tempQueryVersionCachePath);
 
         try {
             Files.createDirectories(new File(PathConfig.tempDirPath).toPath());

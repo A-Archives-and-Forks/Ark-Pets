@@ -67,7 +67,6 @@ public final class Const {
     public static final String pass2FShader     = "shaders/%s/ComplexFragment.glsl";
 
     // Changeable constants
-    public static boolean isHttpsTrustAll       = false;
     public static boolean isUpdateAvailable     = false;
     public static boolean isNewcomer            = false;
     public static boolean isDebugEnabled        = false;

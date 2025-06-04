@@ -23,13 +23,11 @@ import static cn.harryh.arkpets.Const.httpTimeoutDefault;
 abstract public class FetchRemoteTask extends GuiTask {
     protected final String remotePath;
     protected final String destPath;
-    protected final boolean isHttpsTrustAll;
 
-    public FetchRemoteTask(StackPane parent, GuiTaskStyle style, String remotePath, String destPath, boolean isHttpTrustAll) {
+    public FetchRemoteTask(StackPane parent, GuiTaskStyle style, String remotePath, String destPath) {
         super(parent, style);
         this.remotePath = remotePath;
         this.destPath = destPath;
-        this.isHttpsTrustAll = isHttpTrustAll;
     }
 
     @Override
@@ -43,8 +41,7 @@ abstract public class FetchRemoteTask extends GuiTask {
                 NetworkUtils.BufferLog log = new NetworkUtils.BufferLog(httpBufferSizeDefault);
                 HttpsURLConnection connection = Connections.createHttpsConnection(new URL(remotePath),
                         httpTimeoutDefault,
-                        httpTimeoutDefault,
-                        isHttpsTrustAll);
+                        httpTimeoutDefault);
                 final InputStream is = connection.getInputStream();
                 final OutputStream os = Files.newOutputStream(new File(destPath).toPath());
                 final BufferedInputStream bis = new BufferedInputStream(is, httpBufferSizeDefault);

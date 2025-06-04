@@ -26,15 +26,13 @@ abstract public class FetchGitHubRemoteTask extends GuiTask {
     protected final String remotePathSuffix;
     protected final String destPath;
     protected final boolean isArchive;
-    protected final boolean isHttpsTrustAll;
     protected GitHubSource selectedSource;
 
-    public FetchGitHubRemoteTask(StackPane parent, GuiTaskStyle style, String remotePathSuffix, String destPath, boolean isHttpsTrustAll, boolean isArchive) {
+    public FetchGitHubRemoteTask(StackPane parent, GuiTaskStyle style, String remotePathSuffix, String destPath, boolean isArchive) {
         super(parent, style);
         this.remotePathSuffix = remotePathSuffix;
         this.destPath = destPath;
         this.isArchive = isArchive;
-        this.isHttpsTrustAll = isHttpsTrustAll;
     }
 
     @Override
@@ -57,8 +55,7 @@ abstract public class FetchGitHubRemoteTask extends GuiTask {
                 NetworkUtils.BufferLog log = new NetworkUtils.BufferLog(httpBufferSizeDefault);
                 HttpsURLConnection connection = Connections.createHttpsConnection(new URL(remotePath),
                         httpTimeoutDefault,
-                        httpTimeoutDefault,
-                        isHttpsTrustAll);
+                        httpTimeoutDefault);
                 final InputStream is = connection.getInputStream();
                 final OutputStream os = Files.newOutputStream(new File(destPath).toPath());
                 final BufferedInputStream bis = new BufferedInputStream(is, httpBufferSizeDefault);
