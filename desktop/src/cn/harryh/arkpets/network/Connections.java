@@ -14,8 +14,8 @@ public class Connections {
 
     /** Creates an HTTPS connection of the given URL, and then try to connect it.
      * @param url The URL to connect.
-     * @param connectTimeout The timeout of the connection (ms).
-     * @param readTimeout The timeout of the reading operation (ms).
+     * @param connectTimeout The timeout for connecting (ms).
+     * @param readTimeout The timeout for reading data (ms).
      * @return The connection instance which has finished connecting.
      * @throws IOException If I/O error occurs. Typically, when a timeout occurred or the response code wasn't like 2XX.
      */
