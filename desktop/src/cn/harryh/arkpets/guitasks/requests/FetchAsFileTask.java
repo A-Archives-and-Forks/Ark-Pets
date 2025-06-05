@@ -1,8 +1,9 @@
 /** Copyright (c) 2022-2024, Harry Huang
  * At GPL-3.0 License
  */
-package cn.harryh.arkpets.guitasks;
+package cn.harryh.arkpets.guitasks.requests;
 
+import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.network.Connections;
 import cn.harryh.arkpets.network.NetworkUtils;
 import cn.harryh.arkpets.utils.GuiPrefabs;
@@ -20,32 +21,44 @@ import static cn.harryh.arkpets.Const.httpBufferSizeDefault;
 import static cn.harryh.arkpets.Const.httpTimeoutDefault;
 
 
-abstract public class FetchRemoteTask extends GuiTask {
-    protected final String remotePath;
-    protected final String destPath;
+/** The task fetches the given remote content and saves it to a specified local path.
+ * @implNote Implement the {@link #onDownloadedFile(File)} for future operations to the downloaded file.
+ */
+abstract public class FetchAsFileTask extends GuiTask {
+    protected final String localPath;
 
-    public FetchRemoteTask(StackPane parent, GuiTaskStyle style, String remotePath, String destPath) {
+    public FetchAsFileTask(StackPane parent, GuiTaskStyle style, String localPath) {
         super(parent, style);
-        this.remotePath = remotePath;
-        this.destPath = destPath;
+        this.localPath = localPath;
     }
 
+    /** Returns the remote path from which the file will be fetched.
+     * @return The remote path to be fetched.
+     */
+    abstract protected String getRemotePath();
+
+    /** Called when the file has been successfully downloaded.
+     * @param file The downloaded file object representing the local file.
+     */
+    abstract protected void onDownloadedFile(File file);
+
     @Override
-    protected Task<Boolean> getTask() {
+    protected final Task<Boolean> getTask() {
         return new Task<>() {
             @Override
             protected Boolean call() throws Exception {
-                Logger.info("Network", "Fetching " + remotePath + " to " + destPath);
+                URL remoteURL = new URL(getRemotePath());
+                File localFile = new File(localPath);
+
+                Logger.info("Network", "Fetching " + remoteURL + " to " + localFile);
                 this.updateMessage("正在尝试建立连接");
 
                 NetworkUtils.BufferLog log = new NetworkUtils.BufferLog(httpBufferSizeDefault);
-                HttpsURLConnection connection = Connections.createHttpsConnection(new URL(remotePath),
-                        httpTimeoutDefault,
-                        httpTimeoutDefault);
-                final InputStream is = connection.getInputStream();
-                final OutputStream os = Files.newOutputStream(new File(destPath).toPath());
-                final BufferedInputStream bis = new BufferedInputStream(is, httpBufferSizeDefault);
-                final BufferedOutputStream bos = new BufferedOutputStream(os, httpBufferSizeDefault);
+                HttpsURLConnection connection = Connections.createHttpsConnection(remoteURL, httpTimeoutDefault);
+                InputStream is = connection.getInputStream();
+                OutputStream os = Files.newOutputStream(localFile.toPath());
+                BufferedInputStream bis = new BufferedInputStream(is, httpBufferSizeDefault);
+                BufferedOutputStream bos = new BufferedOutputStream(os, httpBufferSizeDefault);
 
                 try (bis; bos; is; os) {
                     int len = httpBufferSizeDefault;
@@ -67,7 +80,7 @@ abstract public class FetchRemoteTask extends GuiTask {
                     }
                     this.updateProgress(max, max);
                     bos.flush();
-                    Logger.info("Network", "Fetched to " + destPath + " , size: " + sum);
+                    Logger.info("Network", "Fetched " + remoteURL + " , size: " + sum);
                 }
                 return this.isDone() && !this.isCancelled();
             }
@@ -78,5 +91,10 @@ abstract public class FetchRemoteTask extends GuiTask {
     protected void onFailed(Throwable e) {
         if (style != GuiTaskStyle.HIDDEN)
             GuiPrefabs.Dialogs.createErrorDialog(parent, e).show();
+    }
+
+    @Override
+    protected void onSucceeded(boolean result) {
+        onDownloadedFile(new File(localPath));
     }
 }

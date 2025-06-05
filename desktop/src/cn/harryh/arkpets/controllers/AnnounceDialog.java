@@ -5,8 +5,8 @@ package cn.harryh.arkpets.controllers;
 
 import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.ArkHomeFX;
-import cn.harryh.arkpets.guitasks.FetchAnnounceTask;
 import cn.harryh.arkpets.guitasks.GuiTask.GuiTaskStyle;
+import cn.harryh.arkpets.guitasks.requests.FetchAnnounceTask;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.StringUtils;

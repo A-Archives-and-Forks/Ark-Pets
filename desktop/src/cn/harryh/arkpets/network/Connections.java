@@ -45,6 +45,17 @@ public class Connections {
         }
     }
 
+    /** Creates an HTTPS connection of the given URL, and then try to connect it.
+     * @param url The URL to connect.
+     * @param timeout The timeout for connecting and reading (ms).
+     * @return The connection instance which has finished connecting.
+     * @throws IOException If I/O error occurs. Typically, when a timeout occurred or the response code wasn't like 2XX.
+     */
+    public static HttpsURLConnection createHttpsConnection(URL url, int timeout)
+            throws IOException {
+        return createHttpsConnection(url, timeout, timeout);
+    }
+
 
     public enum HttpResponseCodeType {
         /** Indicates an invalid HTTP response */

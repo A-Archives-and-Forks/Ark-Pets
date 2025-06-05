@@ -6,6 +6,7 @@ package cn.harryh.arkpets.network;
 import cn.harryh.arkpets.utils.Logger;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -34,32 +35,6 @@ public class Source {
         Logger.debug("Network", "Real delay for \"" + tag + "\" is " + delay + "ms");
     }
 
-    public static void testDelay(List<Source> sources) {
-        sources.forEach(Source::testDelay);
-    }
-
-    public static void sortByDelay(List<Source> sources) {
-        testDelay(sources);
-        sources.sort((o1, o2) -> {
-            if (o1.delay == o2.delay)
-                return 0;
-            if (o1.delay < 0 && o2.delay >= 0)
-                return 1;
-            if (o1.delay >= 0 && o2.delay < 0)
-                return -1;
-            return (o1.delay > o2.delay) ? 1 : -1;
-        });
-    }
-
-    public static void sortByOverallAvailability(List<Source> sources) {
-        sortByDelay(sources);
-        sources.sort((o1, o2) -> {
-            if (o1.lastErrorTime != o2.lastErrorTime)
-                return (o1.lastErrorTime > o2.lastErrorTime) ? 1 : -1;
-            return 0;
-        });
-    }
-
     @Override
     public String toString() {
             return getClass().getSimpleName() + " \"" + tag + "\" (" + delay + "ms)";
@@ -67,7 +42,7 @@ public class Source {
 
 
     public static class GitHubSource extends Source {
-        public static final ArrayList<Source> ghSources;
+        public static final ArrayList<GitHubSource> ghSources;
         static {
             ghSources = new ArrayList<>();
             ghSources.add(new GitHubSource("GitHub",
@@ -85,6 +60,42 @@ public class Source {
             super(tag, rawPreUrl);
             this.rawPreUrl = rawPreUrl;
             this.archivePreUrl = archivePreUrl;
+        }
+
+        public static GitHubSource getMostAvailable() {
+            Logger.info("Network", "Testing real delay");
+            ghSources.forEach(Source::testDelay);
+            List<GitHubSource> sorted = ghSources.stream()
+                    .sorted(new DelayComparator())
+                    .sorted(new AvailabilityComparator())
+                    .toList();
+            GitHubSource selectedSource = sorted.get(0);
+            Logger.info("Network", "Selected the most available " + selectedSource);
+            return selectedSource;
+        }
+    }
+
+
+    public static class DelayComparator implements Comparator<Source> {
+        @Override
+        public int compare(Source o1, Source o2) {
+            if (o1.delay == o2.delay)
+                return 0;
+            if (o1.delay < 0 && o2.delay >= 0)
+                return 1;
+            if (o1.delay >= 0 && o2.delay < 0)
+                return -1;
+            return (o1.delay > o2.delay) ? 1 : -1;
+        }
+    }
+
+
+    public static class AvailabilityComparator implements Comparator<Source> {
+        @Override
+        public int compare(Source o1, Source o2) {
+            if (o1.lastErrorTime != o2.lastErrorTime)
+                return (o1.lastErrorTime > o2.lastErrorTime) ? 1 : -1;
+            return 0;
         }
     }
 }

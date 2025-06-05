@@ -8,7 +8,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 import java.io.Serializable;
 
 
-abstract class BaseModel<T> implements Serializable {
+abstract public class BaseModel<T> implements Serializable {
     @JSONField
     public Integer code;
     @JSONField

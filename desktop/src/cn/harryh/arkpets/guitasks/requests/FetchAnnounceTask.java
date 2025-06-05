@@ -1,40 +1,27 @@
 /** Copyright (c) 2022-2025, Harry Huang
  * At GPL-3.0 License
  */
-package cn.harryh.arkpets.guitasks;
+package cn.harryh.arkpets.guitasks.requests;
 
 import cn.harryh.arkpets.network.api.AppQueryAnnouncement;
 import cn.harryh.arkpets.utils.GuiPrefabs;
-import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
 import com.alibaba.fastjson.JSONObject;
 import javafx.collections.ObservableList;
 import javafx.scene.layout.StackPane;
 
-import java.io.File;
-import java.nio.file.Files;
 import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.PathConfig;
 import static cn.harryh.arkpets.network.api.AppQueryAnnouncement.AnnounceItem;
 
 
-public class FetchAnnounceTask extends FetchRemoteTask {
+public class FetchAnnounceTask extends FetchAsDataTask {
     protected ObservableList<AnnounceItem> acceptor;
 
     public FetchAnnounceTask(StackPane parent, GuiTaskStyle style, ObservableList<AnnounceItem> acceptor) {
-        super(parent,
-                style,
-                PathConfig.urlApi + "?type=queryAnnouncement",
-                PathConfig.tempQueryAnnounceCachePath);
+        super(parent, style);
         this.acceptor = acceptor;
-
-        try {
-            Files.createDirectories(new File(PathConfig.tempDirPath).toPath());
-        } catch (Exception e) {
-            Logger.warn("Task", "Failed to create temp dir.");
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
@@ -43,18 +30,17 @@ public class FetchAnnounceTask extends FetchRemoteTask {
     }
 
     @Override
-    protected void onSucceeded(boolean result) {
+    protected String getRemotePath() {
+        return PathConfig.urlApi + "?type=queryAnnouncement";
+    }
+
+    @Override
+    protected void onReceivedData(JSONObject json) {
         // When finished downloading the latest app ver-info:
         try {
-            // Try to parse the latest app ver-info
-            AppQueryAnnouncement queryAnnounceResult = Objects.requireNonNull(
-                    JSONObject.parseObject(
-                            IOUtils.FileUtil.readByte(new File(PathConfig.tempQueryAnnounceCachePath)),
-                            AppQueryAnnouncement.class
-                    )
-            );
-            if (queryAnnounceResult.code == 0) {
-                acceptor.setAll(Objects.requireNonNull(queryAnnounceResult.data.contents));
+            AppQueryAnnouncement value = json.toJavaObject(AppQueryAnnouncement.class);
+            if (value.code == 0) {
+                acceptor.setAll(Objects.requireNonNull(value.data.contents));
             } else {
                 // On API failed:
                 Logger.warn("Announce", "Announcement fetching failed (api failed)");
