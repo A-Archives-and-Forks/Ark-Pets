@@ -3,6 +3,7 @@
  */
 package cn.harryh.arkpets.utils;
 
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -42,6 +43,22 @@ public class StringUtils {
             }
         }
         return "N/A";
+    }
+
+    /** Gets a masked URL string whose protocol, host, and path of the URL are preserved,
+     * while the query string is masked if it exists.
+     * @param url The URL object to be masked.
+     * @return The masked URL.
+     */
+    public static String getMaskedURL(URL url) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(url.getProtocol());
+        sb.append("://");
+        sb.append(url.getHost());
+        sb.append(url.getPath());
+        if (url.getQuery() != null)
+            sb.append("?***");
+        return sb.toString();
     }
 
     /** Gets a related time string.

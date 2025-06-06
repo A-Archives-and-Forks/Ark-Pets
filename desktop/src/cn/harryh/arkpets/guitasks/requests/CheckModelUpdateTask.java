@@ -19,10 +19,10 @@ import static cn.harryh.arkpets.Const.charsetDefault;
 
 
 public class CheckModelUpdateTask extends FetchAsFileTask {
-    Source.GitHubSource selectedSource;
+    private Source.GitHubSource selectedSource;
 
     public CheckModelUpdateTask(StackPane parent, GuiTaskStyle style) {
-        super(parent, style, PathConfig.tempDirPath + PathConfig.fileModelsDataPath);
+        super(parent, style, PathConfig.tempDirPath + PathConfig.fileModelsDataPath, 16 << 20); // 16 MB
         selectedSource = null;
 
         try {
@@ -42,6 +42,12 @@ public class CheckModelUpdateTask extends FetchAsFileTask {
     protected void onFailed(Throwable e) {
         selectedSource.receiveError();
         super.onFailed(e);
+    }
+
+    @Override
+    protected void onCancelled() {
+        selectedSource.receiveError();
+        super.onCancelled();
     }
 
     @Override

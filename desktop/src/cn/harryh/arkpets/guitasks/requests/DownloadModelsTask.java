@@ -17,7 +17,7 @@ public class DownloadModelsTask extends FetchAsFileTask {
     private Source.GitHubSource selectedSource;
 
     public DownloadModelsTask(StackPane parent, GuiTaskStyle style) {
-        super(parent, style, PathConfig.tempModelsZipCachePath);
+        super(parent, style, PathConfig.tempModelsZipCachePath, 4L << 30); // 4 GB
         selectedSource = null;
 
         try {
@@ -37,6 +37,12 @@ public class DownloadModelsTask extends FetchAsFileTask {
     protected void onFailed(Throwable e) {
         selectedSource.receiveError();
         super.onFailed(e);
+    }
+
+    @Override
+    protected void onCancelled() {
+        selectedSource.receiveError();
+        super.onCancelled();
     }
 
     @Override

@@ -5,7 +5,6 @@ package cn.harryh.arkpets.guitasks.requests;
 
 import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.network.Connections;
-import cn.harryh.arkpets.network.NetworkUtils;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.StringUtils;
@@ -13,12 +12,12 @@ import javafx.concurrent.Task;
 import javafx.scene.layout.StackPane;
 
 import javax.net.ssl.HttpsURLConnection;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
-
-import static cn.harryh.arkpets.Const.httpBufferSizeDefault;
-import static cn.harryh.arkpets.Const.httpTimeoutDefault;
 
 
 /** The task fetches the given remote content and saves it to a specified local path.
@@ -26,10 +25,12 @@ import static cn.harryh.arkpets.Const.httpTimeoutDefault;
  */
 abstract public class FetchAsFileTask extends GuiTask {
     protected final String localPath;
+    private final long contentLengthLimit;
 
-    public FetchAsFileTask(StackPane parent, GuiTaskStyle style, String localPath) {
+    public FetchAsFileTask(StackPane parent, GuiTaskStyle style, String localPath, long contentLengthLimit) {
         super(parent, style);
         this.localPath = localPath;
+        this.contentLengthLimit = contentLengthLimit;
     }
 
     /** Returns the remote path from which the file will be fetched.
@@ -49,38 +50,42 @@ abstract public class FetchAsFileTask extends GuiTask {
             protected Boolean call() throws Exception {
                 URL remoteURL = new URL(getRemotePath());
                 File localFile = new File(localPath);
+                Logger.info("Network", "Fetching " + StringUtils.getMaskedURL(remoteURL) + " to " + localFile);
 
-                Logger.info("Network", "Fetching " + remoteURL + " to " + localFile);
                 this.updateMessage("正在尝试建立连接");
-
-                NetworkUtils.BufferLog log = new NetworkUtils.BufferLog(httpBufferSizeDefault);
-                HttpsURLConnection connection = Connections.createHttpsConnection(remoteURL, httpTimeoutDefault);
-                InputStream is = connection.getInputStream();
+                HttpsURLConnection connection = Connections.createHttpsConnection(remoteURL);
+                Connections.raiseForStatus(connection);
+                long max = connection.getContentLengthLong();
                 OutputStream os = Files.newOutputStream(localFile.toPath());
-                BufferedInputStream bis = new BufferedInputStream(is, httpBufferSizeDefault);
-                BufferedOutputStream bos = new BufferedOutputStream(os, httpBufferSizeDefault);
 
-                try (bis; bos; is; os) {
-                    int len = httpBufferSizeDefault;
-                    long sum = 0;
-                    long max = connection.getContentLengthLong();
-                    byte[] bytes = new byte[len];
-                    while ((len = bis.read(bytes)) != -1) {
-                        bos.write(bytes, 0, len);
-                        sum += len;
-                        log.receive();
-                        long speed = log.getSpeedPerSecond(500);
-                        this.updateMessage("当前已下载：" + StringUtils.getFormattedSizeString(sum) +
-                                (speed != 0 ? " (" + StringUtils.getFormattedSizeString(speed) + "/s)" : ""));
-                        this.updateProgress(sum, max);
-                        if (this.isCancelled()) {
-                            this.updateMessage("下载进程已被取消");
-                            break;
+                Connections.Recorder recorder = new Connections.Recorder() {
+                    @Override
+                    public void receive(int size) throws IOException {
+                        super.receive(size);
+                        long total = getTotalBytes();
+                        if (isCancelled()) {
+                            Logger.warn("Network", "Cancelled fetching manually, size: " + total);
+                            InterruptedIOException e = new InterruptedIOException("Cancelled fetching manually");
+                            e.bytesTransferred = (int) total;
+                            throw e;
                         }
+                        if (total > contentLengthLimit) {
+                            Logger.error("Network", "Exceeded content length limit, size: " + total);
+                            throw new IOException("Exceeded content length limit");
+                        }
+                        updateMessage("当前已下载：" + getTotalBytesString() + (getBytesPerSecondString().equals("0") ?
+                                "" : " (" + getBytesPerSecondString() + "/s)"));
+                        updateProgress(getTotalBytes(), max);
                     }
-                    this.updateProgress(max, max);
-                    bos.flush();
-                    Logger.info("Network", "Fetched " + remoteURL + " , size: " + sum);
+                };
+
+                this.updateMessage("正在等待数据响应");
+                try {
+                    Connections.consume(connection, os, recorder);
+                    Logger.info("Network", "Fetched " + StringUtils.getMaskedURL(remoteURL) +
+                            " , size: " + recorder.getTotalBytes());
+                } catch (InterruptedIOException e) {
+                    return false;
                 }
                 return this.isDone() && !this.isCancelled();
             }

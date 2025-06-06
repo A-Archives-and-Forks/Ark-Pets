@@ -3,10 +3,16 @@
  */
 package cn.harryh.arkpets.network;
 
+import cn.harryh.arkpets.utils.Cached;
+import cn.harryh.arkpets.utils.StringUtils;
+
 import javax.net.ssl.HttpsURLConnection;
-import java.io.IOException;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import static cn.harryh.arkpets.Const.httpBufferSizeDefault;
+import static cn.harryh.arkpets.Const.httpTimeoutDefault;
 
 
 public class Connections {
@@ -17,7 +23,7 @@ public class Connections {
      * @param connectTimeout The timeout for connecting (ms).
      * @param readTimeout The timeout for reading data (ms).
      * @return The connection instance which has finished connecting.
-     * @throws IOException If I/O error occurs. Typically, when a timeout occurred or the response code wasn't like 2XX.
+     * @throws IOException If I/O error occurs. Typically, when a timeout occurred.
      */
     public static HttpsURLConnection createHttpsConnection(URL url, int connectTimeout, int readTimeout)
             throws IOException {
@@ -31,9 +37,6 @@ public class Connections {
             connection.setConnectTimeout(connectTimeout);
             connection.setReadTimeout(readTimeout);
             connection.connect();
-            HttpResponseCode responseCode = new HttpResponseCode(connection);
-            if (responseCode.type != HttpResponseCodeType.SUCCESS)
-                throw new HttpResponseCodeException(responseCode);
             return connection;
         } catch (IOException e) {
             try {
@@ -49,79 +52,188 @@ public class Connections {
      * @param url The URL to connect.
      * @param timeout The timeout for connecting and reading (ms).
      * @return The connection instance which has finished connecting.
-     * @throws IOException If I/O error occurs. Typically, when a timeout occurred or the response code wasn't like 2XX.
+     * @throws IOException If I/O error occurs. Typically, when a timeout occurred.
      */
     public static HttpsURLConnection createHttpsConnection(URL url, int timeout)
             throws IOException {
         return createHttpsConnection(url, timeout, timeout);
     }
 
+    /** Creates an HTTPS connection of the given URL, and then try to connect it.
+     * @param url The URL to connect.
+     * @return The connection instance which has finished connecting.
+     * @throws IOException If I/O error occurs. Typically, when a timeout occurred.
+     */
+    public static HttpsURLConnection createHttpsConnection(URL url)
+            throws IOException {
+        return createHttpsConnection(url, httpTimeoutDefault);
+    }
 
-    public enum HttpResponseCodeType {
-        /** Indicates an invalid HTTP response */
-        UNKNOWN,
-        /** Indicates a {@code 1xx} HTTP response code */
-        INFORMATION,
-        /** Indicates a {@code 2xx} HTTP response code */
-        SUCCESS,
-        /** Indicates a {@code 3xx} HTTP response code */
-        REDIRECTION,
-        /** Indicates a {@code 4xx} HTTP response code */
-        CLIENT_ERROR,
-        /** Indicates a {@code 5xx} HTTP response code */
-        SERVER_ERROR
+    /** Consumes the input stream from an HTTP/HTTPS connection, writes the data to an output stream.
+     * @param connection The {@link HttpURLConnection} instance representing the already established connection.
+     * @param os The output stream where the data from the connection's input stream will be written.
+     * @param recorder The {@link Recorder} instance used to track the number of bytes received.
+     * @throws IOException If an I/O error occurs.
+     */
+    public static void consume(HttpURLConnection connection, OutputStream os, Recorder recorder) throws IOException {
+        InputStream is = getInputStreamOrErrorStream(connection);
+        BufferedInputStream bis = new BufferedInputStream(is, httpBufferSizeDefault);
+        BufferedOutputStream bos = new BufferedOutputStream(os, httpBufferSizeDefault);
+
+        try (bis; bos; is; os) {
+            int len;
+            byte[] bytes = new byte[httpBufferSizeDefault];
+            while ((len = bis.read(bytes)) != -1) {
+                bos.write(bytes, 0, len);
+                recorder.receive(len);
+            }
+            bos.flush();
+        }
+    }
+
+    /** Throws an exception if the connection's status code isn't {@code 2xx}.
+     * @param connection The connection to check.
+     * @throws IOException If the status code check fails or an I/O error occurs.
+     */
+    public static void raiseForStatus(HttpURLConnection connection) throws IOException {
+        int code = connection.getResponseCode();
+        if (code >= 200 && code < 300)
+            return;
+        String message = connection.getResponseMessage();
+        throw new HttpStatusCodeException(code, message == null ? "Unknown" : message);
+    }
+
+    /** Throws an exception if the connection's status code is neither {@code 2xx} nor in the {@code forgiveCodes}.
+     * @param connection The connection to check.
+     * @param forgiveCodes The array of status codes to forgive.
+     * @throws IOException If the status code check fails or an I/O error occurs.
+     */
+    public static void raiseForStatus(HttpURLConnection connection, int[] forgiveCodes) throws IOException {
+       int code = connection.getResponseCode();
+       if (code >= 200 && code < 300)
+           return;
+       for (int forgiveCode : forgiveCodes)
+           if (code == forgiveCode)
+               return;
+       throw new HttpStatusCodeException(connection);
+    }
+
+    private static InputStream getInputStreamOrErrorStream(HttpURLConnection connection) {
+        try {
+            return connection.getInputStream();
+        } catch (IOException e) {
+            return connection.getErrorStream();
+        }
     }
 
 
-    public static class HttpResponseCode {
-        public final int code;
-        public final String message;
-        public final HttpResponseCodeType type;
+    public static class Recorder {
+        protected final int bufferSize;
+        protected final long[] bufferNanoTimes;
+        protected final Cached<String> cachedBps;
+        protected final Cached<String> cachedTb;
+        protected int bufferNanoTimesPtr = 0;
+        protected int pending = 0;
+        protected int total = 0;
 
-        public HttpResponseCode(int code, String message) {
+
+        public Recorder(int bufferSize, int maxRecords, double bpsCacheAge, double tbCacheAge) {
+            if (bufferSize <= 0 || maxRecords <= 0)
+                throw new IllegalArgumentException("bufferSize and maxRecords should be positive.");
+
+            this.bufferNanoTimes = new long[maxRecords];
+            this.bufferSize = bufferSize;
+            this.cachedBps = new Cached<>() {
+                @Override
+                protected String produce() {
+                    return StringUtils.getFormattedSizeString(getBytesPerSecond());
+                }
+
+                @Override
+                protected double cacheAge() {
+                    return bpsCacheAge;
+                }
+            };
+            this.cachedTb = new Cached<>() {
+                @Override
+                protected String produce() {
+                    return StringUtils.getFormattedSizeString(getTotalBytes());
+                }
+
+                @Override
+                protected double cacheAge() {
+                    return tbCacheAge;
+                }
+            };
+        }
+
+        public Recorder() {
+            this(httpBufferSizeDefault, 1024, 0.5, 0.1);
+        }
+
+        public void receive(int size) throws IOException {
+            total += size;
+            pending += size;
+            if (pending >= bufferSize) {
+                pending = 0;
+                bufferNanoTimes[bufferNanoTimesPtr++] = System.nanoTime();
+                bufferNanoTimesPtr = bufferNanoTimesPtr < bufferNanoTimes.length ? bufferNanoTimesPtr : 0;
+            }
+        }
+
+        public long getBytesPerSecond() {
+            int actualLength = bufferNanoTimes.length;
+            while (actualLength > 0 && bufferNanoTimes[actualLength - 1] == 0)
+                actualLength--;
+            if (actualLength <= 1)
+                return 0;
+
+            long maxTime = bufferNanoTimes[bufferNanoTimesPtr != 0 ? bufferNanoTimesPtr - 1 : actualLength - 1];
+            long minTime = bufferNanoTimes[bufferNanoTimesPtr < actualLength ? bufferNanoTimesPtr : 0];
+            if (maxTime - minTime < 1000)
+                return 0;
+
+            return (actualLength - 1) * bufferSize * 1_000_000_000L / (maxTime - minTime);
+        }
+
+        public long getTotalBytes() {
+            return total;
+        }
+
+        public String getBytesPerSecondString() {
+            return cachedBps.getValue();
+        }
+
+        public String getTotalBytesString() {
+            return cachedTb.getValue();
+        }
+    }
+
+
+    public static class HttpStatusCodeException extends IOException {
+        private final int code;
+        private final String message;
+
+        public HttpStatusCodeException(int code, String message) {
             this.code = code;
-            this.message = message;
-            HttpResponseCodeType type;
-            if (100 <= code && code < 200)
-                type = HttpResponseCodeType.INFORMATION;
-            else if (200 <= code && code < 300)
-                type = HttpResponseCodeType.SUCCESS;
-            else if (300 <= code && code < 400)
-                type = HttpResponseCodeType.REDIRECTION;
-            else if (400 <= code && code < 500)
-                type = HttpResponseCodeType.CLIENT_ERROR;
-            else if (500 <= code && code < 600)
-                type = HttpResponseCodeType.SERVER_ERROR;
-            else
-                type = HttpResponseCodeType.UNKNOWN;
-            this.type = type;
+            this.message = message == null ? "" : message;
         }
 
-        public HttpResponseCode(HttpURLConnection connection)
-                throws IOException {
+        public HttpStatusCodeException(HttpURLConnection connection) throws IOException {
             this(connection.getResponseCode(), connection.getResponseMessage());
-        }
-    }
-
-
-    public static class HttpResponseCodeException extends IOException {
-        private final HttpResponseCode responseCode;
-
-        public HttpResponseCodeException(HttpResponseCode responseCode) {
-            this.responseCode = responseCode;
         }
 
         public int getCode() {
-            return responseCode.code;
+            return code;
+        }
+
+        public String getMessage() {
+            return message;
         }
 
         @Override
-        public String getMessage() {
-            return responseCode.code + ": " + responseCode.message;
-        }
-
-        public HttpResponseCodeType getType() {
-            return responseCode.type;
+        public String toString() {
+            return "HTTP " + code + " : " + message;
         }
     }
 }

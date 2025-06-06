@@ -358,11 +358,11 @@ public class GuiPrefabs {
                 h3.setText("桌宠运行时异常退出。您可以稍后重试或查看日志文件。");
             } else if (e instanceof FileNotFoundException) {
                 h3.setText("未找到指定的文件或目录，请稍后重试。详细信息：");
-            } else if (e instanceof Connections.HttpResponseCodeException ex) {
+            } else if (e instanceof Connections.HttpStatusCodeException ex) {
                 h2.setText("神经递质接收异常");
-                switch (ex.getType()) {
-                    case REDIRECTION -> h3.setText("请求的网络地址被重定向转移。详细信息：");
-                    case CLIENT_ERROR -> {
+                switch (ex.getCode() / 100) {
+                    case 3 -> h3.setText("请求的网络地址被重定向转移。详细信息：");
+                    case 4 -> {
                         h3.setText("可能是客户端引发的网络错误，详细信息：");
                         switch (ex.getCode()) {
                             case 400 -> h3.setText("(400)非法请求。详细信息：");
@@ -372,7 +372,7 @@ public class GuiPrefabs {
                             case 429 -> h3.setText("(429)请求过于频繁。详细信息：");
                         }
                     }
-                    case SERVER_ERROR -> {
+                    case 5 -> {
                         h3.setText("可能是服务器引发的网络错误，详细信息：");
                         switch (ex.getCode()) {
                             case 500 -> h3.setText("(500)服务器内部故障，请稍后重试。详细信息：");
@@ -398,7 +398,7 @@ public class GuiPrefabs {
                 h3.setText("SSL证书错误，请检查代理设置。您也可以尝试[信任]所有证书后重试刚才的操作。");
                 JFXButton apply = Dialogs.getTrustButton(dialog);
                 apply.setOnAction(ev -> {
-                    Logger.warn("ErrorDialog", "Set SLL trust all to true");
+                    Logger.warn("ErrorDialog", "Set SSL trust all to true");
                     Connections.trustAllUnsafe = true;
                     Dialogs.disposeDialog(dialog);
                 });

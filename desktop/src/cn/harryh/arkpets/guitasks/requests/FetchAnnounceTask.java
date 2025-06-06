@@ -17,10 +17,10 @@ import static cn.harryh.arkpets.network.api.AppQueryAnnouncement.AnnounceItem;
 
 
 public class FetchAnnounceTask extends FetchAsDataTask {
-    protected ObservableList<AnnounceItem> acceptor;
+    private final ObservableList<AnnounceItem> acceptor;
 
     public FetchAnnounceTask(StackPane parent, GuiTaskStyle style, ObservableList<AnnounceItem> acceptor) {
-        super(parent, style);
+        super(parent, style, 16 << 20); // 16 MB
         this.acceptor = acceptor;
     }
 

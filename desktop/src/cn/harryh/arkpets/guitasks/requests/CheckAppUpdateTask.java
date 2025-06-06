@@ -21,7 +21,7 @@ public class CheckAppUpdateTask extends FetchAsDataTask {
     private final String sourceStr;
 
     public CheckAppUpdateTask(StackPane parent, GuiTaskStyle style, String sourceStr) {
-        super(parent, style);
+        super(parent, style, 16 << 20); // 16 MB
         this.sourceStr = sourceStr;
     }
 
