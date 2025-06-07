@@ -129,7 +129,7 @@ public class ArkHomeFX extends Application {
             }
 
             // Post initialization.
-            rootModule.syncRemoteMetaInfo();
+            rootModule.configNetwork();
             rootModule.moduleWrapperComposer.activate(0);
 
             Logger.info("Launcher", "Finished starting");

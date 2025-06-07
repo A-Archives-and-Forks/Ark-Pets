@@ -10,6 +10,7 @@ import cn.harryh.arkpets.concurrent.ProcessPool;
 import cn.harryh.arkpets.guitasks.DeleteTempFilesTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.guitasks.requests.CheckAppUpdateTask;
+import cn.harryh.arkpets.network.SourceStrategy;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.DialogComposer;
 import cn.harryh.arkpets.utils.GuiComponents.Handbook;
@@ -203,9 +204,16 @@ public final class RootModule implements Controller<ArkHomeFX> {
         thread.start();
     }
 
-    /** Fetches a regular check-app-up-date request from the ArkPets server.
+    /** Configures the basic network settings and fetches a regular check-app-up-date request from the ArkPets server.
      */
-    public void syncRemoteMetaInfo() {
+    public void configNetwork() {
+        SourceStrategy.registerStrategy("ModelDownload")
+                .addBackupSource("GitHub", "https://github.com/isHarryh/Ark-Models/archive/refs/heads/main.zip")
+                .addBackupSource("GHProxy", "https://ghproxy.harryh.cn/https://github.com/isHarryh/Ark-Models/archive/refs/heads/main.zip");
+        SourceStrategy.registerStrategy("ModelDataset")
+                .addBackupSource("GitHub", "https://raw.githubusercontent.com/isHarryh/Ark-Models/main/models_data.json")
+                .addBackupSource("GHProxy", "https://ghproxy.harryh.cn/https://raw.githubusercontent.com/isHarryh/Ark-Models/main/models_data.json");
+
         new CheckAppUpdateTask(app.body, GuiTask.GuiTaskStyle.HIDDEN, "auto").start();
     }
 

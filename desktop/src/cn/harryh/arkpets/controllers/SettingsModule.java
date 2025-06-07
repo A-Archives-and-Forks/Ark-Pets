@@ -8,7 +8,6 @@ import cn.harryh.arkpets.ArkHomeFX;
 import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.guitasks.requests.CheckAppUpdateTask;
-import cn.harryh.arkpets.network.NetworkUtils;
 import cn.harryh.arkpets.platform.StartupConfig;
 import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.GuiComponents;
@@ -342,11 +341,11 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                 configNetworkAgentStatus.setText("未使用代理");
                 configNetworkAgentStatus.setTextFill(GuiPrefabs.COLOR_LIGHT_GRAY);
                 Logger.info("Network", "Set proxy to none");
-                NetworkUtils.setProxy("", "");
+                setProxy("", "");
             } else {
                 if (ipPortRegex.matcher(newValue).matches()) {
                     String[] ipPort = newValue.split(":");
-                    NetworkUtils.setProxy(ipPort[0], ipPort[1]);
+                    setProxy(ipPort[0], ipPort[1]);
                     configNetworkAgentStatus.setText("代理生效中");
                     configNetworkAgentStatus.setTextFill(GuiPrefabs.COLOR_SUCCESS);
                     Logger.info("Network", "Set proxy to host " + ipPort[0] + ", port " + ipPort[1]);
@@ -569,5 +568,12 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         ss.setPeriod(new Duration(5000));
         ss.setRestartOnFailure(true);
         ss.start();
+    }
+
+    private static void setProxy(String host, String port) {
+        System.setProperty("http.proxyHost", host);
+        System.setProperty("http.proxyPort", port);
+        System.setProperty("https.proxyHost", host);
+        System.setProperty("https.proxyPort", port);
     }
 }

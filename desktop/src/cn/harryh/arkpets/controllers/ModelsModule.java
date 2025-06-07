@@ -8,7 +8,7 @@ import cn.harryh.arkpets.assets.ModelItem;
 import cn.harryh.arkpets.assets.ModelItemGroup;
 import cn.harryh.arkpets.assets.ModelsDataset;
 import cn.harryh.arkpets.guitasks.*;
-import cn.harryh.arkpets.guitasks.requests.CheckModelUpdateTask;
+import cn.harryh.arkpets.guitasks.requests.DownloadModelDatasetTask;
 import cn.harryh.arkpets.guitasks.requests.DownloadModelsTask;
 import cn.harryh.arkpets.utils.GuiComponents.NoticeBar;
 import cn.harryh.arkpets.utils.GuiPrefabs;
@@ -355,7 +355,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             /* Foreground check models update */
             if (!app.modelsModule.initModelsDataset(true))
                 return;
-            new CheckModelUpdateTask(app.body, GuiTask.GuiTaskStyle.COMMON).start();
+            new DownloadModelDatasetTask(app.body, GuiTask.GuiTaskStyle.COMMON).start();
         });
 
         modelFetch.setOnAction(modelFetchEventHandler);

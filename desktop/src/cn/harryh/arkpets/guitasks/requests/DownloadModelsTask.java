@@ -3,7 +3,7 @@
  */
 package cn.harryh.arkpets.guitasks.requests;
 
-import cn.harryh.arkpets.network.Source;
+import cn.harryh.arkpets.network.SourceStrategy;
 import cn.harryh.arkpets.utils.Logger;
 import javafx.scene.layout.StackPane;
 
@@ -14,7 +14,7 @@ import static cn.harryh.arkpets.Const.PathConfig;
 
 
 public class DownloadModelsTask extends FetchAsFileTask {
-    private Source.GitHubSource selectedSource;
+    private SourceStrategy.Source selectedSource;
 
     public DownloadModelsTask(StackPane parent, GuiTaskStyle style) {
         super(parent, style, PathConfig.tempModelsZipCachePath, 4L << 30); // 4 GB
@@ -47,8 +47,8 @@ public class DownloadModelsTask extends FetchAsFileTask {
 
     @Override
     protected String getRemotePath() {
-        selectedSource = Source.GitHubSource.getMostAvailable();
-        return selectedSource.archivePreUrl + PathConfig.urlModelsZip;
+        selectedSource = SourceStrategy.getStrategy("ModelDownload").getBestSource();
+        return selectedSource.getUrl();
     }
 
     @Override

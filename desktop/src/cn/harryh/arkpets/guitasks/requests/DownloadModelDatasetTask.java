@@ -3,7 +3,7 @@
  */
 package cn.harryh.arkpets.guitasks.requests;
 
-import cn.harryh.arkpets.network.Source;
+import cn.harryh.arkpets.network.SourceStrategy;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
@@ -18,10 +18,10 @@ import static cn.harryh.arkpets.Const.PathConfig;
 import static cn.harryh.arkpets.Const.charsetDefault;
 
 
-public class CheckModelUpdateTask extends FetchAsFileTask {
-    private Source.GitHubSource selectedSource;
+public class DownloadModelDatasetTask extends FetchAsFileTask {
+    private SourceStrategy.Source selectedSource;
 
-    public CheckModelUpdateTask(StackPane parent, GuiTaskStyle style) {
+    public DownloadModelDatasetTask(StackPane parent, GuiTaskStyle style) {
         super(parent, style, PathConfig.tempDirPath + PathConfig.fileModelsDataPath, 16 << 20); // 16 MB
         selectedSource = null;
 
@@ -52,8 +52,8 @@ public class CheckModelUpdateTask extends FetchAsFileTask {
 
     @Override
     protected String getRemotePath() {
-        selectedSource = Source.GitHubSource.getMostAvailable();
-        return selectedSource.rawPreUrl + PathConfig.urlModelsData;
+        selectedSource = SourceStrategy.getStrategy("ModelDataset").getBestSource();
+        return selectedSource.getUrl();
     }
 
     @Override
