@@ -42,6 +42,10 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
     @FXML
     private Label configBehaviorAiActivationValue;
     @FXML
+    private JFXSlider configBehaviorWalkSpeed;
+    @FXML
+    private Label configBehaviorSpeedWalkValue;
+    @FXML
     private JFXCheckBox configBehaviorAllowInteract;
     @FXML
     private JFXCheckBox configBehaviorDoPeerRepulsion;
@@ -143,6 +147,17 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
                 .setSliderValue(app.config.behavior_ai_activation)
                 .setOnChanged((observable, oldValue, newValue) -> {
                     app.config.behavior_ai_activation = setupBehaviorAiActivation.getValidatedValue();
+                    app.config.save();
+                });
+
+        SliderSetup<Integer> setupBehaviorWalkSpeed = new SimpleMultipleIntegerSliderSetup(configBehaviorWalkSpeed, 5);
+        setupBehaviorWalkSpeed
+                .setDisplay(configBehaviorSpeedWalkValue, "%d px/s", "像素每秒 (pixel/s)")
+                .setRange(0, 200)
+                .setTicks(100, 10)
+                .setSliderValue(app.config.behavior_walk_speed)
+                .setOnChanged((observable, oldValue, newValue) -> {
+                    app.config.behavior_walk_speed = setupBehaviorWalkSpeed.getValidatedValue();
                     app.config.save();
                 });
 

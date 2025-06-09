@@ -150,8 +150,7 @@ public class ArkPets extends InputApplicationAdaptor {
                     newAnim = new AnimData(newAnim.animClip(), null, newAnim.isLoop(), newAnim.isStrict(), -newAnim.mobility());
                     tray.keepAnim = tray.keepAnim == null ? null : newAnim;
                 }
-                float fac = isCtrlPressed() ? 1.85f : 0.85f;
-                walkWindow(fac * cha.getPlaying().mobility());
+                walkWindow(config.behavior_walk_speed * (isCtrlPressed() ? 2 : 1) * cha.getPlaying().mobility());
             }
         } else { // If dragging:
             newAnim = behavior.dragging();
@@ -450,24 +449,21 @@ public class ArkPets extends InputApplicationAdaptor {
     }
 
     /* WINDOW WALKING RELATED */
-    private void walkWindow(float len) {
-        float expectedLen = len * config.display_scale * (30f / config.display_fps);
-        int realLen = randomRound(expectedLen);
-        float newPlaneX = plane.getX() + realLen;
-        plane.changePosition(Gdx.graphics.getDeltaTime(), newPlaneX, plane.getY());
+    private void walkWindow(float speed) {
+        float distance = speed * config.display_scale * Gdx.graphics.getDeltaTime();
+        int bias = Math.abs(distance - (int) distance) >= Math.random() ? (int) Math.signum(distance) : 0;
+        int intDistance = (int) distance + bias;
+        plane.changePosition(Gdx.graphics.getDeltaTime(), plane.getX() + intDistance, plane.getY());
     }
 
-    private int randomRound(float val) {
-        int integer = (int) val;
-        float decimal = val - integer;
-        int offset = Math.abs(decimal) >= Math.random() ? (val >= 0 ? 1 : -1) : 0;
-        return integer + offset;
-    }
-
-    private boolean willReachBorder(float len) {
-        if (plane == null) return false;
-        return (plane.getX() >= plane.borderRight() - cha.camera.getWidth() && len > 0) ||
-                (plane.getX() <= plane.borderLeft() && len < 0);
+    private boolean willReachBorder(float speed) {
+        if (plane == null)
+            return false;
+        if (speed > 0)
+            return plane.getX() >= plane.borderRight() - cha.camera.getWidth();
+        if (speed < 0)
+            return plane.getX() <= plane.borderLeft();
+        return false;
     }
 
 
