@@ -63,7 +63,11 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     @FXML
     private JFXComboBox<NamedItem<Integer>> configRenderOutline;
     @FXML
+    private JFXComboBox<NamedItem<Integer>> configRenderOutlineEmphasis;
+    @FXML
     private JFXComboBox<NamedItem<Integer>> configRenderOutlineColor;
+    @FXML
+    private JFXComboBox<NamedItem<Integer>> configRenderOutlineColorEmphasis;
     @FXML
     private JFXComboBox<NamedItem<Float>> configRenderOutlineWidth;
     @FXML
@@ -222,12 +226,32 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     app.config.render_outline = newValue.value();
                     app.config.save();
                 });
+        new ComboBoxSetup<>(configRenderOutlineEmphasis).setItems(new NamedItem<>("始终开启", ArkConfig.RenderOutline.ALWAYS.ordinal()),
+                        new NamedItem<>("处于前台时", ArkConfig.RenderOutline.FOCUSED.ordinal()),
+                        new NamedItem<>("点击时", ArkConfig.RenderOutline.PRESSING.ordinal()),
+                        new NamedItem<>("拖拽时", ArkConfig.RenderOutline.DRAGGING.ordinal()),
+                        new NamedItem<>("关闭", ArkConfig.RenderOutline.NEVER.ordinal()))
+                .selectValue(app.config.render_outline_emphasis, "未知")
+                .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
+                    app.config.render_outline_emphasis = newValue.value();
+                    app.config.save();
+                });
         new ComboBoxSetup<>(configRenderOutlineColor).setItems(new NamedItem<>("黄色", 0xFFFF00FF),
+                        new NamedItem<>("橙色", 0xFFBB00FF),
                         new NamedItem<>("白色", 0xFFFFFFFF),
                         new NamedItem<>("青色", 0x00FFFFFF))
                 .selectValue(Color.rgba8888(ArkConfig.getGdxColorFrom(app.config.render_outline_color)), app.config.render_outline_color + "（自定义）")
                 .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
                     app.config.render_outline_color = String.format("#%08X", newValue.value());
+                    app.config.save();
+                });
+        new ComboBoxSetup<>(configRenderOutlineColorEmphasis).setItems(new NamedItem<>("黄色", 0xFFFF00FF),
+                        new NamedItem<>("橙色", 0xFFBB00FF),
+                        new NamedItem<>("白色", 0xFFFFFFFF),
+                        new NamedItem<>("青色", 0x00FFFFFF))
+                .selectValue(Color.rgba8888(ArkConfig.getGdxColorFrom(app.config.render_outline_emphasis_color)), app.config.render_outline_emphasis_color + "（自定义）")
+                .setOnNonNullValueUpdated((observable, oldValue, newValue) -> {
+                    app.config.render_outline_emphasis_color = String.format("#%08X", newValue.value());
                     app.config.save();
                 });
         new ComboBoxSetup<>(configRenderOutlineWidth).setItems(new NamedItem<>("极细", 1f),

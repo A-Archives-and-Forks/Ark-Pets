@@ -62,8 +62,16 @@
                                 <JFXComboBox fx:id="configRenderOutline" prefWidth="120.0"/>
                             </HBox>
                             <HBox>
+                                <Label text="开启条件（操控中）"/>
+                                <JFXComboBox fx:id="configRenderOutlineEmphasis" prefWidth="120.0"/>
+                            </HBox>
+                            <HBox>
                                 <Label text="描边颜色"/>
                                 <JFXComboBox fx:id="configRenderOutlineColor" prefWidth="120.0"/>
+                            </HBox>
+                            <HBox>
+                                <Label text="描边颜色（操控中）"/>
+                                <JFXComboBox fx:id="configRenderOutlineColorEmphasis" prefWidth="120.0"/>
                             </HBox>
                             <HBox>
                                 <Label text="描边宽度"/>

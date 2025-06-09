@@ -104,8 +104,12 @@ public class ArkConfig implements Serializable {
     public boolean      render_enable_mipmap;
     /** @since ArkPets 3.3 */ @JSONField(defaultValue = "1")
     public int          render_outline;
-    /** @since ArkPets 3.3 */ @JSONField(defaultValue = "#FFFF00FF")
+    /** @since ArkPets 3.3 */ @JSONField(defaultValue = "#FFBB00FF")
     public String       render_outline_color;
+    /** @since ArkPets 3.9 */ @JSONField(defaultValue = "3")
+    public int       render_outline_emphasis;
+    /** @since ArkPets 3.9 */ @JSONField(defaultValue = "#00FFFFFF")
+    public String          render_outline_emphasis_color;
     /** @since ArkPets 3.3 */ @JSONField(defaultValue = "2.0")
     public float        render_outline_width;
     /** @since ArkPets 3.6 */ @JSONField(defaultValue = "#000000BB")

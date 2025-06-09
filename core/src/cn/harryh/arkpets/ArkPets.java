@@ -172,7 +172,9 @@ public class ArkPets extends InputApplicationAdaptor {
         updateWindow();
 
         // 4.Outline.
-        boolean renderOutline = switch (ArkConfig.getRenderOutlineFrom(config.render_outline)) {
+        boolean renderOutline = switch (ArkConfig.getRenderOutlineFrom(
+                tray.keepAnim != null ? config.render_outline_emphasis : config.render_outline
+        )) {
             case ALWAYS -> true;
             case PRESSING -> isMouseDown();
             case FOCUSED -> isFocused.getValue();
@@ -180,6 +182,9 @@ public class ArkPets extends InputApplicationAdaptor {
             default -> false;
         };
         cha.setOutlineAlpha(renderOutline ? 1f : 0f);
+        cha.setOutlineColor(ArkConfig.getGdxColorFrom(
+                tray.keepAnim != null ? config.render_outline_emphasis_color : config.render_outline_color
+        ));
     }
 
     @Override
