@@ -6,6 +6,7 @@
     "behavior_allow_special":true,
     "behavior_allow_walk":true,
     "behavior_do_peer_repulsion":true,
+    "behavior_walk_speed": 30.0,
     "canvas_color":"#00000000",
     "canvas_coverage":0.8,
     "canvas_sampling_interval":4,

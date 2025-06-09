@@ -48,6 +48,8 @@ public class ArkConfig implements Serializable {
     public boolean      behavior_allow_walk;
     /** @since ArkPets 1.6 */ @JSONField(defaultValue = "true")
     public boolean      behavior_do_peer_repulsion;
+    /** @since ArkPets 3.9 */ @JSONField(defaultValue = "30.0")
+    public float        behavior_walk_speed;
     /** @since ArkPets 3.3 */ @JSONField(defaultValue = "#00000000")
     public String       canvas_color;
     /** @since ArkPets 3.8 */ @JSONField(defaultValue = "0.8")
