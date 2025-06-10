@@ -23,7 +23,7 @@ public class CheckAppUpdateTask extends FetchAsDataTask {
     private final String sourceStr;
 
     public CheckAppUpdateTask(StackPane parent, GuiTaskStyle style, String sourceStr) {
-        super(parent, style, 16 << 20); // 16 MB
+        super(parent, style);
         this.sourceStr = sourceStr;
     }
 
@@ -33,7 +33,7 @@ public class CheckAppUpdateTask extends FetchAsDataTask {
     }
 
     @Override
-    protected URL getRemotePath() {
+    protected URL getTargetURL() {
         return new StringUtils.URLStringBuilder(PathConfig.urlApi)
                 .addQuery("type", "queryVersion")
                 .addQuery("cliVer", appVersion.toString())

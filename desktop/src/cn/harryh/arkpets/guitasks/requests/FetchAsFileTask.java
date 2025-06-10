@@ -3,9 +3,7 @@
  */
 package cn.harryh.arkpets.guitasks.requests;
 
-import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.network.Connections;
-import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.StringUtils;
 import javafx.concurrent.Task;
@@ -23,20 +21,17 @@ import java.nio.file.Files;
 /** The task fetches the given remote content and saves it to a specified local path.
  * @implNote Implement the {@link #onDownloadedFile(File)} for future operations to the downloaded file.
  */
-abstract public class FetchAsFileTask extends GuiTask {
+abstract public class FetchAsFileTask extends FetchTask {
     protected final String localPath;
-    private final long contentLengthLimit;
 
     public FetchAsFileTask(StackPane parent, GuiTaskStyle style, String localPath, long contentLengthLimit) {
-        super(parent, style);
+        super(parent, style, contentLengthLimit);
         this.localPath = localPath;
-        this.contentLengthLimit = contentLengthLimit;
     }
 
-    /** Returns the remote URL from which the file will be fetched.
-     * @return The remote URL to be fetched.
-     */
-    abstract protected URL getRemotePath();
+    public FetchAsFileTask(StackPane parent, GuiTaskStyle style, String localPath) {
+        this(parent, style, localPath, 4L << 30); // 4 GB for default
+    }
 
     /** Called when the file has been successfully downloaded.
      * @param file The downloaded file object representing the local file.
@@ -48,7 +43,7 @@ abstract public class FetchAsFileTask extends GuiTask {
         return new Task<>() {
             @Override
             protected Boolean call() throws Exception {
-                URL remoteURL = getRemotePath();
+                URL remoteURL = getTargetURL();
                 File localFile = new File(localPath);
                 Logger.info("Network", "Fetching " + StringUtils.getMaskedURL(remoteURL) + " to " + localFile);
 
@@ -90,12 +85,6 @@ abstract public class FetchAsFileTask extends GuiTask {
                 return this.isDone() && !this.isCancelled();
             }
         };
-    }
-
-    @Override
-    protected void onFailed(Throwable e) {
-        if (style != GuiTaskStyle.HIDDEN)
-            GuiPrefabs.Dialogs.createErrorDialog(parent, e).show();
     }
 
     @Override

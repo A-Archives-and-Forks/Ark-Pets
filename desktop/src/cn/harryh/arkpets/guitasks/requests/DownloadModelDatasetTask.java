@@ -18,7 +18,7 @@ public class DownloadModelDatasetTask extends FetchAsFileTask {
     private SourceStrategy.Source selectedSource;
 
     public DownloadModelDatasetTask(StackPane parent, GuiTaskStyle style) {
-        super(parent, style, PathConfig.tempDirPath + PathConfig.fileModelsDataPath, 16 << 20); // 16 MB
+        super(parent, style, PathConfig.tempDirPath + PathConfig.fileModelsDataPath);
         selectedSource = null;
 
         try {
@@ -47,7 +47,7 @@ public class DownloadModelDatasetTask extends FetchAsFileTask {
     }
 
     @Override
-    protected URL getRemotePath() {
+    protected URL getTargetURL() {
         selectedSource = SourceStrategy.getStrategy("ModelDataset").getBestSource();
         return selectedSource.toURL();
     }

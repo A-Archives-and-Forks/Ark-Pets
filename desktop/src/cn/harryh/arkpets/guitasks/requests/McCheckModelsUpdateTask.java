@@ -16,7 +16,7 @@ public class McCheckModelsUpdateTask extends FetchAsDataTask {
     private final String cdk;
 
     public McCheckModelsUpdateTask(StackPane parent, GuiTaskStyle style, String cdk) {
-        super(parent, style, 4L << 30); // 4 GB
+        super(parent, style);
         this.cdk = cdk;
     }
 
@@ -26,7 +26,7 @@ public class McCheckModelsUpdateTask extends FetchAsDataTask {
     }
 
     @Override
-    protected URL getRemotePath() {
+    protected URL getTargetURL() {
         return new StringUtils.URLStringBuilder("https://mirrorchyan.com/api/resources/ArkModelsRepo/latest")
                 .addQuery("cdk", cdk)
                 .addQuery("user_agent", appName + "Gui")

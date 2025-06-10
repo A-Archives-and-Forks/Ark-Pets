@@ -22,7 +22,7 @@ public class FetchAnnounceTask extends FetchAsDataTask {
     private final ObservableList<AnnounceItem> acceptor;
 
     public FetchAnnounceTask(StackPane parent, GuiTaskStyle style, ObservableList<AnnounceItem> acceptor) {
-        super(parent, style, 16 << 20); // 16 MB
+        super(parent, style);
         this.acceptor = acceptor;
     }
 
@@ -32,7 +32,7 @@ public class FetchAnnounceTask extends FetchAsDataTask {
     }
 
     @Override
-    protected URL getRemotePath() {
+    protected URL getTargetURL() {
         return new StringUtils.URLStringBuilder(PathConfig.urlApi)
                 .addQuery("type", "queryAnnouncement")
                 .toURL();

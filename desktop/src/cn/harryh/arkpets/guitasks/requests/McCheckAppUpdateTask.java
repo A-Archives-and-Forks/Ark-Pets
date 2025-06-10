@@ -18,7 +18,7 @@ public class McCheckAppUpdateTask extends FetchAsDataTask {
     private final String os;
 
     public McCheckAppUpdateTask(StackPane parent, GuiTaskStyle style, String cdk) {
-        super(parent, style, 16 << 20, new int[]{400, 403});  // 16 MB
+        super(parent, style, new int[]{400, 403});
         this.cdk = cdk;
         this.os = "win";  // Should be replaced with actual OS detection logic in higher version of ArkPets
     }
@@ -29,7 +29,7 @@ public class McCheckAppUpdateTask extends FetchAsDataTask {
     }
 
     @Override
-    protected URL getRemotePath() {
+    protected URL getTargetURL() {
         return new StringUtils.URLStringBuilder("https://mirrorchyan.com/api/resources/ArkPetsApp/latest")
                 .addQuery("current_version", "v" + appVersion)
                 .addQuery("cdk", cdk)

@@ -18,7 +18,7 @@ public class DownloadModelsTask extends FetchAsFileTask {
     private SourceStrategy.Source selectedSource;
 
     public DownloadModelsTask(StackPane parent, GuiTaskStyle style) {
-        super(parent, style, PathConfig.tempModelsZipCachePath, 4L << 30); // 4 GB
+        super(parent, style, PathConfig.tempModelsZipCachePath);
         selectedSource = null;
 
         try {
@@ -47,7 +47,7 @@ public class DownloadModelsTask extends FetchAsFileTask {
     }
 
     @Override
-    protected URL getRemotePath() {
+    protected URL getTargetURL() {
         selectedSource = SourceStrategy.getStrategy("ModelDownload").getBestSource();
         return selectedSource.toURL();
     }
