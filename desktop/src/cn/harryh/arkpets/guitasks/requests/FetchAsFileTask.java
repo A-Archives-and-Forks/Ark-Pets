@@ -33,10 +33,10 @@ abstract public class FetchAsFileTask extends GuiTask {
         this.contentLengthLimit = contentLengthLimit;
     }
 
-    /** Returns the remote path from which the file will be fetched.
-     * @return The remote path to be fetched.
+    /** Returns the remote URL from which the file will be fetched.
+     * @return The remote URL to be fetched.
      */
-    abstract protected String getRemotePath();
+    abstract protected URL getRemotePath();
 
     /** Called when the file has been successfully downloaded.
      * @param file The downloaded file object representing the local file.
@@ -48,7 +48,7 @@ abstract public class FetchAsFileTask extends GuiTask {
         return new Task<>() {
             @Override
             protected Boolean call() throws Exception {
-                URL remoteURL = new URL(getRemotePath());
+                URL remoteURL = getRemotePath();
                 File localFile = new File(localPath);
                 Logger.info("Network", "Fetching " + StringUtils.getMaskedURL(remoteURL) + " to " + localFile);
 

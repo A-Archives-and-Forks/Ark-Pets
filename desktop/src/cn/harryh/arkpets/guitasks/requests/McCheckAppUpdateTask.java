@@ -3,16 +3,24 @@
  */
 package cn.harryh.arkpets.guitasks.requests;
 
+import cn.harryh.arkpets.utils.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import javafx.scene.layout.StackPane;
+
+import java.net.URL;
+
+import static cn.harryh.arkpets.Const.appName;
+import static cn.harryh.arkpets.Const.appVersion;
 
 
 public class McCheckAppUpdateTask extends FetchAsDataTask {
     private final String cdk;
+    private final String os;
 
     public McCheckAppUpdateTask(StackPane parent, GuiTaskStyle style, String cdk) {
         super(parent, style, 16 << 20, new int[]{400, 403});  // 16 MB
         this.cdk = cdk;
+        this.os = "win";  // Should be replaced with actual OS detection logic in higher version of ArkPets
     }
 
     @Override
@@ -21,8 +29,13 @@ public class McCheckAppUpdateTask extends FetchAsDataTask {
     }
 
     @Override
-    protected String getRemotePath() {
-        return "https://mirrorchyan.com/api/resources/ArkPetsApp/latest?cdk=" + cdk;
+    protected URL getRemotePath() {
+        return new StringUtils.URLStringBuilder("https://mirrorchyan.com/api/resources/ArkPetsApp/latest")
+                .addQuery("current_version", "v" + appVersion)
+                .addQuery("cdk", cdk)
+                .addQuery("user_agent", appName + "Gui")
+                .addQuery("os", os)
+                .toURL();
     }
 
     @Override

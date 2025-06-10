@@ -7,10 +7,12 @@ import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.network.api.AppQueryVersion;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.utils.StringUtils;
 import cn.harryh.arkpets.utils.Version;
 import com.alibaba.fastjson.JSONObject;
 import javafx.scene.layout.StackPane;
 
+import java.net.URL;
 import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.PathConfig;
@@ -31,8 +33,12 @@ public class CheckAppUpdateTask extends FetchAsDataTask {
     }
 
     @Override
-    protected String getRemotePath() {
-        return PathConfig.urlApi + "?type=queryVersion&cliVer=" + appVersion + "&source=" + sourceStr;
+    protected URL getRemotePath() {
+        return new StringUtils.URLStringBuilder(PathConfig.urlApi)
+                .addQuery("type", "queryVersion")
+                .addQuery("cliVer", appVersion.toString())
+                .addQuery("source", sourceStr)
+                .toURL();
     }
 
     @Override

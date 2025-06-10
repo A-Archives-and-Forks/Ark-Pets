@@ -3,8 +3,13 @@
  */
 package cn.harryh.arkpets.guitasks.requests;
 
+import cn.harryh.arkpets.utils.StringUtils;
 import com.alibaba.fastjson.JSONObject;
 import javafx.scene.layout.StackPane;
+
+import java.net.URL;
+
+import static cn.harryh.arkpets.Const.appName;
 
 
 public class McCheckModelsUpdateTask extends FetchAsDataTask {
@@ -21,8 +26,11 @@ public class McCheckModelsUpdateTask extends FetchAsDataTask {
     }
 
     @Override
-    protected String getRemotePath() {
-        return "https://mirrorchyan.com/api/resources/ArkModelsRepo/latest?cdk=" + cdk;
+    protected URL getRemotePath() {
+        return new StringUtils.URLStringBuilder("https://mirrorchyan.com/api/resources/ArkModelsRepo/latest")
+                .addQuery("cdk", cdk)
+                .addQuery("user_agent", appName + "Gui")
+                .toURL();
     }
 
     @Override

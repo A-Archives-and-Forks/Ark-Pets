@@ -8,6 +8,7 @@ import cn.harryh.arkpets.utils.Logger;
 import javafx.scene.layout.StackPane;
 
 import java.io.File;
+import java.net.URL;
 import java.nio.file.Files;
 
 import static cn.harryh.arkpets.Const.PathConfig;
@@ -46,9 +47,9 @@ public class DownloadModelsTask extends FetchAsFileTask {
     }
 
     @Override
-    protected String getRemotePath() {
+    protected URL getRemotePath() {
         selectedSource = SourceStrategy.getStrategy("ModelDownload").getBestSource();
-        return selectedSource.getUrl();
+        return selectedSource.toURL();
     }
 
     @Override

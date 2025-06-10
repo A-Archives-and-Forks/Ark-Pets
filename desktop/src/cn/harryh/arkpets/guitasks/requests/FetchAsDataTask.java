@@ -41,10 +41,10 @@ abstract public class FetchAsDataTask extends GuiTask {
         this(parent, style, contentLengthLimit, new int[0]);
     }
 
-    /** Returns the remote path from which the data will be fetched.
-     * @return The remote path to be fetched.
+    /** Returns the remote URL from which the data will be fetched.
+     * @return The remote URL to be fetched.
      */
-    abstract protected String getRemotePath();
+    abstract protected URL getRemotePath();
 
     /** Called when the data has been successfully fetched and parsed.
      * @param json The fetched data object, already parsed to JSON.
@@ -56,7 +56,7 @@ abstract public class FetchAsDataTask extends GuiTask {
         return new Task<>() {
             @Override
             protected Boolean call() throws Exception {
-                URL remoteURL = new URL(getRemotePath());
+                URL remoteURL = getRemotePath();
                 Logger.info("Network", "Fetching " + StringUtils.getMaskedURL(remoteURL));
 
                 this.updateMessage("正在尝试建立连接");

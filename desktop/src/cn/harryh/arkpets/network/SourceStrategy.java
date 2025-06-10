@@ -90,8 +90,12 @@ public class SourceStrategy {
             this.url = url;
         }
 
-        public String getUrl() {
-            return url;
+        public URL toURL() {
+            try {
+                return new URL(url);
+            } catch (Exception e) {
+                throw new RuntimeException("Invalid URL format: " + url, e);
+            }
         }
 
         public void receiveError() {
