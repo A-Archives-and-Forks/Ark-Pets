@@ -26,6 +26,11 @@ abstract public class FetchTask extends GuiTask {
     abstract protected URL getTargetURL();
 
     @Override
+    protected String getInitialContent() {
+        return "正在激活神经通路";
+    }
+
+    @Override
     protected void onFailed(Throwable e) {
         if (style != GuiTaskStyle.HIDDEN)
             GuiPrefabs.Dialogs.createErrorDialog(parent, e).show();

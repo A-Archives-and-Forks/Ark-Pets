@@ -80,7 +80,13 @@ public final class ProcessPool implements Executor {
 
     public record ProcessResult(int exitValue, long processId) {
         public boolean isSuccess() {
-            return exitValue() == 0;
+            return exitValue == 0;
+        }
+
+        public UnexpectedExitCodeException toException() {
+             if (isSuccess())
+                return null;
+            return new UnexpectedExitCodeException(exitValue, processId);
         }
     }
 

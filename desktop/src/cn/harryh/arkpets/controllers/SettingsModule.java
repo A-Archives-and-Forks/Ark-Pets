@@ -697,21 +697,32 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     }
 
     private void executeAppUpdate() {
-        assertDownloadSource(true, () -> new DownloadAppTask(app.body, GuiTask.GuiTaskStyle.COMMON) {
-            @Override
-            protected void onDownloadedFile(File file) {
-                Logger.info("Updater", "Closing all core instances");
-                HostTray.getInstance().forEachMemberTray(memberTray -> memberTray.sendOperation(SocketData.Operation.LOGOUT));
+        if (!StartupConfig.getInstance().isStartupAvailable()) {
+            // Maybe the user is not an installer user
+            Logger.warn("Updater", "Maybe auto update is not available");
+            GuiPrefabs.Dialogs.createConfirmDialog(app.body,
+                    GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_INFO_ALT, GuiPrefabs.COLOR_INFO),
+                    "自动更新不可用",
+                    "请您手动下载新版程序文件并进行安装",
+                    "您使用的似乎不是安装包版本的 ArkPets，或者您的系统环境存在限制，所以无法自动更新哦~ 是否前往 ArkPets 官网下载？",
+                    () -> app.popBrowser(PathConfig.urlDownload)).show();
+        } else {
+            assertDownloadSource(true, () -> new DownloadAppTask(app.body, GuiTask.GuiTaskStyle.COMMON) {
+                @Override
+                protected void onDownloadedFile(File file) {
+                    Logger.info("Updater", "Closing all core instances");
+                    HostTray.getInstance().forEachMemberTray(memberTray -> memberTray.sendOperation(SocketData.Operation.LOGOUT));
 
-                Logger.info("Updater", "Starting update task");
-                new AppInstallTask(app.body, GuiTaskStyle.COMMON, file) {
-                    @Override
-                    protected void onSucceeded(boolean result) {
-                        app.rootModule.exit();
-                    }
-                }.start();
-            }
-        }.start());
+                    Logger.info("Updater", "Starting update task");
+                    new AppInstallTask(app.body, GuiTaskStyle.COMMON, file) {
+                        @Override
+                        protected void onSucceeded(boolean result) {
+                            app.rootModule.exit();
+                        }
+                    }.start();
+                }
+            }.start());
+        }
     }
 
     private static void setProxy(String host, String port) {

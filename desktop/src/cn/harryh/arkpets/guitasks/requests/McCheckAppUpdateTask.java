@@ -10,7 +10,6 @@ import javafx.scene.layout.StackPane;
 import java.net.URL;
 
 import static cn.harryh.arkpets.Const.appName;
-import static cn.harryh.arkpets.Const.appVersion;
 
 
 public class McCheckAppUpdateTask extends FetchAsDataTask {
@@ -20,7 +19,7 @@ public class McCheckAppUpdateTask extends FetchAsDataTask {
     public McCheckAppUpdateTask(StackPane parent, GuiTaskStyle style, String cdk) {
         super(parent, style, new int[]{400, 403});
         this.cdk = cdk;
-        this.os = "win";  // Should be replaced with actual OS detection logic in higher version of ArkPets
+        this.os = "win"; // Should be replaced with actual OS detection logic in higher version of ArkPets
     }
 
     @Override
@@ -31,7 +30,6 @@ public class McCheckAppUpdateTask extends FetchAsDataTask {
     @Override
     protected URL getTargetURL() {
         return new StringUtils.URLStringBuilder("https://mirrorchyan.com/api/resources/ArkPetsApp/latest")
-                .addQuery("current_version", "v" + appVersion)
                 .addQuery("cdk", cdk)
                 .addQuery("user_agent", appName + "Gui")
                 .addQuery("os", os)
