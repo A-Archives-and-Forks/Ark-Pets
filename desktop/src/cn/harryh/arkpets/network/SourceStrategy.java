@@ -33,7 +33,7 @@ public class SourceStrategy {
         return setPrimarySource(new Source(name, url));
     }
 
-    public SourceStrategy unsetPrimarySource() {
+    public SourceStrategy clearPrimarySource() {
         primarySource = null;
         return this;
     }
@@ -45,6 +45,11 @@ public class SourceStrategy {
 
     public SourceStrategy addBackupSource(String name, String url) {
         return addBackupSource(new Source(name, url));
+    }
+    
+    public SourceStrategy clearBackupSource() {
+        backupSources.clear();
+        return this;
     }
 
     public Source getBestSource() {

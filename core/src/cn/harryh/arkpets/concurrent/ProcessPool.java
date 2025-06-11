@@ -48,23 +48,8 @@ public final class ProcessPool implements Executor {
         executorService.shutdown();
     }
 
-    public Future<ProcessResult> submit(Class<?> clazz, List<String> jvmArgs, List<String> args) {
+    public Future<ProcessResult> submit(List<String> command) {
         FutureTask<ProcessResult> task = new FutureTask<>(() -> {
-            // Attributes preparation
-            String javaHome = System.getProperty("java.home");
-            String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
-            String classpath = System.getProperty("java.class.path");
-            String className = clazz.getName();
-            // Command preparation
-            List<String> command = new ArrayList<>();
-            command.add(javaBin);
-            if (!jvmArgs.isEmpty())
-                command.addAll(jvmArgs);
-            command.add("-cp");
-            command.add(classpath);
-            command.add(className);
-            if (!args.isEmpty())
-                command.addAll(args);
             // Process execution
             ProcessBuilder builder = new ProcessBuilder(command);
             Process process = builder.inheritIO().start();
@@ -73,6 +58,23 @@ public final class ProcessPool implements Executor {
         });
         executorService.submit(task);
         return task;
+    }
+
+    public Future<ProcessResult> submit(Class<?> clazz, List<String> jvmArgs, List<String> args) {
+        // Attributes preparation
+        String javaHome = System.getProperty("java.home");
+        String javaBin = javaHome + File.separator + "bin" + File.separator + "java";
+        String classpath = System.getProperty("java.class.path");
+        String className = clazz.getName();
+        // Command preparation
+        List<String> command = new ArrayList<>();
+        command.add(javaBin);
+        command.addAll(jvmArgs);
+        command.add("-cp");
+        command.add(classpath);
+        command.add(className);
+        command.addAll(args);
+        return submit(command);
     }
 
 

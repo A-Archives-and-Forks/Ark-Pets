@@ -208,6 +208,7 @@ public final class RootModule implements Controller<ArkHomeFX> {
     /** Configures the basic network settings and fetches a regular check-app-up-date request from the ArkPets server.
      */
     public void configNetwork() {
+        SourceStrategy.registerStrategy("AppDownload");
         SourceStrategy.registerStrategy("ModelDownload")
                 .addBackupSource("GitHub", "https://github.com/isHarryh/Ark-Models/archive/refs/heads/main.zip")
                 .addBackupSource("GHProxy", "https://ghproxy.harryh.cn/https://github.com/isHarryh/Ark-Models/archive/refs/heads/main.zip");

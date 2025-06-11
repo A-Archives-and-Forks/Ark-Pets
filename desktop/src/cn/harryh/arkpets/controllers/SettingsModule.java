@@ -6,14 +6,19 @@ package cn.harryh.arkpets.controllers;
 import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.ArkHomeFX;
 import cn.harryh.arkpets.Const;
+import cn.harryh.arkpets.concurrent.SocketData;
+import cn.harryh.arkpets.guitasks.AppInstallTask;
 import cn.harryh.arkpets.guitasks.GuiTask;
 import cn.harryh.arkpets.guitasks.requests.CheckAppUpdateTask;
+import cn.harryh.arkpets.guitasks.requests.DownloadAppTask;
+import cn.harryh.arkpets.guitasks.requests.McCheckAppUpdateTask;
+import cn.harryh.arkpets.network.SourceStrategy;
+import cn.harryh.arkpets.network.api.McQueryVersion;
 import cn.harryh.arkpets.platform.StartupConfig;
-import cn.harryh.arkpets.utils.ArgPending;
-import cn.harryh.arkpets.utils.GuiComponents;
+import cn.harryh.arkpets.tray.HostTray;
+import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.utils.GuiComponents.*;
-import cn.harryh.arkpets.utils.GuiPrefabs;
-import cn.harryh.arkpets.utils.Logger;
+import com.alibaba.fastjson.JSONObject;
 import com.badlogic.gdx.graphics.Color;
 import com.jfoenix.controls.*;
 import javafx.application.Platform;
@@ -468,13 +473,60 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     }
 
     private void initAbout() {
-        aboutQueryUpdate.setOnMouseClicked  (e -> {
+        aboutQueryUpdate.setOnMouseClicked(e -> {
             /* Foreground check app update */
-            new CheckAppUpdateTask(app.body, GuiTask.GuiTaskStyle.COMMON, "manual").start();
+            new CheckAppUpdateTask(app.body, GuiTask.GuiTaskStyle.COMMON, "manual") {
+                @Override
+                protected void onHasNewStableVersion(Version stableVersion) {
+                    if (style == GuiTaskStyle.HIDDEN)
+                        return;
+                    JFXDialog dialog = GuiPrefabs.Dialogs.createConfirmDialog(app.body,
+                            GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_INFO_ALT, GuiPrefabs.COLOR_INFO),
+                            "检查软件更新",
+                            "检测到软件有新的版本！",
+                            "当前版本 " + appVersion + " 可更新到 " + stableVersion + "\n是否要现在进行更新？",
+                            () -> executeAppUpdate());
+                    JFXButton gotoButton = new JFXButton("访问官网");
+                    gotoButton.setOnAction(e -> app.popBrowser(PathConfig.urlDownload));
+                    GuiPrefabs.Dialogs.attachAction(dialog, gotoButton, 0);
+                    dialog.show();
+                }
+
+                @Override
+                protected void onUpToDated(Version stableVersion) {
+                    if (style == GuiTaskStyle.HIDDEN)
+                        return;
+                    JFXDialog dialog = GuiPrefabs.Dialogs.createCommonDialog(app.body,
+                            GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_SUCCESS_ALT, GuiPrefabs.COLOR_SUCCESS),
+                            "检查软件更新",
+                            "尚未发现新的正式版本。",
+                            "当前版本 " + appVersion + " 已是最新",
+                            null);
+                    JFXButton forceBtn = new JFXButton("强制重装");
+                    forceBtn.setOnAction(e -> {
+                        executeAppUpdate();
+                        GuiPrefabs.Dialogs.disposeDialog(dialog);
+                    });
+                    GuiPrefabs.Dialogs.attachAction(dialog, forceBtn, 0);
+                    dialog.show();
+                }
+
+                @Override
+                protected void onAPIFailed() {
+                    if (style == GuiTaskStyle.HIDDEN)
+                        return;
+                    GuiPrefabs.Dialogs.createCommonDialog(parent,
+                            GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_DANGER, GuiPrefabs.COLOR_DANGER),
+                            "检查软件更新",
+                            "服务器返回了无效的消息。",
+                            "可能是兼容性问题或服务器不可用。\n您可以访问ArkPets官网或GitHub仓库以查看是否有新版本。",
+                            null).show();
+                }
+            }.start();
         });
-        aboutVisitWebsite.setOnMouseClicked (e -> app.popBrowser(Const.PathConfig.urlOfficial));
-        aboutReadme.setOnMouseClicked       (e -> app.popBrowser(Const.PathConfig.urlReadme));
-        aboutGitHub.setOnMouseClicked       (e -> app.popBrowser(Const.PathConfig.urlLicense));
+        aboutVisitWebsite.setOnMouseClicked(e -> app.popBrowser(Const.PathConfig.urlOfficial));
+        aboutReadme.setOnMouseClicked(e -> app.popBrowser(Const.PathConfig.urlReadme));
+        aboutGitHub.setOnMouseClicked(e -> app.popBrowser(Const.PathConfig.urlLicense));
     }
 
     private void initNoticeBox() {
@@ -496,12 +548,12 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
 
             @Override
             protected String getText() {
-                return "ArkPets 有新版本可用！点击此处前往下载~";
+                return "ArkPets 有新版本可用！点击此处进行更新~";
             }
 
             @Override
             protected void onClick(MouseEvent event) {
-                app.popBrowser(Const.PathConfig.urlDownload);
+                executeAppUpdate();
             }
         };
         diskFreeSpaceNotice = new NoticeBar(noticeBox) {
@@ -608,6 +660,58 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         ss.setPeriod(new Duration(5000));
         ss.setRestartOnFailure(true);
         ss.start();
+    }
+
+    private void assertDownloadSource(boolean doDoubleCheck, Runnable onDone) {
+        SourceStrategy.getStrategy("AppDownload").clearPrimarySource();
+        String cdk;
+        if ((cdk = app.config.getMcCdk()) != null) {
+            Logger.debug("Updater", "Attempting using CDK to fetch resource");
+            new McCheckAppUpdateTask(app.body, GuiTask.GuiTaskStyle.STRICT, cdk) {
+                @Override
+                protected void onReceivedData(JSONObject json) {
+                    McQueryVersion value = json.toJavaObject(McQueryVersion.class);
+                    try {
+                        value.raiseForCode();
+                        SourceStrategy.getStrategy("AppDownload").setPrimarySource("MirrorChyan", value.data.url);
+
+                        Logger.info("Updater", "CDK assertion passed");
+                        if (onDone != null)
+                            onDone.run();
+                    } catch (McQueryVersion.McException e) {
+                        Logger.warn("Updater", "CDK assertion not passed, " + e.getMessage());
+                        if (doDoubleCheck)
+                            app.dialogs.popDialog("downloadDialog", (Runnable) () -> assertDownloadSource(false, onDone));
+                        else if (onDone != null)
+                            onDone.run();
+                    }
+                }
+            }.start();
+        } else {
+            Logger.info("Updater", "CDK assertion not passed due to not set");
+            if (doDoubleCheck)
+                app.dialogs.popDialog("downloadDialog", (Runnable) () -> assertDownloadSource(false, onDone));
+            else if (onDone != null)
+                onDone.run();
+        }
+    }
+
+    private void executeAppUpdate() {
+        assertDownloadSource(true, () -> new DownloadAppTask(app.body, GuiTask.GuiTaskStyle.COMMON) {
+            @Override
+            protected void onDownloadedFile(File file) {
+                Logger.info("Updater", "Closing all core instances");
+                HostTray.getInstance().forEachMemberTray(memberTray -> memberTray.sendOperation(SocketData.Operation.LOGOUT));
+
+                Logger.info("Updater", "Starting update task");
+                new AppInstallTask(app.body, GuiTaskStyle.COMMON, file) {
+                    @Override
+                    protected void onSucceeded(boolean result) {
+                        app.rootModule.exit();
+                    }
+                }.start();
+            }
+        }.start());
     }
 
     private static void setProxy(String host, String port) {

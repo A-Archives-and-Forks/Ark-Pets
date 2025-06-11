@@ -714,7 +714,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     }
 
     private void assertDownloadSource(boolean doDoubleCheck, Runnable onDone) {
-        SourceStrategy.getStrategy("ModelDownload").unsetPrimarySource();
+        SourceStrategy.getStrategy("ModelDownload").clearPrimarySource();
         String cdk;
         if ((cdk = app.config.getMcCdk()) != null) {
             Logger.debug("ModelManager", "Attempting using CDK to fetch resource");
