@@ -106,11 +106,11 @@ public class ArkConfig implements Serializable {
     public boolean      render_enable_mipmap;
     /** @since ArkPets 3.3 */ @JSONField(defaultValue = "1")
     public int          render_outline;
-    /** @since ArkPets 3.3 */ @JSONField(defaultValue = "#FFBB00FF")
+    /** @since ArkPets 3.3 */ @JSONField(defaultValue = "#FFFF00FF")
     public String       render_outline_color;
     /** @since ArkPets 3.9 */ @JSONField(defaultValue = "3")
     public int       render_outline_emphasis;
-    /** @since ArkPets 3.9 */ @JSONField(defaultValue = "#00FFFFFF")
+    /** @since ArkPets 3.9 */ @JSONField(defaultValue = "#FFBB00FF")
     public String          render_outline_emphasis_color;
     /** @since ArkPets 3.3 */ @JSONField(defaultValue = "2.0")
     public float        render_outline_width;
@@ -169,6 +169,7 @@ public class ArkConfig implements Serializable {
     /** Sets the MirrorChyan CDK.
      * @param string The CDK to set. If the string is {@code null} or empty, the CDK will be cleared.
      */
+    @JSONField(deserialize = false)
     public void setMcCdk(String string) throws GeneralSecurityException {
         if (string != null && !string.isEmpty()) {
             try {
