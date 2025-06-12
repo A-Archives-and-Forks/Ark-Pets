@@ -4,12 +4,10 @@
 package cn.harryh.arkpets.guitasks.requests;
 
 import cn.harryh.arkpets.network.SourceStrategy;
-import cn.harryh.arkpets.utils.Logger;
 import javafx.scene.layout.StackPane;
 
 import java.io.File;
 import java.net.URL;
-import java.nio.file.Files;
 
 import static cn.harryh.arkpets.Const.PathConfig;
 
@@ -18,15 +16,8 @@ public class DownloadModelsTask extends FetchAsFileTask {
     private SourceStrategy.Source selectedSource;
 
     public DownloadModelsTask(StackPane parent, GuiTaskStyle style) {
-        super(parent, style, PathConfig.tempModelsZipCachePath);
+        super(parent, style, PathConfig.tempDirPath);
         selectedSource = null;
-
-        try {
-            Files.createDirectories(new File(PathConfig.tempDirPath).toPath());
-        } catch (Exception e) {
-            Logger.warn("Task", "Failed to create temp dir.");
-            throw new RuntimeException(e);
-        }
     }
 
     @Override

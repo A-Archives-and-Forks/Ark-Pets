@@ -57,7 +57,8 @@ abstract public class FetchAsDataTask extends FetchTask {
                 this.updateMessage("正在尝试建立连接");
                 HttpsURLConnection connection = Connections.createHttpsConnection(remoteURL);
                 Connections.raiseForStatus(connection, forgiveCodes);
-                long max = connection.getContentLengthLong();
+
+                long fullSize = connection.getContentLengthLong();
                 response.reset();
 
                 Connections.Recorder recorder = new Connections.Recorder() {
@@ -75,9 +76,11 @@ abstract public class FetchAsDataTask extends FetchTask {
                             Logger.error("Network", "Exceeded content length limit, size: " + total);
                             throw new IOException("Exceeded content length limit");
                         }
-                        updateMessage("当前已下载：" + getTotalBytesString() + (getBytesPerSecondString().equals("0") ?
-                                "" : " (" + getBytesPerSecondString() + "/s)"));
-                        updateProgress(getTotalBytes(), max);
+                        String bps = getBytesPerSecondString();
+                        updateMessage("当前已下载：" +
+                                getTotalBytesString() +
+                                ("0".equals(bps) ? "" : " (" + bps + "/s)"));
+                        updateProgress(getTotalBytes(), fullSize);
                     }
                 };
 

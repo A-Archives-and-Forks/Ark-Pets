@@ -10,6 +10,8 @@ import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static cn.harryh.arkpets.Const.httpBufferSizeDefault;
 import static cn.harryh.arkpets.Const.httpTimeoutDefault;
@@ -116,6 +118,29 @@ public class Connections {
            if (code == forgiveCode)
                return;
        throw new HttpStatusCodeException(connection);
+    }
+
+    /** Extracts the suggested download file name from the response header.
+     * @param connection The connection instance to extract file name.
+     * @return The suggested file name, or {@code null} if not found.
+     */
+    public static String extractDownloadFilename(HttpURLConnection connection) {
+        String disposition = connection.getHeaderField("Content-Disposition");
+        if (disposition != null) {
+            Matcher m = Pattern.compile("filename=\"?([^\"]+)\"?").matcher(disposition);
+            return m.find() ? m.group(1) : null;
+        }
+        return null;
+    }
+
+    /** Extracts the suggested download file name from the response header, or returns a default value if not found.
+     * @param connection The connection instance to extract file name.
+     * @param defaultValue The default value to return if no file name is found.
+     * @return The suggested file name, or the given default value if not found.
+     */
+    public static String extractDownloadFilename(HttpURLConnection connection, String defaultValue) {
+        String fileName = extractDownloadFilename(connection);
+        return fileName != null && !fileName.isBlank() ? fileName : defaultValue;
     }
 
     private static InputStream getInputStreamOrErrorStream(HttpURLConnection connection) {
