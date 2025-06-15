@@ -38,6 +38,13 @@ abstract public class Behavior {
         idxRec = 0;
     }
 
+    /** Checks whether the random animation is expired or empty.
+     * @return True if expired or empty, false otherwise.
+     */
+    public final boolean isAutoAnimExpired() {
+        return actionAutoGetter.isExpiredOrEmpty();
+    }
+
     /** Gets a random animation.
      * @return AnimData object.
      */

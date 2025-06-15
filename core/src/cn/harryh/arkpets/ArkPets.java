@@ -139,18 +139,28 @@ public class ArkPets extends InputApplicationAdaptor {
 
         // 2.Select a new animation.
         AnimData newAnim;
-        if (tray.keepAnim == null) newAnim = behavior.autoAnim(); // AI anim.
-        else newAnim = tray.keepAnim;
+        if (tray.keepAnim == null) {
+            if (behavior.isAutoAnimExpired()) {
+                newAnim = behavior.autoAnim(); // AI anim.
+            } else {
+                newAnim = null;
+            }
+        } else {
+            newAnim = tray.keepAnim;
+        }
+
         if (!isMouseDragging()) { // If no dragging:
             plane.updatePosition(Gdx.graphics.getDeltaTime());
             if (cha.getPlaying().mobility() != 0) {
-                if (tray.keepAnim == null && willReachBorder(cha.getPlaying().mobility())) {
+                int mobility = cha.getPlaying().mobility();
+                if (tray.keepAnim == null && willReachBorder(mobility)) {
                     // Turn around if auto-walk cause the collision from screen border.
                     newAnim = cha.getPlaying();
-                    newAnim = new AnimData(newAnim.animClip(), null, newAnim.isLoop(), newAnim.isStrict(), -newAnim.mobility());
+                    mobility = -mobility;
+                    newAnim = new AnimData(newAnim.animClip(), null, newAnim.isLoop(), newAnim.isStrict(), mobility);
                     tray.keepAnim = tray.keepAnim == null ? null : newAnim;
                 }
-                walkWindow(config.behavior_walk_speed * (isCtrlPressed() ? 2 : 1) * cha.getPlaying().mobility());
+                walkWindow(config.behavior_walk_speed * (isCtrlPressed() ? 2 : 1) * mobility);
             }
         } else { // If dragging:
             newAnim = behavior.dragging();

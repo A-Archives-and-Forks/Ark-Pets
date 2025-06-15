@@ -46,6 +46,14 @@ public abstract class Cached<T> {
         return cachedValue;
     }
 
+    /** Checks whether the cache is either expired or empty.
+     * @return True if expired or empty, false otherwise.
+     */
+    public boolean isExpiredOrEmpty() {
+        long cacheAgeNanos = (long) (cacheAge() * 1_000_000_000L);
+        return cacheEmpty || System.nanoTime() > cacheAgeNanos + cacheNanoTime;
+    }
+
     /** Resets the cache immediately.
      */
     public final void reset() {
