@@ -615,10 +615,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
 
                     @Override
                     protected String getContent() {
-                        int maxHz = -1;
-                        for (ArkConfig.Monitor i : ArkConfig.Monitor.getMonitors())
-                            if (i.hz > maxHz)
-                                maxHz = i.hz;
+                        int maxHz = Monitor.getMaxRefreshRate();
                         return "您设置的最大帧率超过了您的显示器的最大刷新率（" + maxHz + " Hz），因此实际帧率并不会得到提高。";
                     }
                 };
@@ -628,10 +625,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
             protected boolean getEntranceVisibleCondition() {
                 int configHz = configDisplayFps.getValue() == null ?
                         app.config.display_fps : configDisplayFps.getValue().value();
-                int maxHz = -1;
-                for (ArkConfig.Monitor i : ArkConfig.Monitor.getMonitors())
-                    if (i.hz > maxHz)
-                        maxHz = i.hz;
+                int maxHz = Monitor.getMaxRefreshRate();
                 return configHz > maxHz;
             }
         };

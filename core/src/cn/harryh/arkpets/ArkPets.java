@@ -11,10 +11,7 @@ import cn.harryh.arkpets.platform.HWndCtrl;
 import cn.harryh.arkpets.platform.WindowSystem;
 import cn.harryh.arkpets.transitions.TransitionVector2;
 import cn.harryh.arkpets.tray.MemberTrayImpl;
-import cn.harryh.arkpets.utils.Cached;
-import cn.harryh.arkpets.utils.InputApplicationAdaptor;
-import cn.harryh.arkpets.utils.Logger;
-import cn.harryh.arkpets.utils.Plane;
+import cn.harryh.arkpets.utils.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
@@ -103,10 +100,10 @@ public class ArkPets extends InputApplicationAdaptor {
         plane.setFrict(config.physic_air_friction_acc, config.physic_static_friction_acc);
         plane.setObjSize(cha.camera.getWidth(), cha.camera.getHeight());
         plane.setSpeedLimit(config.physic_speed_limit_x, config.physic_speed_limit_y);
-        ArkConfig.Monitor primaryMonitor = refreshMonitorInfo();
+        Monitor primaryMonitor = refreshMonitorInfo();
         plane.changePosition(0,
-                primaryMonitor.size[0] * config.initial_position_x - cha.camera.getWidth() / 2f,
-                -(primaryMonitor.size[1] * config.initial_position_y + cha.camera.getHeight())
+                primaryMonitor.getWidth() * config.initial_position_x - cha.camera.getWidth() / 2f,
+                -(primaryMonitor.getHeight() * config.initial_position_y + cha.camera.getHeight())
         );
 
         // 4.Window position setup
@@ -443,24 +440,24 @@ public class ArkPets extends InputApplicationAdaptor {
         return config.window_style_topmost ? minWindow : null; // Return the last peer window.
     }
 
-    private ArkConfig.Monitor refreshMonitorInfo() {
-        ArkConfig.Monitor[] monitors = ArkConfig.Monitor.getMonitors();
-        if (monitors.length == 0) {
+    private Monitor refreshMonitorInfo() {
+        List<Monitor> monitors = Monitor.getMonitors();
+        if (monitors.isEmpty()) {
             Logger.error("App", "Failed to get monitors information since no monitor has been found");
             throw new RuntimeException("Failed to refresh monitors config.");
         }
         plane.world.clear();
         boolean flag = true;
-        for (ArkConfig.Monitor i : monitors) {
+        for (Monitor m : monitors) {
             if (!flag) break;
             flag = config.display_multi_monitors;
-            float left = i.virtual[0];
-            float right = left + i.size[0];
-            float top = -i.virtual[1];
-            float bottom = top - i.size[1] + config.display_margin_bottom;
+            float left = m.getVirtualX();
+            float right = left + m.getWidth();
+            float top = -m.getVirtualY();
+            float bottom = top - m.getHeight() + config.display_margin_bottom;
             plane.world.add(new Plane.RectArea(left, right, top, bottom));
         }
-        return monitors[0];
+        return monitors.get(0); // Return the primary monitor.
     }
 
     /* WINDOW WALKING RELATED */

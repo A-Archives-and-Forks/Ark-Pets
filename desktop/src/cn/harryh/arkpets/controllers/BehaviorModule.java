@@ -10,6 +10,7 @@ import cn.harryh.arkpets.transitions.EasingFunction;
 import cn.harryh.arkpets.utils.GuiComponents.*;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.utils.Monitor;
 import com.jfoenix.controls.*;
 import javafx.application.Platform;
 import javafx.concurrent.ScheduledService;
@@ -345,7 +346,7 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
                     }
                 };
                 task.setOnSucceeded(e ->
-                        configDeployMultiMonitorsStatus.setText("检测到 " + ArkConfig.Monitor.getMonitors().length + " 个显示屏"));
+                        configDeployMultiMonitorsStatus.setText("检测到 " + Monitor.getMonitors().size() + " 个显示屏"));
                 return task;
             }
         };
