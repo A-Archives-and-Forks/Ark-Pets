@@ -10,15 +10,25 @@
 | [`#126`]<br>[`b874313`]             | 新增了可以调整桌宠的行走速度的功能。                                                                  |
 | [`#67`]<br>[`ec1f6dd`]              | 新增了可以在启动器内**直接更新软件**的功能。                                                            |
 
-| **修复**                  |                                                  |
-|:------------------------|:-------------------------------------------------|
-| [`#126`]<br>[`51b7806`] | 修复了在特定情况下，桌宠在被鼠标拖拽后会原地消失的问题。                     |
+| **修复**                  |                              |
+|:------------------------|:-----------------------------|
+| [`#126`]<br>[`51b7806`] | 修复了在特定情况下，桌宠在被鼠标拖拽后会原地消失的问题。 |
 
 | **优化**                                 |                                  |
 |:---------------------------------------|:---------------------------------|
 | [`#125`]<br>[`e0f2dce`]                | 优化了日志模块的安全性，现在采用的是 reload4j 日志库。 |
 | [`#113`]<br>[`4d35feb`]<br>[`f6a9c64`] | 优化了桌宠输入控制模块的代码逻辑。                |
 | [`f5b0d9e`]<br>[`601f522`]             | 优化了网络模块的代码逻辑。                    |
+
+| **补丁**                                 |                            |
+|:---------------------------------------|:---------------------------|
+| `v3.9.1`<br>[`76464f9`]                | 修复了桌宠在行走到屏幕边缘时会频繁翻转的问题。    |
+| `v3.9.1`<br>[`e7e0ac3`]<br>[`c4e0f40`] | 修复了桌宠所处的显示器断开连接时，桌宠会消失的问题。 |
+
+
+[`76464f9`]: https://github.com/isHarryh/Ark-Pets/commit/76464f9a7db59428ef547c99400fb51170179648
+[`e7e0ac3`]: https://github.com/isHarryh/Ark-Pets/commit/e7e0ac340ce679b5efa4ed3d8ec685492ef29ae7
+[`c4e0f40`]: https://github.com/isHarryh/Ark-Pets/commit/c4e0f40638bed4e2a30d6c59209899559b988a53
 
 ## v3.8
 | **新增**                  |                                                        |
@@ -638,3 +648,6 @@
 [`51b7806`]: https://github.com/isHarryh/Ark-Pets/commit/51b7806ba9715344ecaeeef675b1735d7e4a39d2
 [`b874313`]: https://github.com/isHarryh/Ark-Pets/commit/b874313bd5e58d8ef9110f93b81b202dbddb6292
 [`ec1f6dd`]: https://github.com/isHarryh/Ark-Pets/commit/ec1f6ddba6712a5c96d0f72d51008024dbe5bc84
+[`76464f9`]: https://github.com/isHarryh/Ark-Pets/commit/76464f9a7db59428ef547c99400fb51170179648
+[`e7e0ac3`]: https://github.com/isHarryh/Ark-Pets/commit/e7e0ac340ce679b5efa4ed3d8ec685492ef29ae7
+[`c4e0f40`]: https://github.com/isHarryh/Ark-Pets/commit/c4e0f40638bed4e2a30d6c59209899559b988a53
