@@ -16,7 +16,8 @@ import java.util.List;
 
 public class AppInstallTask extends GuiTask {
     protected static final int PRE_DELAY = 500;
-    protected static final int POST_DELAY = 5000;
+    protected static final int WAIT_DELAY = 5000;
+    protected static final int POST_DELAY = 500;
 
     protected final File pack;
 
@@ -35,7 +36,7 @@ public class AppInstallTask extends GuiTask {
         return new Task<>() {
             @Override
             protected Boolean call() throws Exception {
-                // Use thread sleep here to ensure the dialog is shown
+                // Pre delay
                 this.updateMessage("正在准备");
                 this.updateProgress(0, 1);
                 Thread.sleep(PRE_DELAY);
@@ -44,15 +45,14 @@ public class AppInstallTask extends GuiTask {
                 List<String> command;
                 if (pack.isFile() && pack.canExecute() && pack.getName().toLowerCase().endsWith(".exe")) {
                     // Windows only
-                    Logger.info("Updater", "Installing app from: " + pack.getAbsolutePath());
+                    Logger.info("Updater", "Ready to install app from: " + pack.getAbsolutePath());
                     command = List.of(
                             "cmd.exe",
                             "/c",
                             pack.getAbsolutePath(),
                             "/SILENT",
                             "/NOCANCEL",
-                            "/FORCECLOSEAPPLICATIONS",
-                            "/RESTARTAPPLICATIONS"
+                            "/FORCECLOSEAPPLICATIONS"
                     );
                 } else {
                     Logger.error("Updater", "File not found or invalid: " + pack.getAbsolutePath());
@@ -60,15 +60,24 @@ public class AppInstallTask extends GuiTask {
                 }
 
                 // Use countdown to notify the user that the installation is about to start
-                int interval = 10;
-                for (long i = POST_DELAY; i >= 0; i -= interval) {
-                    this.updateMessage("将在 " + (int) Math.ceil(i / 1000.0) + " 秒后开始安装\n安装完成后您可重新打开程序");
-                    this.updateProgress(POST_DELAY - i, POST_DELAY);
+                int interval = 20;
+                for (long i = WAIT_DELAY; i >= 0; i -= interval) {
+                    this.updateMessage("将在 " + (int) Math.ceil(i / 1000.0) + " 秒后开始安装");
+                    this.updateProgress(WAIT_DELAY - i, WAIT_DELAY);
                     Thread.sleep(interval);
+                    if (this.isCancelled())
+                        return false;
                 }
 
                 // Execute the installation command
+                Logger.info("Updater", "Executing installation command");
                 ProcessPool.getInstance().submit(command);
+
+                // Post delay
+                this.updateMessage("正在安装，请耐心等待...");
+                this.updateProgress(1, 1);
+                Thread.sleep(POST_DELAY);
+
                 return this.isDone() && !this.isCancelled();
             }
         };

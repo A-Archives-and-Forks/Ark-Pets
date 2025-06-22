@@ -711,7 +711,8 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                     new AppInstallTask(app.body, GuiTaskStyle.COMMON, file) {
                         @Override
                         protected void onSucceeded(boolean result) {
-                            app.rootModule.exit();
+                            Logger.info("Launcher", "Updater close request");
+                            GuiPrefabs.fadeOutWindow(app.stage, durationNormal, e -> Platform.exit());
                         }
                     }.start();
                 }
