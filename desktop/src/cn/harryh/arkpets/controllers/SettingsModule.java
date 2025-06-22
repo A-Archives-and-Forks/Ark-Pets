@@ -691,7 +691,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     }
 
     private void executeAppUpdate() {
-        if (!StartupConfig.getInstance().isStartupAvailable()) {
+        if (!StartupConfig.getInstance().isAutoUpdateAvailable()) {
             // Maybe the user is not an installer user
             Logger.warn("Updater", "Maybe auto update is not available");
             GuiPrefabs.Dialogs.createConfirmDialog(app.body,

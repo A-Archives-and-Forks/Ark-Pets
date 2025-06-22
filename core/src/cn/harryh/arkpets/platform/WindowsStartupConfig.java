@@ -26,6 +26,7 @@ public class WindowsStartupConfig extends StartupConfig {
     private static final String startupTarget    = "ArkPets.exe";
     private static final String startupShortcut  = "ArkPetsStartup.lnk";
     private static final String oldStartupScript = "ArkPetsStartupService.vbs";
+    private static final String uninstallTarget  = "unins000.exe";
 
     public WindowsStartupConfig() {
         try {
@@ -95,6 +96,11 @@ public class WindowsStartupConfig extends StartupConfig {
     @Override
     public boolean isStartupAvailable() {
         return this.available;
+    }
+
+    @Override
+    public boolean isAutoUpdateAvailable() {
+        return new File(startupTarget).isFile() && new File(uninstallTarget).isFile();
     }
 
     private static class IPersistFile extends Unknown {

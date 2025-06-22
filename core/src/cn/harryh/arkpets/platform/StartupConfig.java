@@ -33,4 +33,8 @@ public abstract class StartupConfig {
     /** Returns true if auto-startup is available.
      */
     public abstract boolean isStartupAvailable();
+
+    /** Returns true if auto-update is available.
+     */
+    public abstract boolean isAutoUpdateAvailable();
 }
