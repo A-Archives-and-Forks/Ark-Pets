@@ -24,11 +24,8 @@
 |:---------------------------------------|:---------------------------|
 | `v3.9.1`<br>[`76464f9`]                | 修复了桌宠在行走到屏幕边缘时会频繁翻转的问题。    |
 | `v3.9.1`<br>[`e7e0ac3`]<br>[`c4e0f40`] | 修复了桌宠所处的显示器断开连接时，桌宠会消失的问题。 |
-
-
-[`76464f9`]: https://github.com/isHarryh/Ark-Pets/commit/76464f9a7db59428ef547c99400fb51170179648
-[`e7e0ac3`]: https://github.com/isHarryh/Ark-Pets/commit/e7e0ac340ce679b5efa4ed3d8ec685492ef29ae7
-[`c4e0f40`]: https://github.com/isHarryh/Ark-Pets/commit/c4e0f40638bed4e2a30d6c59209899559b988a53
+| `v3.9.2`<br>[`cd34faa`]                | 修复了软件内更新可以被 zip 版本用户触发的问题。 |
+| `v3.9.2`<br>[`5294d91`]                | 修复了软件内更新完成后，程序未重启的问题。      |
 
 ## v3.8
 | **新增**                  |                                                        |
@@ -651,3 +648,8 @@
 [`76464f9`]: https://github.com/isHarryh/Ark-Pets/commit/76464f9a7db59428ef547c99400fb51170179648
 [`e7e0ac3`]: https://github.com/isHarryh/Ark-Pets/commit/e7e0ac340ce679b5efa4ed3d8ec685492ef29ae7
 [`c4e0f40`]: https://github.com/isHarryh/Ark-Pets/commit/c4e0f40638bed4e2a30d6c59209899559b988a53
+[`76464f9`]: https://github.com/isHarryh/Ark-Pets/commit/76464f9a7db59428ef547c99400fb51170179648
+[`e7e0ac3`]: https://github.com/isHarryh/Ark-Pets/commit/e7e0ac340ce679b5efa4ed3d8ec685492ef29ae7
+[`c4e0f40`]: https://github.com/isHarryh/Ark-Pets/commit/c4e0f40638bed4e2a30d6c59209899559b988a53
+[`cd34faa`]: https://github.com/isHarryh/Ark-Pets/commit/cd34faaee325ebb31d29ccfe4dfa3c766cdd634d
+[`5294d91`]: https://github.com/isHarryh/Ark-Pets/commit/5294d918451c4d3421cb9fc10110fa01f77d21bc
