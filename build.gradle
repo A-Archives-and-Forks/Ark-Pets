@@ -9,7 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "org.openjfx:javafx-plugin:0.0.13"
+        classpath "org.openjfx:javafx-plugin:0.1.0"
     }
 }
 
@@ -19,7 +19,7 @@ allprojects {
     apply plugin: "java-library"
     apply plugin: "org.openjfx.javafxplugin"
 
-    version = "3.9.1"
+    version = "3.9.2"
     ext {
         // App Metadata
         appName = "ArkPets"
@@ -30,7 +30,7 @@ allprojects {
         // Prefabs
         gdxVersion = "1.11.0"
         jnaVersion = "5.12.1"
-        javaFXVersion = "17.0.8"
+        javaFXVersion = "17.0.15"
     }
 
     repositories {
