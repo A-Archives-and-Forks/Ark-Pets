@@ -49,29 +49,13 @@ public class ArkPets extends InputApplicationAdaptor {
     public ArkPets(String title) {
         APP_TITLE = title;
 
-        hWndTopmostGetter = new Cached<>() {
-            @Override
-            protected HWndCtrl produce() {
-                return refreshWindowIndex();
-            }
+        hWndTopmostGetter = new Cached<>();
+        hWndTopmostGetter.setValueProducer(this::refreshWindowIndex);
+        hWndTopmostGetter.setCacheAgeProducer(() -> 4.0 / getReducedFPS());
 
-            @Override
-            protected double cacheAge() {
-                return 4.0 / getReducedFPS();
-            }
-        };
-
-        isFocused = new Cached<>() {
-            @Override
-            protected Boolean produce() {
-                return hWndMine.isForeground();
-            }
-
-            @Override
-            protected double cacheAge() {
-                return 4.0 / getReducedFPS();
-            }
-        };
+        isFocused = new Cached<>();
+        isFocused.setValueProducer(() -> hWndMine.isForeground());
+        isFocused.setCacheAgeProducer(() -> 4.0 / getReducedFPS());
     }
 
     @Override

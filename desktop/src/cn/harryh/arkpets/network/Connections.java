@@ -166,30 +166,15 @@ public class Connections {
             if (bufferSize <= 0 || maxRecords <= 0)
                 throw new IllegalArgumentException("bufferSize and maxRecords should be positive.");
 
-            this.bufferNanoTimes = new long[maxRecords];
             this.bufferSize = bufferSize;
-            this.cachedBps = new Cached<>() {
-                @Override
-                protected String produce() {
-                    return StringUtils.getFormattedSizeString(getBytesPerSecond());
-                }
+            bufferNanoTimes = new long[maxRecords];
 
-                @Override
-                protected double cacheAge() {
-                    return bpsCacheAge;
-                }
-            };
-            this.cachedTb = new Cached<>() {
-                @Override
-                protected String produce() {
-                    return StringUtils.getFormattedSizeString(getTotalBytes());
-                }
-
-                @Override
-                protected double cacheAge() {
-                    return tbCacheAge;
-                }
-            };
+            cachedBps = new Cached<>();
+            cachedBps.setValueProducer(() -> StringUtils.getFormattedSizeString(getBytesPerSecond()));
+            cachedBps.setCacheAge(bpsCacheAge);
+            cachedTb = new Cached<>();
+            cachedTb.setValueProducer(() -> StringUtils.getFormattedSizeString(getTotalBytes()));
+            cachedTb.setCacheAge(tbCacheAge);
         }
 
         public Recorder() {

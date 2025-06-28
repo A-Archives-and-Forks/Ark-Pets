@@ -22,19 +22,12 @@ abstract public class Behavior {
     public Behavior(AnimClipGroup animList) {
         actionList = null;
         this.animList = animList;
-        actionAutoGetter = new Cached<>() {
-            @Override
-            protected AnimData produce() {
-                return getRandomAction();
-            }
-
-            @Override
-            protected double cacheAge() {
-                if (getCachedValue() == null)
-                    return minAnimCacheAge;
-                return Math.max(minAnimCacheAge, getCachedValue().animClip().duration);
-            }
-        };
+        actionAutoGetter = new Cached<>();
+        actionAutoGetter.setValueProducer(this::getRandomAction);
+        actionAutoGetter.setCacheAgeProducer(() -> {
+            AnimData cache = actionAutoGetter.getCachedValue();
+            return cache == null ? minAnimCacheAge : Math.max(minAnimCacheAge, cache.animClip().duration);
+        });
         idxRec = 0;
     }
 
@@ -42,7 +35,7 @@ abstract public class Behavior {
      * @return True if expired or empty, false otherwise.
      */
     public final boolean isAutoAnimExpired() {
-        return actionAutoGetter.isExpiredOrEmpty();
+        return actionAutoGetter.isExpired();
     }
 
     /** Gets a random animation.
