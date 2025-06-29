@@ -14,6 +14,7 @@ import cn.harryh.arkpets.tray.MemberTrayImpl;
 import cn.harryh.arkpets.utils.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -100,7 +101,7 @@ public class ArkPets extends InputApplicationAdaptor {
 
         // 5.Window style setup
         hWndMine = WindowSystem.findWindow(null, APP_TITLE);
-        hWndMine.setLayered(true);
+        hWndMine.attachGLFWWindow((Lwjgl3Graphics) Gdx.graphics);
         if (config.window_style_topmost)
             hWndMine.setTopmost(true);
         updateWindow();

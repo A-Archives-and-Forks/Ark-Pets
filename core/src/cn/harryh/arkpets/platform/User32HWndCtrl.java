@@ -96,27 +96,11 @@ public class User32HWndCtrl extends HWndCtrl {
     }
 
     @Override
-    public void setLayered(boolean enable) {
-        if (enable)
-            setWindowExStyle(getWindowExStyle() | User32HWndCtrl.WS_EX_LAYERED);
-        else
-            setWindowExStyle(getWindowExStyle() & ~User32HWndCtrl.WS_EX_LAYERED);
-    }
-
-    @Override
     public void setTopmost(boolean enable) {
         if (enable)
             setWindowExStyle(getWindowExStyle() | User32HWndCtrl.WS_EX_TOPMOST);
         else
             setWindowExStyle(getWindowExStyle() & ~User32HWndCtrl.WS_EX_TOPMOST);
-    }
-
-    @Override
-    public void setTransparent(boolean enable) {
-        if (enable)
-            setWindowExStyle(getWindowExStyle() | User32HWndCtrl.WS_EX_TRANSPARENT);
-        else
-            setWindowExStyle(getWindowExStyle() & ~User32HWndCtrl.WS_EX_TRANSPARENT);
     }
 
     @Override

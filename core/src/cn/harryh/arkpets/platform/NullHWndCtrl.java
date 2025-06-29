@@ -42,15 +42,7 @@ public class NullHWndCtrl extends HWndCtrl {
     }
 
     @Override
-    public void setLayered(boolean enable) {
-    }
-
-    @Override
     public void setTopmost(boolean enable) {
-    }
-
-    @Override
-    public void setTransparent(boolean enable) {
     }
 
     @Override
