@@ -40,6 +40,8 @@ public class ArkPets extends InputApplicationAdaptor {
     private HWndCtrl hWndMine;
     private List<? extends HWndCtrl> hWndList;
     private final Cached<HWndCtrl> hWndTopmostGetter;
+    private final Cached<Boolean> hWndTransparentSetter;
+    private final Cached<HWndCtrl.WindowRect> hWndPosSetter;
 
     private final String APP_TITLE;
     private int offsetY = 0;
@@ -57,6 +59,9 @@ public class ArkPets extends InputApplicationAdaptor {
         isFocused = new Cached<>();
         isFocused.setValueProducer(() -> hWndMine.isForeground());
         isFocused.setCacheAgeProducer(() -> 4.0 / getReducedFPS());
+
+        hWndTransparentSetter = new Cached<>();
+        hWndPosSetter = new Cached<>();
     }
 
     @Override
@@ -337,11 +342,22 @@ public class ArkPets extends InputApplicationAdaptor {
             }
         }
         // Transparent style
-        hWndMine.setTransparent(isAlwaysTransparent);
+        hWndTransparentSetter.setValue(isAlwaysTransparent);
+        if (hWndTransparentSetter.isChanged()) {
+            hWndMine.setTransparent(hWndTransparentSetter.getValue());
+        }
         // Window position
-        hWndMine.setWindowPosition(hWndTopmostGetter.getValue(),
-                (int) windowPosition.now().x, (int) windowPosition.now().y,
-                cha.camera.getWidth(), cha.camera.getHeight());
+        HWndCtrl.WindowRect rect = new HWndCtrl.WindowRect(
+                (int) windowPosition.now().y,
+                (int) windowPosition.now().y + cha.camera.getHeight(),
+                (int) windowPosition.now().x,
+                (int) windowPosition.now().x + cha.camera.getWidth());
+        hWndPosSetter.setValue(rect);
+        if (hWndPosSetter.isChanged()) {
+            rect = hWndPosSetter.getValue();
+            hWndMine.setWindowPosition(hWndTopmostGetter.getValue(),
+                    rect.left(), rect.top(), rect.width(), rect.height());
+        }
     }
 
     private RelativeWindowPosition getRelativeWindowPositionAt(int x, int y) {

@@ -168,6 +168,10 @@ public abstract class HWndCtrl {
         public WindowRect() {
             this(0, 0, 0, 0);
         }
+
+        public int width() { return right - left; }
+
+        public int height() { return bottom - top; }
     }
 
     public enum MouseEvent {

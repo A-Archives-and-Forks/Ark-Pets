@@ -47,6 +47,7 @@ public final class Cached<T> {
             if (valueProducer != null && isExpired()) {
                 setValue(valueProducer.get());
             }
+            valueChangedFlag = false;
             return cachedValue;
         }
     }
