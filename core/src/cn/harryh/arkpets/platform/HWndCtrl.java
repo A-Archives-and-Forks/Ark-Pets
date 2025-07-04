@@ -184,4 +184,7 @@ public abstract class HWndCtrl {
         MBUTTONDOWN,
         MBUTTONUP,
     }
+
+    public record MousePoint(int x, int y) {
+    }
 }

@@ -155,6 +155,13 @@ public class User32HWndCtrl extends HWndCtrl {
         return windowList;
     }
 
+    public static MousePoint getMousePos() {
+        WinDef.POINT point = new WinDef.POINT();
+        boolean result = User32.INSTANCE.GetCursorPos(point);
+        if (!result) return new MousePoint(0, 0);
+        return new MousePoint(point.x, point.y);
+    }
+
     /** Gets the value of the window's extended styles.
      * @return EX_STYLE value.
      * @see WinUser
