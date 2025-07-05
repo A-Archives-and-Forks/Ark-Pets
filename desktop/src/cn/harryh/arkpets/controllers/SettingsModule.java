@@ -47,74 +47,74 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
     private Pane noticeBox;
 
     @FXML
-    private JFXComboBox<NamedItem<Float>> configDisplayScale;
+    private ComboBox<NamedItem<Float>> configDisplayScale;
     @FXML
-    private JFXButton configDisplayScaleHelp;
+    private Button configDisplayScaleHelp;
     @FXML
-    private JFXComboBox<NamedItem<Integer>> configDisplayFps;
+    private ComboBox<NamedItem<Integer>> configDisplayFps;
     @FXML
-    private JFXButton configDisplayFpsHelp;
+    private Button configDisplayFpsHelp;
 
     @FXML
-    private JFXTabPane configRenderTabPane;
+    private TabPane configRenderTabPane;
     @FXML
-    private JFXComboBox<NamedItem<Integer>> configCanvasColor;
+    private ComboBox<NamedItem<Integer>> configCanvasColor;
     @FXML
-    private JFXComboBox<NamedItem<Float>> configCanvasCoverage;
+    private ComboBox<NamedItem<Float>> configCanvasCoverage;
     @FXML
-    private JFXButton configCanvasCoverageHelp;
+    private Button configCanvasCoverageHelp;
     @FXML
-    private JFXComboBox<NamedItem<Integer>> configCanvasSamplingInterval;
+    private ComboBox<NamedItem<Integer>> configCanvasSamplingInterval;
     @FXML
-    private JFXComboBox<NamedItem<Integer>> configRenderOutline;
+    private ComboBox<NamedItem<Integer>> configRenderOutline;
     @FXML
-    private JFXComboBox<NamedItem<Integer>> configRenderOutlineEmphasis;
+    private ComboBox<NamedItem<Integer>> configRenderOutlineEmphasis;
     @FXML
-    private JFXComboBox<NamedItem<Integer>> configRenderOutlineColor;
+    private ComboBox<NamedItem<Integer>> configRenderOutlineColor;
     @FXML
-    private JFXComboBox<NamedItem<Integer>> configRenderOutlineColorEmphasis;
+    private ComboBox<NamedItem<Integer>> configRenderOutlineColorEmphasis;
     @FXML
-    private JFXComboBox<NamedItem<Float>> configRenderOutlineWidth;
+    private ComboBox<NamedItem<Float>> configRenderOutlineWidth;
     @FXML
-    private JFXSlider configRenderOpacityNormal;
+    private Slider configRenderOpacityNormal;
     @FXML
     private Label configRenderOpacityNormalValue;
     @FXML
-    private JFXSlider configRenderOpacityDim;
+    private Slider configRenderOpacityDim;
     @FXML
     private Label configRenderOpacityDimValue;
     @FXML
-    private JFXComboBox<NamedItem<Integer>> configRenderShadowColor;
+    private ComboBox<NamedItem<Integer>> configRenderShadowColor;
     @FXML
-    private JFXCheckBox configEnableAngle;
+    private CheckBox configEnableAngle;
     @FXML
-    private JFXButton configEnableAngleHelp;
+    private Button configEnableAngleHelp;
     @FXML
-    private JFXCheckBox configEnableMipMap;
+    private CheckBox configEnableMipMap;
     @FXML
-    private JFXButton configEnableMipMapHelp;
+    private Button configEnableMipMapHelp;
 
     @FXML
-    private JFXCheckBox configWindowTopmost;
+    private CheckBox configWindowTopmost;
     @FXML
-    private JFXComboBox<String> configLoggingLevel;
+    private ComboBox<String> configLoggingLevel;
     @FXML
-    private JFXButton exportLog;
+    private Button exportLog;
     @FXML
-    private JFXCheckBox configAutoStartup;
+    private CheckBox configAutoStartup;
     @FXML
-    private JFXCheckBox configSolidExit;
+    private CheckBox configSolidExit;
     @FXML
-    private JFXCheckBox configWindowToolwindow;
+    private CheckBox configWindowToolwindow;
     @FXML
-    private JFXButton configWindowToolwindowHelp;
+    private Button configWindowToolwindowHelp;
     @FXML
-    private JFXCheckBox configEcoMode;
+    private CheckBox configEcoMode;
 
     @FXML
-    private JFXTextField configNetworkSource;
+    private TextField configNetworkSource;
     @FXML
-    private JFXTextField configNetworkProxy;
+    private TextField configNetworkProxy;
     @FXML
     private Label configNetworkProxyStatus;
 

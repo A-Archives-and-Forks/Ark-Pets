@@ -17,7 +17,6 @@ import cn.harryh.arkpets.utils.GuiComponents.Handbook;
 import cn.harryh.arkpets.utils.GuiComponents.Toast;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
-import com.jfoenix.controls.*;
 import javafx.application.Platform;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
@@ -74,24 +73,24 @@ public final class RootModule implements Controller<ArkHomeFX> {
     @FXML
     private Pane sidebar;
     @FXML
-    private JFXButton annoEntrance;
+    private Button annoEntrance;
     @FXML
-    private JFXButton menuBtn1;
+    private Button menuBtn1;
     @FXML
-    private JFXButton menuBtn2;
+    private Button menuBtn2;
     @FXML
-    private JFXButton menuBtn3;
+    private Button menuBtn3;
     @FXML
-    public JFXButton launchBtn;
+    public Button launchBtn;
 
     @FXML
     public AnchorPane titleBar;
     @FXML
     public Text titleText;
     @FXML
-    private JFXButton titleMinimizeBtn;
+    private Button titleMinimizeBtn;
     @FXML
-    private JFXButton titleCloseBtn;
+    private Button titleCloseBtn;
 
     @FXML
     private HBox toast;

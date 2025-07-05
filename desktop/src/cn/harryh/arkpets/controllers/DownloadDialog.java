@@ -12,7 +12,6 @@ import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.StringUtils;
 import com.alibaba.fastjson.JSONObject;
-import com.jfoenix.controls.*;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
@@ -29,20 +28,20 @@ public final class DownloadDialog implements DialogController<ArkHomeFX> {
     @FXML
     private AnchorPane dialog;
     @FXML
-    private JFXButton dialogReturn;
+    private Button dialogReturn;
 
     @FXML
     private Label mcIndicator;
     @FXML
     private Label mcPurchase;
     @FXML
-    private JFXTextField mcCdkInput;
+    private TextField mcCdkInput;
     @FXML
-    private JFXButton mcConfirm;
+    private Button mcConfirm;
     @FXML
     private Label psIndicator;
     @FXML
-    private JFXButton psConfirm;
+    private Button psConfirm;
 
     private ArkHomeFX app;
 
@@ -68,7 +67,7 @@ public final class DownloadDialog implements DialogController<ArkHomeFX> {
     }
 
     @Override
-    public JFXButton getReturnButton() {
+    public Button getReturnButton() {
         return dialogReturn;
     }
 

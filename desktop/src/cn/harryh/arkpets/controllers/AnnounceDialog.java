@@ -40,12 +40,12 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
     @FXML
     private AnchorPane dialog;
     @FXML
-    private JFXButton dialogReturn;
+    private Button dialogReturn;
 
     @FXML
-    private JFXListView<JFXListCell<AnnounceItem>> annoListView;
+    private ListView<ListCell<AnnounceItem>> annoListView;
     @FXML
-    private JFXButton annoRefetch;
+    private Button annoRefetch;
     @FXML
     private Label annoTitle;
     @FXML
@@ -59,7 +59,7 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
     @FXML
     private VBox annoContainer;
 
-    private JFXListCell<AnnounceItem> selectedAnnoCell;
+    private ListCell<AnnounceItem> selectedAnnoCell;
 
     private AnnounceReadHandler announceReadHandler;
 
@@ -70,8 +70,8 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
         this.app = app;
 
         annoListView.getSelectionModel().getSelectedItems().addListener(
-                (ListChangeListener<JFXListCell<AnnounceItem>>) (observable -> observable.getList().forEach(
-                        (Consumer<JFXListCell<AnnounceItem>>) this::selectCell)
+                (ListChangeListener<ListCell<AnnounceItem>>) (observable -> observable.getList().forEach(
+                        (Consumer<ListCell<AnnounceItem>>) this::selectCell)
                 )
         );
 
@@ -86,7 +86,7 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
     }
 
     @Override
-    public JFXButton getReturnButton() {
+    public Button getReturnButton() {
         return dialogReturn;
     }
 
@@ -118,10 +118,10 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
         });
     }
 
-    private JFXListCell<AnnounceItem> createCell(AnnounceItem anno) {
+    private ListCell<AnnounceItem> createCell(AnnounceItem anno) {
         double width = annoListView.getPrefWidth() * 0.75;
         double offset = width * 0.175;
-        JFXListCell<AnnounceItem> cell = new JFXListCell<>();
+        ListCell<AnnounceItem> cell = new JFXListCell<>();
         cell.getStyleClass().addAll("list-item");
         cell.setPrefWidth(width);
         cell.setItem(anno);
@@ -138,7 +138,7 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
         return cell;
     }
 
-    private void refreshCellGraphic(JFXListCell<AnnounceItem> cell) {
+    private void refreshCellGraphic(ListCell<AnnounceItem> cell) {
         double width = annoListView.getPrefWidth() * 0.75;
         double offset = width * 0.175;
         SVGPath dot = (SVGPath) ((Group) (cell.getGraphic())).getChildrenUnmodifiable().get(0);
@@ -147,7 +147,7 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
         name.setPrefWidth(width - (announceReadHandler.isRead(cell.getItem()) ? 0 : offset));
     }
 
-    private void selectCell(JFXListCell<AnnounceItem> cell) {
+    private void selectCell(ListCell<AnnounceItem> cell) {
         // Reset
         if (selectedAnnoCell != null) {
             selectedAnnoCell.getStyleClass().setAll("list-item");

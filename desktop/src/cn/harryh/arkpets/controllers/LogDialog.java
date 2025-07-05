@@ -42,14 +42,14 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
     @FXML
     private AnchorPane dialog;
     @FXML
-    private JFXButton dialogReturn;
+    private Button dialogReturn;
 
     @FXML
     private TreeTableView<LogItem> logView;
     @FXML
-    private JFXButton logRefetch;
+    private Button logRefetch;
     @FXML
-    private JFXButton logExplore;
+    private Button logExplore;
 
     @FXML
     private Label logName;
@@ -64,11 +64,11 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
     @FXML
     private Label logSelectedCount;
     @FXML
-    public JFXButton quickSelectAll;
+    public Button quickSelectAll;
     @FXML
-    public JFXButton quickSelectRecent;
+    public Button quickSelectRecent;
     @FXML
-    private JFXButton exportSelected;
+    private Button exportSelected;
 
     private ObservableList<LogItem> coreLogList;
     private ObservableList<LogItem> desktopLogList;
@@ -96,7 +96,7 @@ public final class LogDialog implements DialogController<ArkHomeFX> {
     }
 
     @Override
-    public JFXButton getReturnButton() {
+    public Button getReturnButton() {
         return dialogReturn;
     }
 

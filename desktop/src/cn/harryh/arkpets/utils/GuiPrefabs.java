@@ -139,7 +139,7 @@ public class GuiPrefabs {
         timeline.playFromStart();
     }
 
-    public static void bindToggleAndWrapper(JFXButton toggle, Node wrapper, Duration duration) {
+    public static void bindToggleAndWrapper(ButtonBase toggle, Node wrapper, Duration duration) {
         toggle.setOnAction(e -> {
             if (wrapper.isVisible())
                 GuiPrefabs.fadeOutNode(wrapper, duration, null);

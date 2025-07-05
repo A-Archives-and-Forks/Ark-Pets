@@ -59,7 +59,7 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
     @FXML
     private Label configDeployMarginBottomValue;
     @FXML
-    private JFXButton toggleConfigDeployPosition;
+    private Button toggleConfigDeployPosition;
     @FXML
     private HBox wrapperConfigDeployPosition;
     @FXML
@@ -68,21 +68,21 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
     @FXML
     private Label configTransitionAnimationLabel;
     @FXML
-    private JFXComboBox<NamedItem<Float>> configTransitionAnimation;
+    private ComboBox<NamedItem<Float>> configTransitionAnimation;
     @FXML
     private JFXButton configTransitionAnimationHelp;
     @FXML
     private Label configTransitionDurationLabel;
     @FXML
-    private JFXComboBox<NamedItem<Float>> configTransitionDuration;
+    private ComboBox<NamedItem<Float>> configTransitionDuration;
     @FXML
     private JFXButton configTransitionDurationHelp;
     @FXML
     private Label configTransitionFunctionLabel;
     @FXML
-    private JFXComboBox<NamedItem<String>> configTransitionFunction;
+    private ComboBox<NamedItem<String>> configTransitionFunction;
     @FXML
-    private JFXButton configTransitionFunctionHelp;
+    private Button configTransitionFunctionHelp;
 
     @FXML
     private JFXSlider configPhysicGravity;
@@ -253,7 +253,7 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
                     app.config.transition_type = newValue.value();
                     app.config.save();
                 });
-        new HelpHandbookEntrance(app.body, configTransitionFunctionHelp) {
+        new HelpHandbookEntrance(app.body, (JFXButton) configTransitionFunctionHelp) {
             @Override
             public Handbook getHandbook() {
                 return new ControlHelpHandbook(configTransitionFunctionLabel) {

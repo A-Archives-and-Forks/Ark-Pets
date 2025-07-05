@@ -567,10 +567,10 @@ public class GuiComponents {
     abstract public static class HandbookEntrance {
         private static final double scale = 2.0 / 3;
         protected final StackPane root;
-        protected final JFXButton target;
+        protected final ButtonBase target;
         protected final Handbook handbook;
 
-        public HandbookEntrance(StackPane root, JFXButton target) {
+        public HandbookEntrance(StackPane root, ButtonBase target) {
             this.root = root;
             this.target = target;
             handbook = getHandbook();
@@ -580,7 +580,8 @@ public class GuiComponents {
             graphic.setScaleY(scale);
             target.setText("");
             target.setGraphic(graphic);
-            target.setRipplerFill(Color.GRAY);
+            if (target instanceof JFXButton jfxButton)
+                jfxButton.setRipplerFill(Color.GRAY);
             target.setOnAction(e -> getHandbook().show(root));
         }
 
@@ -591,7 +592,7 @@ public class GuiComponents {
 
 
     abstract public static class DangerHandbookEntrance extends HandbookEntrance {
-        public DangerHandbookEntrance(StackPane root, JFXButton target) {
+        public DangerHandbookEntrance(StackPane root, ButtonBase target) {
             super(root, target);
             refresh();
         }
@@ -616,7 +617,7 @@ public class GuiComponents {
 
 
     abstract public static class WarningHandbookEntrance extends HandbookEntrance {
-        public WarningHandbookEntrance(StackPane root, JFXButton target) {
+        public WarningHandbookEntrance(StackPane root, ButtonBase target) {
             super(root, target);
             refresh();
         }
@@ -641,7 +642,7 @@ public class GuiComponents {
 
 
     abstract public static class HelpHandbookEntrance extends HandbookEntrance {
-        public HelpHandbookEntrance(StackPane root, JFXButton target) {
+        public HelpHandbookEntrance(StackPane root, ButtonBase target) {
             super(root, target);
         }
 
