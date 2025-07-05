@@ -9,7 +9,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "org.openjfx:javafx-plugin:0.0.13"
+        classpath "org.openjfx:javafx-plugin:0.1.0"
     }
 }
 
@@ -30,7 +30,7 @@ allprojects {
         // Prefabs
         gdxVersion = "1.11.0"
         jnaVersion = "5.12.1"
-        javaFXVersion = "17.0.8"
+        javaFXVersion = "17.0.15"
     }
 
     repositories {
