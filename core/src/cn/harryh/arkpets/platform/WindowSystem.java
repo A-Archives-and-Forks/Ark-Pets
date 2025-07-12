@@ -92,6 +92,20 @@ public enum WindowSystem {
         }
     }
 
+    /** Gets the mouse position.
+     * @return The MousePoint record.
+     */
+    public static HWndCtrl.MousePoint getMousePos() {
+        switch (PLATFORM) {
+            case USER32 -> {
+                return User32HWndCtrl.getMousePos();
+            }
+            default -> {
+                return new HWndCtrl.MousePoint(0, 0);
+            }
+        }
+    }
+
     /** Frees all the resources.
      */
     public static void free() {

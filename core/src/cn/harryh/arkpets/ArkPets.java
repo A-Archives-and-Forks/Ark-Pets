@@ -14,6 +14,7 @@ import cn.harryh.arkpets.tray.MemberTrayImpl;
 import cn.harryh.arkpets.utils.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -39,6 +40,8 @@ public class ArkPets extends InputApplicationAdaptor {
     private HWndCtrl hWndMine;
     private List<? extends HWndCtrl> hWndList;
     private final Cached<HWndCtrl> hWndTopmostGetter;
+    private final Cached<Boolean> hWndTransparentSetter;
+    private final Cached<HWndCtrl.WindowRect> hWndPosSetter;
 
     private final String APP_TITLE;
     private int offsetY = 0;
@@ -56,6 +59,9 @@ public class ArkPets extends InputApplicationAdaptor {
         isFocused = new Cached<>();
         isFocused.setValueProducer(() -> hWndMine.isForeground());
         isFocused.setCacheAgeProducer(() -> 4.0 / getReducedFPS());
+
+        hWndTransparentSetter = new Cached<>();
+        hWndPosSetter = new Cached<>();
     }
 
     @Override
@@ -100,7 +106,7 @@ public class ArkPets extends InputApplicationAdaptor {
 
         // 5.Window style setup
         hWndMine = WindowSystem.findWindow(null, APP_TITLE);
-        hWndMine.setLayered(true);
+        hWndMine.attachGLFWWindow((Lwjgl3Graphics) Gdx.graphics);
         if (config.window_style_topmost)
             hWndMine.setTopmost(true);
         updateWindow();
@@ -336,11 +342,22 @@ public class ArkPets extends InputApplicationAdaptor {
             }
         }
         // Transparent style
-        hWndMine.setTransparent(isAlwaysTransparent);
+        hWndTransparentSetter.setValue(isAlwaysTransparent);
+        if (hWndTransparentSetter.isChanged()) {
+            hWndMine.setTransparent(hWndTransparentSetter.getValue());
+        }
         // Window position
-        hWndMine.setWindowPosition(hWndTopmostGetter.getValue(),
-                (int) windowPosition.now().x, (int) windowPosition.now().y,
-                cha.camera.getWidth(), cha.camera.getHeight());
+        HWndCtrl.WindowRect rect = new HWndCtrl.WindowRect(
+                (int) windowPosition.now().y,
+                (int) windowPosition.now().y + cha.camera.getHeight(),
+                (int) windowPosition.now().x,
+                (int) windowPosition.now().x + cha.camera.getWidth());
+        hWndPosSetter.setValue(rect);
+        if (hWndPosSetter.isChanged()) {
+            rect = hWndPosSetter.getValue();
+            hWndMine.setWindowPosition(hWndTopmostGetter.getValue(),
+                    rect.left(), rect.top(), rect.width(), rect.height());
+        }
     }
 
     private RelativeWindowPosition getRelativeWindowPositionAt(int x, int y) {

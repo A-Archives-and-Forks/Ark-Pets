@@ -96,27 +96,11 @@ public class User32HWndCtrl extends HWndCtrl {
     }
 
     @Override
-    public void setLayered(boolean enable) {
-        if (enable)
-            setWindowExStyle(getWindowExStyle() | User32HWndCtrl.WS_EX_LAYERED);
-        else
-            setWindowExStyle(getWindowExStyle() & ~User32HWndCtrl.WS_EX_LAYERED);
-    }
-
-    @Override
     public void setTopmost(boolean enable) {
         if (enable)
             setWindowExStyle(getWindowExStyle() | User32HWndCtrl.WS_EX_TOPMOST);
         else
             setWindowExStyle(getWindowExStyle() & ~User32HWndCtrl.WS_EX_TOPMOST);
-    }
-
-    @Override
-    public void setTransparent(boolean enable) {
-        if (enable)
-            setWindowExStyle(getWindowExStyle() | User32HWndCtrl.WS_EX_TRANSPARENT);
-        else
-            setWindowExStyle(getWindowExStyle() & ~User32HWndCtrl.WS_EX_TRANSPARENT);
     }
 
     @Override
@@ -169,6 +153,13 @@ public class User32HWndCtrl extends HWndCtrl {
             return true;
         }, null);
         return windowList;
+    }
+
+    public static MousePoint getMousePos() {
+        WinDef.POINT point = new WinDef.POINT();
+        boolean result = User32.INSTANCE.GetCursorPos(point);
+        if (!result) return new MousePoint(0, 0);
+        return new MousePoint(point.x, point.y);
     }
 
     /** Gets the value of the window's extended styles.
