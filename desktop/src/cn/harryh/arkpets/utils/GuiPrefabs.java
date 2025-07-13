@@ -29,6 +29,7 @@ import javafx.scene.shape.SVGPath;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import javafx.util.Builder;
 import javafx.util.Duration;
 
 import javax.net.ssl.SSLException;
@@ -187,6 +188,82 @@ public class GuiPrefabs {
     }
 
 
+    public static class ButtonBuilder implements Builder<Button> {
+        protected String text;
+        protected Color color;
+        protected Color bgColor;
+        protected int fontSize;
+        protected String styleClass;
+        protected EventHandler<ActionEvent> onAction;
+
+        public ButtonBuilder () {
+            text = "";
+            color = null;
+            bgColor = null;
+            fontSize = 0;
+            onAction = null;
+            styleClass = null;
+        }
+
+        public ButtonBuilder setText(String text) {
+            this.text = text;
+            return this;
+        }
+
+        public ButtonBuilder setTextColor(Color color) {
+            this.color = color;
+            return this;
+        }
+
+        public ButtonBuilder setBackgroundColor(Color bgColor) {
+            this.bgColor = bgColor;
+            return this;
+        }
+
+        public ButtonBuilder setFontSize(int fontSize) {
+            this.fontSize = fontSize;
+            return this;
+        }
+
+        public ButtonBuilder setAdditionalStyleClass(String styleClass) {
+            this.styleClass = styleClass;
+            return this;
+        }
+
+        public ButtonBuilder setOnAction(EventHandler<ActionEvent> onAction) {
+            this.onAction = onAction;
+            return this;
+        }
+
+        @Override
+        public Button build() {
+            Button button = new JFXButton(text);
+
+            if (color != null)
+                button.setTextFill(color);
+            if (onAction != null)
+                button.setOnAction(onAction);
+            if (styleClass != null)
+                button.getStyleClass().add(styleClass);
+
+            StringBuilder styleStringBuilder = new StringBuilder();
+            if (fontSize > 0) {
+                styleStringBuilder.append("-fx-font-size:");
+                styleStringBuilder.append(fontSize);
+                styleStringBuilder.append("px;");
+            }
+            if (bgColor != null) {
+                styleStringBuilder.append("-fx-background-color:");
+                styleStringBuilder.append(toWebColor(bgColor));
+                styleStringBuilder.append(';');
+            }
+            button.setStyle(styleStringBuilder.toString());
+
+            return button;
+        }
+    }
+
+
     public static class Icons {
         public static final String SVG_INFO        = "m12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-.001 5.75c.69 0 1.251.56 1.251 1.25s-.561 1.25-1.251 1.25-1.249-.56-1.249-1.25.559-1.25 1.249-1.25zm2.001 12.25h-4v-1c.484-.179 1-.201 1-.735v-4.467c0-.534-.516-.618-1-.797v-1h3v6.265c0 .535.517.558 1 .735v.999z";
         public static final String SVG_INFO_ALT    = "m12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-.001 5.75c.69 0 1.251.56 1.251 1.25s-.561 1.25-1.251 1.25-1.249-.56-1.249-1.25.559-1.25 1.249-1.25zm2.001 12.25h-4v-1c.484-.179 1-.201 1-.735v-4.467c0-.534-.516-.618-1-.797v-1h3v6.265c0 .535.517.558 1 .735v.999z";
@@ -252,7 +329,7 @@ public class GuiPrefabs {
             JFXDialogLayout layout = new JFXDialogLayout();
             layout.setHeading(Dialogs.getHeading(graphic, title, COLOR_LIGHT_GRAY));
             layout.setBody(body);
-            layout.setActions(Dialogs.getOkayButton(dialog));
+            layout.setActions(Dialogs.getOkayButton(dialog, null));
             dialog.setContent(layout);
 
             if (detail != null && !detail.isEmpty()) {
@@ -279,12 +356,8 @@ public class GuiPrefabs {
             JFXDialogLayout layout = new JFXDialogLayout();
             layout.setHeading(Dialogs.getHeading(graphic, title, COLOR_LIGHT_GRAY));
             layout.setBody(body);
-            JFXButton confirmButton = getOkayButton(dialog);
-            JFXButton cancelButton = getCancelButton(dialog);
-            confirmButton.setOnAction(e -> {
-                dialog.setOnDialogClosed(ev -> onConfirmed.run());
-                dialog.close();
-            });
+            Button confirmButton = getOkayButton(dialog, e -> dialog.setOnDialogClosed(ev -> onConfirmed.run()));
+            Button cancelButton = getCancelButton(dialog, null);
             layout.setActions(cancelButton, confirmButton);
             dialog.setContent(layout);
             return dialog;
@@ -351,7 +424,7 @@ public class GuiPrefabs {
                 disposeDialog(dialog);
             });
 
-            layout.setActions(button, Dialogs.getOkayButton(dialog));
+            layout.setActions(button, Dialogs.getOkayButton(dialog, null));
             dialog.setContent(layout);
 
             if (e instanceof ProcessPool.UnexpectedExitCodeException) {
@@ -400,13 +473,19 @@ public class GuiPrefabs {
             } else if (e instanceof SSLException) {
                 h2.setText("无法建立安全的神经连接");
                 h3.setText("SSL证书错误，请检查代理设置。您也可以尝试[信任]所有证书后重试刚才的操作。");
-                JFXButton apply = Dialogs.getTrustButton(dialog);
-                apply.setOnAction(ev -> {
+                Button trustButton = new ButtonBuilder()
+                        .setText("信 任")
+                        .setTextColor(COLOR_WHITE)
+                        .setBackgroundColor(COLOR_WARNING)
+                        .setFontSize(13)
+                        .setOnAction(ev -> disposeDialog(dialog))
+                        .build();
+                trustButton.setOnAction(ev -> {
                     Logger.warn("ErrorDialog", "Set SSL trust all to true");
                     Connections.trustAllUnsafe = true;
                     Dialogs.disposeDialog(dialog);
                 });
-                Dialogs.attachAction(dialog, apply, 0);
+                Dialogs.attachAction(dialog, trustButton, 0);
             } else if (e instanceof ZipException) {
                 h3.setText("压缩文件相关错误。可能是文件不完整或已损坏，请稍后重试。");
             }
@@ -447,40 +526,32 @@ public class GuiPrefabs {
             return h3;
         }
 
-        public static JFXButton getCancelButton(JFXDialog dialog) {
-            JFXButton button = new JFXButton();
-            button.setText("取 消");
-            button.setTextFill(COLOR_WHITE);
-            button.setStyle("-fx-font-size:13px;-fx-background-color:" + toWebColor(COLOR_INFO));
-            button.setOnAction(e -> disposeDialog(dialog));
-            return button;
+        public static Button getOkayButton(JFXDialog dialog, EventHandler<ActionEvent> afterAction) {
+            return new ButtonBuilder()
+                    .setText("确 认")
+                    .setTextColor(COLOR_WHITE)
+                    .setBackgroundColor(COLOR_INFO)
+                    .setFontSize(13)
+                    .setOnAction(e -> {
+                        disposeDialog(dialog);
+                        if (afterAction != null)
+                            afterAction.handle(e);
+                    })
+                    .build();
         }
 
-        public static JFXButton getOkayButton(JFXDialog dialog) {
-            JFXButton button = new JFXButton();
-            button.setText("确 认");
-            button.setTextFill(COLOR_WHITE);
-            button.setStyle("-fx-font-size:13px;-fx-background-color:" + toWebColor(COLOR_INFO));
-            button.setOnAction(e -> disposeDialog(dialog));
-            return button;
-        }
-
-        public static JFXButton getGotoButton(JFXDialog dialog) {
-            JFXButton button = new JFXButton();
-            button.setText("前 往");
-            button.setTextFill(COLOR_WHITE);
-            button.setStyle("-fx-font-size:13px;-fx-background-color:" + toWebColor(COLOR_SUCCESS));
-            button.setOnAction(e -> disposeDialog(dialog));
-            return button;
-        }
-
-        public static JFXButton getTrustButton(JFXDialog dialog) {
-            JFXButton button = new JFXButton();
-            button.setText("信 任");
-            button.setTextFill(COLOR_WHITE);
-            button.setStyle("-fx-font-size:13px;-fx-background-color:" + toWebColor(COLOR_WARNING));
-            button.setOnAction(e -> disposeDialog(dialog));
-            return button;
+        public static Button getCancelButton(JFXDialog dialog, EventHandler<ActionEvent> afterAction) {
+            return new ButtonBuilder()
+                    .setText("取 消")
+                    .setTextColor(COLOR_WHITE)
+                    .setBackgroundColor(COLOR_INFO)
+                    .setFontSize(13)
+                    .setOnAction(e -> {
+                        disposeDialog(dialog);
+                        if (afterAction != null)
+                            afterAction.handle(e);
+                    })
+                    .build();
         }
     }
 

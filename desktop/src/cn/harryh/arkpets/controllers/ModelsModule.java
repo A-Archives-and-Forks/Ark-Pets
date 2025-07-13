@@ -60,19 +60,19 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     @FXML
     private Pane loadFailureTip;
     @FXML
-    private JFXButton searchModelConfirm;
+    private Button searchModelConfirm;
     @FXML
-    private JFXButton searchModelReset;
+    private Button searchModelReset;
     @FXML
-    private JFXButton searchModelRandom;
+    private Button searchModelRandom;
     @FXML
-    private JFXButton searchModelReload;
+    private Button searchModelReload;
     @FXML
-    private JFXTextField searchModelInput;
+    private TextField searchModelInput;
     @FXML
     private Label searchModelStatus;
     @FXML
-    private JFXListView<JFXListCell<ModelItem>> modelListView;
+    private ListView<JFXListCell<ModelItem>> modelListView;
     @FXML
     private Label selectedModelName;
     @FXML
@@ -82,9 +82,9 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     @FXML
     private Label selectedModelType;
     @FXML
-    private JFXButton modelFavorite;
+    private Button modelFavorite;
     @FXML
-    private JFXButton topFavorite;
+    private Button topFavorite;
 
     @FXML
     private AnchorPane infoPane;
@@ -93,9 +93,9 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     @FXML
     private AnchorPane managePane;
     @FXML
-    private JFXButton toggleFilterPane;
+    private Button toggleFilterPane;
     @FXML
-    private JFXButton toggleManagePane;
+    private Button toggleManagePane;
     @FXML
     private ScrollPane infoPaneTagScroll;
     @FXML
@@ -110,17 +110,17 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     @FXML
     private VBox noticeBox;
     @FXML
-    private JFXButton modelUpdate;
+    private Button modelUpdate;
     @FXML
-    private JFXButton modelFetch;
+    private Button modelFetch;
     @FXML
-    private JFXButton modelVerify;
+    private Button modelVerify;
     @FXML
-    private JFXButton modelReFetch;
+    private Button modelReFetch;
     @FXML
-    private JFXButton modelImport;
+    private Button modelImport;
     @FXML
-    private JFXButton modelExport;
+    private Button modelExport;
     @FXML
     private Label modelHelp;
 
@@ -441,7 +441,6 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         }
 
         modelFavorite.setGraphic(favIcon);
-        modelFavorite.setRipplerFill(Color.GRAY);
         modelFavorite.setOnAction(e -> {
             String key = selectedModelCell.getItem().key;
             if (app.config.character_favorites.containsKey(key)) {
@@ -560,7 +559,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                     String s = change.getElementAdded() == null ? change.getElementRemoved() : change.getElementAdded();
                     String t = app.modelsDataset.sortTags == null ? s : app.modelsDataset.sortTags.getOrDefault(s, s);
                     for (Node node : filterPaneTagFlow.getChildren())
-                        if (node instanceof JFXButton tag && t.equals(tag.getText())) {
+                        if (node instanceof Button tag && t.equals(tag.getText())) {
                             String styleFrom = change.getElementAdded() == null ? "info-tag-badge-active" : "info-tag-badge";
                             String styleTo = change.getElementAdded() == null ? "info-tag-badge" : "info-tag-badge-active";
                             GuiPrefabs.replaceStyleClass(tag, styleFrom, styleTo);
@@ -572,15 +571,17 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                     sortTags.sort(Comparator.naturalOrder());
                     sortTags.forEach(s -> {
                         String t = app.modelsDataset.sortTags == null ? s : app.modelsDataset.sortTags.getOrDefault(s, s);
-                        JFXButton tag = new JFXButton(t);
-                        tag.getStyleClass().add("info-tag-badge");
-                        tag.setOnAction(ev -> {
-                            if (filterTagSet.contains(s))
-                                filterTagSet.remove(s);
-                            else
-                                filterTagSet.add(s);
-                            modelSearch(searchModelInput.getText());
-                        });
+                        Button tag = new GuiPrefabs.ButtonBuilder()
+                                .setText(t)
+                                .setAdditionalStyleClass("info-tag-badge")
+                                .setOnAction(ev -> {
+                                    if (filterTagSet.contains(s))
+                                        filterTagSet.remove(s);
+                                    else
+                                        filterTagSet.add(s);
+                                    modelSearch(searchModelInput.getText());
+                                })
+                                .build();
                         filterPaneTagFlow.getChildren().add(tag);
                     });
                 }
@@ -671,14 +672,16 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             String s = o.toString();
             String t = app.modelsDataset.sortTags == null ?
                     s : app.modelsDataset.sortTags.getOrDefault(s, s);
-            JFXButton tag = new JFXButton(t);
-            tag.getStyleClass().add("info-tag-badge-active");
-            tag.setOnAction(e -> {
-                filterTagSet.clear();
-                filterTagSet.add(s);
-                infoPaneComposer.activate(1);
-                modelSearch(searchModelInput.getText());
-            });
+            Button tag = new GuiPrefabs.ButtonBuilder()
+                    .setText(t)
+                    .setAdditionalStyleClass("info-tag-badge-active")
+                    .setOnAction(e -> {
+                        filterTagSet.clear();
+                        filterTagSet.add(s);
+                        infoPaneComposer.activate(1);
+                        modelSearch(searchModelInput.getText());
+                    })
+                    .build();
             infoPaneTagFlow.getChildren().add(tag);
         });
         // Switch info pane

@@ -131,7 +131,7 @@
             </ScrollPane>
         </VBox>
         <JFXButton fx:id="modelFavorite" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                   opacity="0.875" prefHeight="30.0" prefWidth="30.0" scaleX="0.875" scaleY="0.875"
+                   opacity="0.875" prefHeight="30.0" prefWidth="30.0" ripplerFill="gray" scaleX="0.875" scaleY="0.875"
                    AnchorPane.topAnchor="5.0" AnchorPane.rightAnchor="2.5"/>
     </AnchorPane>
     <AnchorPane fx:id="filterPane" layoutX="${_infoPaneX}" layoutY="${_infoPaneY}" prefHeight="${_infoPaneH}"

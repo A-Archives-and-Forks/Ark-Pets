@@ -136,12 +136,11 @@ abstract public class GuiTask {
         JFXDialogLayout layout = new JFXDialogLayout();
         layout.setHeading(bar);
         layout.setBody(content);
-        layout.setActions(GuiPrefabs.Dialogs.getOkayButton(dialog));
         dialog.setContent(layout);
+
+        // Set the actions of the dialog
         if (cancelable) {
-            JFXButton cancel = GuiPrefabs.Dialogs.getCancelButton(dialog);
-            cancel.setOnAction(e -> boundTask.cancel());
-            layout.setActions(cancel);
+            layout.setActions(GuiPrefabs.Dialogs.getCancelButton(dialog, e -> boundTask.cancel()));
         } else {
             layout.setActions(List.of());
         }

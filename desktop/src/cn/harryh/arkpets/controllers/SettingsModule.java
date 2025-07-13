@@ -486,8 +486,10 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                             "检测到软件有新的版本！",
                             "当前版本 " + appVersion + " 可更新到 " + stableVersion + "\n是否要现在进行更新？",
                             () -> executeAppUpdate());
-                    JFXButton gotoButton = new JFXButton("访问官网");
-                    gotoButton.setOnAction(e -> app.popBrowser(PathConfig.urlDownload));
+                    Button gotoButton = new GuiPrefabs.ButtonBuilder()
+                            .setText("访问官网")
+                            .setOnAction(e -> app.popBrowser(PathConfig.urlDownload))
+                            .build();
                     GuiPrefabs.Dialogs.attachAction(dialog, gotoButton, 0);
                     dialog.show();
                 }
@@ -502,12 +504,14 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
                             "尚未发现新的正式版本。",
                             "当前版本 " + appVersion + " 已是最新",
                             null);
-                    JFXButton forceBtn = new JFXButton("强制重装");
-                    forceBtn.setOnAction(e -> {
-                        executeAppUpdate();
-                        GuiPrefabs.Dialogs.disposeDialog(dialog);
-                    });
-                    GuiPrefabs.Dialogs.attachAction(dialog, forceBtn, 0);
+                    Button forceButton = new GuiPrefabs.ButtonBuilder()
+                            .setText("强制重装")
+                            .setOnAction(e -> {
+                                executeAppUpdate();
+                                GuiPrefabs.Dialogs.disposeDialog(dialog);
+                            })
+                            .build();
+                    GuiPrefabs.Dialogs.attachAction(dialog, forceButton, 0);
                     dialog.show();
                 }
 

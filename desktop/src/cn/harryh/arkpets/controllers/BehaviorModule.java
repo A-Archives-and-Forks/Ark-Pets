@@ -11,7 +11,6 @@ import cn.harryh.arkpets.utils.GuiComponents.*;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Monitor;
-import com.jfoenix.controls.*;
 import javafx.application.Platform;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
@@ -31,31 +30,31 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
     private ScrollPane moduleScroll;
 
     @FXML
-    private JFXCheckBox configBehaviorAllowWalk;
+    private CheckBox configBehaviorAllowWalk;
     @FXML
-    private JFXCheckBox configBehaviorAllowSit;
+    private CheckBox configBehaviorAllowSit;
     @FXML
-    private JFXCheckBox configBehaviorAllowSleep;
+    private CheckBox configBehaviorAllowSleep;
     @FXML
-    private JFXCheckBox configBehaviorAllowSpecial;
+    private CheckBox configBehaviorAllowSpecial;
     @FXML
-    private JFXSlider configBehaviorAiActivation;
+    private Slider configBehaviorAiActivation;
     @FXML
     private Label configBehaviorAiActivationValue;
     @FXML
-    private JFXSlider configBehaviorWalkSpeed;
+    private Slider configBehaviorWalkSpeed;
     @FXML
     private Label configBehaviorSpeedWalkValue;
     @FXML
-    private JFXCheckBox configBehaviorAllowInteract;
+    private CheckBox configBehaviorAllowInteract;
     @FXML
-    private JFXCheckBox configBehaviorDoPeerRepulsion;
+    private CheckBox configBehaviorDoPeerRepulsion;
     @FXML
-    private JFXCheckBox configDeployMultiMonitors;
+    private CheckBox configDeployMultiMonitors;
     @FXML
     private Label configDeployMultiMonitorsStatus;
     @FXML
-    private JFXSlider configDeployMarginBottom;
+    private Slider configDeployMarginBottom;
     @FXML
     private Label configDeployMarginBottomValue;
     @FXML
@@ -70,13 +69,13 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
     @FXML
     private ComboBox<NamedItem<Float>> configTransitionAnimation;
     @FXML
-    private JFXButton configTransitionAnimationHelp;
+    private Button configTransitionAnimationHelp;
     @FXML
     private Label configTransitionDurationLabel;
     @FXML
     private ComboBox<NamedItem<Float>> configTransitionDuration;
     @FXML
-    private JFXButton configTransitionDurationHelp;
+    private Button configTransitionDurationHelp;
     @FXML
     private Label configTransitionFunctionLabel;
     @FXML
@@ -85,23 +84,23 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
     private Button configTransitionFunctionHelp;
 
     @FXML
-    private JFXSlider configPhysicGravity;
+    private Slider configPhysicGravity;
     @FXML
     private Label configPhysicGravityValue;
     @FXML
-    private JFXSlider configPhysicAirFriction;
+    private Slider configPhysicAirFriction;
     @FXML
     private Label configPhysicAirFrictionValue;
     @FXML
-    private JFXSlider configPhysicStaticFriction;
+    private Slider configPhysicStaticFriction;
     @FXML
     private Label configPhysicStaticFrictionValue;
     @FXML
-    private JFXSlider configPhysicSpeedLimitX;
+    private Slider configPhysicSpeedLimitX;
     @FXML
     private Label configPhysicSpeedLimitXValue;
     @FXML
-    private JFXSlider configPhysicSpeedLimitY;
+    private Slider configPhysicSpeedLimitY;
     @FXML
     private Label configPhysicSpeedLimitYValue;
     @FXML
@@ -253,7 +252,7 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
                     app.config.transition_type = newValue.value();
                     app.config.save();
                 });
-        new HelpHandbookEntrance(app.body, (JFXButton) configTransitionFunctionHelp) {
+        new HelpHandbookEntrance(app.body, configTransitionFunctionHelp) {
             @Override
             public Handbook getHandbook() {
                 return new ControlHelpHandbook(configTransitionFunctionLabel) {
