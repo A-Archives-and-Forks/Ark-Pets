@@ -19,7 +19,7 @@ import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Version;
 import com.alibaba.fastjson.JSONObject;
-import com.jfoenix.controls.*;
+import com.jfoenix.controls.JFXListCell;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -72,7 +72,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     @FXML
     private Label searchModelStatus;
     @FXML
-    private ListView<JFXListCell<ModelItem>> modelListView;
+    private ListView<ListCell<ModelItem>> modelListView;
     @FXML
     private Label selectedModelName;
     @FXML
@@ -125,8 +125,8 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     private Label modelHelp;
 
     private ModelItemGroup assetItemList;
-    private JFXListCell<ModelItem> selectedModelCell;
-    private ArrayList<JFXListCell<ModelItem>> modelCellList = new ArrayList<>();
+    private ListCell<ModelItem> selectedModelCell;
+    private ArrayList<ListCell<ModelItem>> modelCellList = new ArrayList<>();
     private ObservableSet<String> filterTagSet = FXCollections.observableSet();
 
     private GuiPrefabs.PeerNodeComposer infoPaneComposer;
@@ -212,13 +212,12 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         } catch (FileNotFoundException e) {
             Logger.warn("ModelManager", "Failed to initialize model dataset due to file not found. (" + e.getMessage() + ")");
             if (doPopNotice) {
-                JFXDialog dialog = GuiPrefabs.Dialogs.createCommonDialog(app.body,
+                GuiPrefabs.Dialogs.createCommonDialog(app.body,
                         GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_WARNING_ALT, GuiPrefabs.COLOR_WARNING),
                         "模型载入失败",
                         "模型未成功载入：未找到数据集。",
                         "模型数据集文件 " + PathConfig.fileModelsDataPath + " 可能不在工作目录下。\n请先前往 [选项] 进行模型下载。",
-                        null);
-                dialog.show();
+                        null).show();
             }
         } catch (ModelsDataset.DatasetKeyException e) {
             Logger.warn("ModelManager", "Failed to initialize model dataset due to dataset parsing error. (" + e.getMessage() + ")");
@@ -469,7 +468,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             modelSearch(searchModelInput.getText());
             ModelItem recentSelected = assetItemList.searchByRelPath(app.config.character_asset);
             if (recentSelected != null)
-                for (JFXListCell<ModelItem> cell : modelListView.getItems())
+                for (ListCell<ModelItem> cell : modelListView.getItems())
                     if (recentSelected.equals(cell.getItem())) {
                         modelListView.scrollTo(cell);
                         modelListView.getSelectionModel().select(cell);
@@ -494,7 +493,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             int curSize = searched.size();
             searchModelStatus.setText((rawSize == curSize ? rawSize : curSize + " / " + rawSize) + " 个模型");
             // Add cells
-            for (JFXListCell<ModelItem> cell : modelCellList)
+            for (ListCell<ModelItem> cell : modelCellList)
                 if (searched.contains(cell.getItem()))
                     modelListView.getItems().add(cell);
             Logger.info("ModelManager", "Search \"%s\" (%d results, %.1f ms)"
@@ -528,8 +527,8 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                         throw new IOException("Found no assets in the target directories.");
                     // Initialize list view.
                     modelListView.getSelectionModel().getSelectedItems().addListener(
-                            (ListChangeListener<JFXListCell<ModelItem>>) (observable -> observable.getList().forEach(
-                                    (Consumer<JFXListCell<ModelItem>>) this::selectCell)
+                            (ListChangeListener<ListCell<ModelItem>>) (observable -> observable.getList().forEach(
+                                    (Consumer<ListCell<ModelItem>>) this::selectCell)
                             )
                     );
                     modelListView.setFixedCellSize(30);
@@ -595,7 +594,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                     // Scroll to recent selected model and then select it.
                     ModelItem recentSelected = assetItemList.searchByRelPath(app.config.character_asset);
                     if (recentSelected != null) {
-                        for (JFXListCell<ModelItem> cell : modelListView.getItems())
+                        for (ListCell<ModelItem> cell : modelListView.getItems())
                             if (recentSelected.equals(cell.getItem())) {
                                 modelListView.scrollTo(cell);
                                 modelListView.getSelectionModel().select(cell);
@@ -646,7 +645,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         return item;
     }
 
-    private void selectCell(JFXListCell<ModelItem> cell) {
+    private void selectCell(ListCell<ModelItem> cell) {
         // Reset
         if (selectedModelCell != null) {
             selectedModelCell.getStyleClass().setAll("list-item");

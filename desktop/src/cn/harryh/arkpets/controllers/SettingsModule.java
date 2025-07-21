@@ -20,7 +20,7 @@ import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.utils.GuiComponents.*;
 import com.alibaba.fastjson.JSONObject;
 import com.badlogic.gdx.graphics.Color;
-import com.jfoenix.controls.*;
+import com.jfoenix.controls.JFXDialog;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.concurrent.ScheduledService;

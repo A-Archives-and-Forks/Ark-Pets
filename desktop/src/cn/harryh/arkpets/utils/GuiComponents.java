@@ -4,13 +4,15 @@
 package cn.harryh.arkpets.utils;
 
 import cn.harryh.arkpets.Const;
-import com.jfoenix.controls.*;
+import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXTreeTableColumn;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.ScaleTransition;
 import javafx.animation.Timeline;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.DoublePropertyBase;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -32,6 +34,7 @@ import javafx.util.Duration;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.function.Function;
 
 
 public class GuiComponents {
@@ -313,6 +316,49 @@ public class GuiComponents {
                 );
                 timeline.play();
             }
+        }
+    }
+
+
+    /** A useful tool to create a {@link TreeTableColumn}.
+     * @param <S> The type of the cell items.
+     * @param <T> The type of the cell values.
+     */
+    @SuppressWarnings("UnusedReturnValue")
+    public static class TreeTableColumnSetup<S, T> {
+        private final TreeTableColumn<S, T> column;
+
+        public TreeTableColumnSetup(TreeTableColumn<S, T> column) {
+            this.column = column;
+        }
+
+        public TreeTableColumnSetup() {
+            this(new JFXTreeTableColumn<>());
+        }
+
+        public TreeTableColumnSetup<S, T> setText(String text) {
+            column.setText(text);
+            return this;
+        }
+
+        public TreeTableColumnSetup<S, T> setReorderable(boolean reorderable) {
+            column.setReorderable(reorderable);
+            return this;
+        }
+
+        public TreeTableColumnSetup<S, T> setValueExtractor(Function<S, T> extractor) {
+            column.setCellValueFactory(cellDataFeatures -> {
+                S rawValue = cellDataFeatures.getValue().getValue();
+                if (rawValue == null || extractor == null)
+                    return null;
+                return new SimpleObjectProperty<>(extractor.apply(rawValue));
+            });
+            return this;
+        }
+
+        public TreeTableColumnSetup<S, T> attachTo(TreeTableView<S> treeTableView) {
+            treeTableView.getColumns().add(column);
+            return this;
         }
     }
 

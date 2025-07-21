@@ -13,7 +13,7 @@ import cn.harryh.arkpets.utils.StringUtils;
 import cn.harryh.arkpets.utils.markdown.FxmlConvertor;
 import cn.harryh.arkpets.utils.markdown.FxmlDocumentController;
 import com.alibaba.fastjson.JSONObject;
-import com.jfoenix.controls.*;
+import com.jfoenix.controls.JFXListCell;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;

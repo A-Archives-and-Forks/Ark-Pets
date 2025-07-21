@@ -5,7 +5,8 @@ package cn.harryh.arkpets.guitasks;
 
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
-import com.jfoenix.controls.*;
+import com.jfoenix.controls.JFXDialog;
+import com.jfoenix.controls.JFXDialogLayout;
 import javafx.concurrent.Task;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;

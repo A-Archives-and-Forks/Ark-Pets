@@ -4,7 +4,7 @@
 package cn.harryh.arkpets.utils;
 
 import cn.harryh.arkpets.controllers.DialogController;
-import com.jfoenix.controls.*;
+import com.jfoenix.controls.JFXDialog;
 import javafx.application.Application;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
