@@ -100,7 +100,7 @@
         </JFXButton>
         <Label styleClass="dialog-title-label" text="公告"/>
     </HBox>
-    <JFXListView fx:id="annoListView" prefHeight="250.0" prefWidth="175.0" styleClass="list"
+    <JFXListView fx:id="annoListView" prefHeight="250.0" prefWidth="175.0" styleClass="arklist"
                  AnchorPane.bottomAnchor="-5.0" AnchorPane.leftAnchor="-5.0">
         <placeholder>
             <VBox id="Loading-empty-tip" alignment="CENTER" spacing="5.0">

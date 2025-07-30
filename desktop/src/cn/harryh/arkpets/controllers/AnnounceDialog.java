@@ -14,6 +14,9 @@ import cn.harryh.arkpets.utils.markdown.FxmlConvertor;
 import cn.harryh.arkpets.utils.markdown.FxmlDocumentController;
 import com.alibaba.fastjson.JSONObject;
 import com.jfoenix.controls.JFXListCell;
+import javafx.beans.binding.StringBinding;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -43,7 +46,7 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
     private Button dialogReturn;
 
     @FXML
-    private ListView<ListCell<AnnounceItem>> annoListView;
+    private ListView<AnnounceItem> annoListView;
     @FXML
     private Button annoRefetch;
     @FXML
@@ -59,25 +62,41 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
     @FXML
     private VBox annoContainer;
 
-    private ListCell<AnnounceItem> selectedAnnoCell;
-
     private AnnounceReadHandler announceReadHandler;
 
     private ArkHomeFX app;
 
+    private AnnounceItemWrapper selectedAnnounce;
+
+    private final ObservableList<AnnounceItem> annoItemList = FXCollections.observableArrayList();
+
     @Override
     public void initializeWith(ArkHomeFX app) {
         this.app = app;
+        this.selectedAnnounce = new AnnounceItemWrapper();
 
+        annoListView.setItems(annoItemList);
         annoListView.getSelectionModel().getSelectedItems().addListener(
-                (ListChangeListener<ListCell<AnnounceItem>>) (observable -> observable.getList().forEach(
-                        (Consumer<ListCell<AnnounceItem>>) this::selectCell)
+                (ListChangeListener<AnnounceItem>) (observable -> observable.getList().forEach(
+                        (Consumer<AnnounceItem>) this::selectCell)
                 )
         );
+        annoListView.setCellFactory(this::createCell);
 
         annoRefetch.setOnAction(e -> this.fetchAnnounce(true, () -> {}));
 
         announceReadHandler = new AnnounceReadHandler(app.config);
+
+        annoTitle.textProperty().bind(selectedAnnounce.titleProperty);
+        annoDate.textProperty().bind(selectedAnnounce.dateProperty);
+        annoDate.visibleProperty().bind(selectedAnnounce.dateProperty.isNotEmpty());
+        annoDate.managedProperty().bind(selectedAnnounce.dateProperty.isNotEmpty());
+        annoGroup.textProperty().bind(selectedAnnounce.groupProperty);
+        annoGroup.managedProperty().bind(selectedAnnounce.groupProperty.isNotEmpty());
+        annoGroup.visibleProperty().bind(selectedAnnounce.groupProperty.isNotEmpty());
+        annoGotoOrigin.visibleProperty().bind(selectedAnnounce.sourceProperty.isNotEmpty());
+        annoGotoOrigin.managedProperty().bind(selectedAnnounce.sourceProperty.isNotEmpty());
+        annoGotoOrigin.setOnMouseClicked(e -> app.popBrowser(selectedAnnounce.sourceProperty.get()));
     }
 
     @Override
@@ -91,7 +110,6 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
     }
 
     public void fetchAnnounce(boolean doPopNotice, Runnable onNeedImmediateShow) {
-        ObservableList<AnnounceItem> annoItemList = FXCollections.observableArrayList();
         new FetchAnnounceTask(app.body, doPopNotice ? GuiTaskStyle.COMMON : GuiTaskStyle.HIDDEN, annoItemList).start();
 
         annoListView.getItems().clear();
@@ -100,7 +118,6 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
             change.next();
             if (change.wasAdded() && change.getAddedSize() > 0) {
                 Logger.info("Announce", "Fetched " + change.getAddedSize() + " announcements");
-                change.getAddedSubList().forEach(anno -> annoListView.getItems().add(createCell(anno)));
                 announceReadHandler.retainAll(change.getAddedSubList());
             }
             // Handle callback
@@ -118,69 +135,26 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
         });
     }
 
-    private ListCell<AnnounceItem> createCell(AnnounceItem anno) {
-        double width = annoListView.getPrefWidth() * 0.75;
-        double offset = width * 0.175;
-        ListCell<AnnounceItem> cell = new JFXListCell<>();
-        cell.getStyleClass().addAll("list-item");
-        cell.setPrefWidth(width);
-        cell.setItem(anno);
-        cell.setId(anno.getAnnoId());
-        SVGPath dot = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_DIAMOND, anno.getParsedGroup().color);
-        dot.setLayoutX(-offset);
-        dot.setScaleX(0.6);
-        dot.setScaleY(0.6);
-        dot.setEffect(new DropShadow(null, GuiPrefabs.COLOR_WHITE, 4.0, 0.5, 0.0, 0.0));
-        Label name = new Label(anno.title);
-        name.getStyleClass().addAll("list-item-label");
-        cell.setGraphic(new Group(dot, name));
-        refreshCellGraphic(cell);
-        return cell;
+    private ListCell<AnnounceItem> createCell(ListView<AnnounceItem> announceItemListView) {
+        return new AnnounceListCell(announceItemListView.getPrefWidth());
     }
 
-    private void refreshCellGraphic(ListCell<AnnounceItem> cell) {
-        double width = annoListView.getPrefWidth() * 0.75;
-        double offset = width * 0.175;
-        SVGPath dot = (SVGPath) ((Group) (cell.getGraphic())).getChildrenUnmodifiable().get(0);
-        dot.setVisible(!announceReadHandler.isRead(cell.getItem()));
-        Label name = (Label) ((Group) (cell.getGraphic())).getChildrenUnmodifiable().get(1);
-        name.setPrefWidth(width - (announceReadHandler.isRead(cell.getItem()) ? 0 : offset));
-    }
-
-    private void selectCell(ListCell<AnnounceItem> cell) {
-        // Reset
-        if (selectedAnnoCell != null) {
-            selectedAnnoCell.getStyleClass().setAll("list-item");
-            refreshCellGraphic(selectedAnnoCell);
-        }
-        selectedAnnoCell = cell;
-        selectedAnnoCell.getStyleClass().add("list-item-active");
+    private void selectCell(AnnounceItem cell) {
         // Display info
-        AnnounceItem anno = cell.getItem();
-        annoTitle.setText(anno.title);
-        GuiPrefabs.replaceTextAutoVisibility(annoGroup, switch (anno.getParsedGroup()) {
-            case DEFAULT -> null;
-            case INFO -> "普通公告";
-            case WARN -> "重要公告";
-            case DANGER -> "紧急公告";
-        });
-        GuiPrefabs.replaceTextAutoVisibility(annoDate,
-                anno.date != null && !anno.date.isEmpty() ? StringUtils.getSimpleTimeString(anno.getParsedDate()) : "");
-        GuiPrefabs.replaceTextAutoVisibility(annoGotoOrigin, anno.source != null ? "查看原文" : null);
-        annoGotoOrigin.setOnMouseClicked(e -> app.popBrowser(anno.source));
+        selectedAnnounce.setAnnounce(cell);
         // Display announcement
         GuiPrefabs.fadeOutNode(annoContainer, durationFast, e -> {
             GuiPrefabs.disableScrollPaneCache(annoScroll);
             annoScroll.setVvalue(0.0);
             annoContainer.getChildren().clear();
-            FxmlDocumentController document = FxmlConvertor.toFxmlController(anno.markdown);
+            FxmlDocumentController document = FxmlConvertor.toFxmlController(cell.markdown);
             document.getBodyNode().setMaxWidth(annoScroll.getWidth());
             document.setHyperlinkConsumer(string -> app.popBrowser(string));
             annoContainer.getChildren().add(document.getBodyNode());
             GuiPrefabs.fadeInNode(annoContainer, durationFast, null);
         });
         // Mark as read
-        announceReadHandler.setRead(anno);
+        announceReadHandler.setRead(cell);
     }
 
 
@@ -237,6 +211,80 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
                 int delta = size - config.user_announcement_read.size();
                 Logger.info("Announce", "Removed " + delta + " legacy local announcement records");
                 config.save();
+            }
+        }
+    }
+
+    private static class AnnounceItemWrapper {
+        private final StringProperty titleProperty = new SimpleStringProperty("暂未选择任何公告");
+        private final StringProperty sourceProperty = new SimpleStringProperty();
+        private AnnounceItem announce;
+
+        private final StringBinding dateProperty = new StringBinding() {
+            @Override
+            protected String computeValue() {
+                if (announce == null) return "日期";
+                return announce.date != null && !announce.date.isEmpty() ? StringUtils.getSimpleTimeString(announce.getParsedDate()) : "";
+            }
+        };
+
+        private final StringBinding groupProperty = new StringBinding() {
+            @Override
+            protected String computeValue() {
+                if (announce == null) return "等级";
+                return switch (announce.getParsedGroup()) {
+                    case DEFAULT -> null;
+                    case INFO -> "普通公告";
+                    case WARN -> "重要公告";
+                    case DANGER -> "紧急公告";
+                };
+            }
+        };
+
+        public void setAnnounce(AnnounceItem announce) {
+            this.announce = announce;
+            titleProperty.set(announce.title);
+            sourceProperty.set(announce.source);
+            dateProperty.invalidate();
+            groupProperty.invalidate();
+        }
+    }
+
+    private class AnnounceListCell extends JFXListCell<AnnounceItem> {
+        private final double width;
+        private final double offset;
+        private final SVGPath dot;
+        private final Label name;
+        private final Group group;
+
+        public AnnounceListCell(double listWidth) {
+            this.width = listWidth * 0.75;
+            this.offset = listWidth * 0.175;
+            dot = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_DIAMOND, GuiPrefabs.COLOR_BLACK);
+            dot.setLayoutX(-offset);
+            dot.setScaleX(0.6);
+            dot.setScaleY(0.6);
+            dot.setEffect(new DropShadow(null, GuiPrefabs.COLOR_WHITE, 4.0, 0.5, 0.0, 0.0));
+            name = new Label();
+            name.getStyleClass().addAll("list-item-label");
+            setPrefWidth(width);
+            this.group = new Group(dot, name);
+        }
+
+        @Override
+        protected void updateItem(AnnounceItem anno, boolean empty) {
+            super.updateItem(anno, empty);
+            if (empty || anno == null) {
+                setText(null);
+                setGraphic(null);
+            } else {
+                setText(null);
+                setId(anno.getAnnoId());
+                name.setText(anno.title);
+                dot.setFill(anno.getParsedGroup().color);
+                dot.setVisible(!announceReadHandler.isRead(anno));
+                name.setPrefWidth(width - (announceReadHandler.isRead(anno) ? 0 : offset));
+                setGraphic(group);
             }
         }
     }
