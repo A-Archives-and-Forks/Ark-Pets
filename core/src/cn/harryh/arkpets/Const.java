@@ -132,23 +132,27 @@ public final class Const {
         private static final String fontFileBold     = "/fonts/SourceHanSansCN-Bold.otf";
 
         public static void loadFontsToJavafx() {
-            javafx.scene.text.Font.loadFont(FontsConfig.class.getResourceAsStream(fontFileRegular),
-                    javafx.scene.text.Font.getDefault().getSize());
-            javafx.scene.text.Font.loadFont(FontsConfig.class.getResourceAsStream(fontFileBold),
-                    javafx.scene.text.Font.getDefault().getSize());
+            if (System.getProperty("arkpets.usesystemfont") == null) {
+                javafx.scene.text.Font.loadFont(FontsConfig.class.getResourceAsStream(fontFileRegular),
+                        javafx.scene.text.Font.getDefault().getSize());
+                javafx.scene.text.Font.loadFont(FontsConfig.class.getResourceAsStream(fontFileBold),
+                        javafx.scene.text.Font.getDefault().getSize());
+            }
         }
 
         public static void loadFontsToSwing() {
-            try {
-                InputStream in = Objects.requireNonNull(FontsConfig.class.getResourceAsStream(fontFileRegular));
-                java.awt.Font font = java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, in);
-                if (font != null) {
-                    UIManager.put("Label.font", font.deriveFont(10f).deriveFont(Font.ITALIC));
-                    UIManager.put("Menu.font", font.deriveFont(11f));
-                    UIManager.put("MenuItem.font", font.deriveFont(11f));
+            if (System.getProperty("arkpets.usesystemfont") == null) {
+                try {
+                    InputStream in = Objects.requireNonNull(FontsConfig.class.getResourceAsStream(fontFileRegular));
+                    java.awt.Font font = java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, in);
+                    if (font != null) {
+                        UIManager.put("Label.font", font.deriveFont(10f).deriveFont(Font.ITALIC));
+                        UIManager.put("Menu.font", font.deriveFont(11f));
+                        UIManager.put("MenuItem.font", font.deriveFont(11f));
+                    }
+                } catch (FontFormatException | IOException e) {
+                    Logger.error("System", "Failed to load tray menu font, details see below.", e);
                 }
-            } catch (FontFormatException | IOException e) {
-                Logger.error("System", "Failed to load tray menu font, details see below.", e);
             }
         }
     }
