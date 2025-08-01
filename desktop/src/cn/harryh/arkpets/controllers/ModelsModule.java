@@ -16,6 +16,7 @@ import cn.harryh.arkpets.network.api.McQueryVersion;
 import cn.harryh.arkpets.utils.GuiComponents.NoticeBar;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.IOUtils;
+import cn.harryh.arkpets.utils.ScrollUtils;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Version;
 import com.alibaba.fastjson.JSONObject;
@@ -299,6 +300,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     }
 
     private void initModelFilter() {
+        ScrollUtils.addSmoothScrolling(filterPaneTagScroll);
         filterPaneTagClear.setOnMouseClicked(e -> app.popLoading(ev -> {
             filterTagSet.clear();
             modelSearch(searchModelInput.getText());

@@ -9,6 +9,7 @@ import cn.harryh.arkpets.guitasks.GuiTask.GuiTaskStyle;
 import cn.harryh.arkpets.guitasks.requests.FetchAnnounceTask;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.utils.ScrollUtils;
 import cn.harryh.arkpets.utils.StringUtils;
 import cn.harryh.arkpets.utils.markdown.FxmlConvertor;
 import cn.harryh.arkpets.utils.markdown.FxmlDocumentController;
@@ -75,6 +76,7 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
     @Override
     public void initializeWith(ArkHomeFX app) {
         this.app = app;
+        ScrollUtils.addSmoothScrolling(annoScroll);
         this.selectedAnnounce = new AnnounceItemWrapper();
 
         annoListView.setItems(annoItemList);

@@ -145,7 +145,7 @@ public final class SettingsModule implements Controller<ArkHomeFX> {
         initNetwork();
         initAbout();
         initScheduledListener();
-
+        ScrollUtils.addSmoothScrolling(moduleScroll);
         Platform.runLater(() -> GuiPrefabs.disableScrollPaneCache(moduleScroll));
     }
 
