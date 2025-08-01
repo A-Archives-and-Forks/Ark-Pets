@@ -269,6 +269,7 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
             name.getStyleClass().addAll("list-item-label");
             setPrefWidth(width);
             this.group = new Group(dot, name);
+            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         }
 
         @Override

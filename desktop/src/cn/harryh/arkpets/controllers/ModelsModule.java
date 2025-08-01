@@ -801,6 +801,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             alias1.getStyleClass().add("list-item-label-sub");
             this.group = new Group(fav, name, alias1);
             setPrefSize(width, height);
+            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         }
 
         @Override
