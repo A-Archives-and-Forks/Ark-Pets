@@ -13,7 +13,7 @@ import cn.harryh.arkpets.utils.StringUtils;
 import cn.harryh.arkpets.utils.markdown.FxmlConvertor;
 import cn.harryh.arkpets.utils.markdown.FxmlDocumentController;
 import com.alibaba.fastjson.JSONObject;
-import com.jfoenix.controls.JFXListCell;
+import com.jfoenix.controls.JFXRippler;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -22,12 +22,14 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
+import javafx.scene.shape.Shape;
 
 import java.time.Instant;
 import java.util.List;
@@ -250,15 +252,16 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
         }
     }
 
-    private class AnnounceListCell extends JFXListCell<AnnounceItem> {
+    private class AnnounceListCell extends ListCell<AnnounceItem> {
         private final double width;
         private final double offset;
         private final SVGPath dot;
         private final Label name;
         private final Group group;
+        private final JFXRippler rippler;
 
         public AnnounceListCell(double listWidth) {
-            this.width = listWidth * 0.75;
+            this.width = listWidth * 0.95;
             this.offset = listWidth * 0.175;
             dot = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_DIAMOND, GuiPrefabs.COLOR_BLACK);
             dot.setLayoutX(-offset);
@@ -269,7 +272,22 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
             name.getStyleClass().addAll("list-item-label");
             setPrefWidth(width);
             this.group = new Group(dot, name);
+            this.rippler = new JFXRippler(this.group);
             setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        }
+
+        @Override
+        protected void layoutChildren() {
+            super.layoutChildren();
+            rippler.resizeRelocate(0, 0, getWidth(), getHeight());
+            if (!getChildren().contains(rippler) && !getChildren().isEmpty()) {
+                for (Node child : getChildren()) {
+                    if (child instanceof Label || child instanceof Shape) {
+                        child.setMouseTransparent(true);
+                    }
+                }
+                getChildren().add(0, rippler);
+            }
         }
 
         @Override
@@ -279,13 +297,14 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
                 setText(null);
                 setGraphic(null);
             } else {
-                setText(null);
                 setId(anno.getAnnoId());
                 name.setText(anno.title);
+                name.setPrefWidth(width - (announceReadHandler.isRead(anno) ? 0 : offset));
+                name.setPrefHeight(35);
                 dot.setFill(anno.getParsedGroup().color);
                 dot.setVisible(!announceReadHandler.isRead(anno));
-                name.setPrefWidth(width - (announceReadHandler.isRead(anno) ? 0 : offset));
                 setGraphic(group);
+                setText(null);
             }
         }
     }

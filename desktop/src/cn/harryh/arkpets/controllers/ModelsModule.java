@@ -13,10 +13,13 @@ import cn.harryh.arkpets.guitasks.requests.DownloadModelsTask;
 import cn.harryh.arkpets.guitasks.requests.McCheckModelsUpdateTask;
 import cn.harryh.arkpets.network.SourceStrategy;
 import cn.harryh.arkpets.network.api.McQueryVersion;
-import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.utils.GuiComponents.NoticeBar;
+import cn.harryh.arkpets.utils.GuiPrefabs;
+import cn.harryh.arkpets.utils.IOUtils;
+import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.utils.Version;
 import com.alibaba.fastjson.JSONObject;
-import com.jfoenix.controls.JFXListCell;
+import com.jfoenix.controls.JFXRippler;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.When;
@@ -37,6 +40,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
+import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 
 import java.io.File;
@@ -617,7 +621,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     }
 
     private ListCell<ModelItem> createCell(ListView<ModelItem> modelItemListView) {
-        double width = modelListView.getPrefWidth() - 50;
+        double width = modelListView.getPrefWidth() - 20;
         double height = 30;
         double divide = 0.618;
         return new ModelListCell(width, divide, height);
@@ -773,7 +777,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         }
     }
 
-    private class ModelListCell extends JFXListCell<ModelItem> {
+    private class ModelListCell extends ListCell<ModelItem> {
 
         private final double width;
         private final double divide;
@@ -782,6 +786,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         private final SVGPath fav;
         private final Label alias1;
         private final Group group;
+        private final JFXRippler rippler;
 
         public ModelListCell(double width, double divide, double height) {
             this.width = width;
@@ -800,8 +805,23 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             alias1.setPrefSize(width * (1 - divide), height);
             alias1.getStyleClass().add("list-item-label-sub");
             this.group = new Group(fav, name, alias1);
+            this.rippler = new JFXRippler(this.group);
             setPrefSize(width, height);
             setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        }
+
+        @Override
+        protected void layoutChildren() {
+            super.layoutChildren();
+            rippler.resizeRelocate(0, 0, getWidth(), getHeight());
+            if (!getChildren().contains(rippler) && !getChildren().isEmpty()) {
+                for (Node child : getChildren()) {
+                    if (child instanceof Label || child instanceof Shape) {
+                        child.setMouseTransparent(true);
+                    }
+                }
+                getChildren().add(0, rippler);
+            }
         }
 
         @Override
