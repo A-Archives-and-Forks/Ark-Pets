@@ -54,7 +54,7 @@ public class ArkPets extends InputApplicationAdaptor {
 
         hWndTopmostGetter = new Cached<>();
         hWndTopmostGetter.setValueProducer(this::refreshWindowIndex);
-        hWndTopmostGetter.setCacheAgeProducer(() -> 4.0 / getReducedFPS());
+        hWndTopmostGetter.setCacheAgeProducer(() -> 8.0 / getReducedFPS());
 
         isFocused = new Cached<>();
         isFocused.setValueProducer(() -> hWndMine.isForeground());
@@ -352,10 +352,11 @@ public class ArkPets extends InputApplicationAdaptor {
                 (int) windowPosition.now().y + cha.camera.getHeight(),
                 (int) windowPosition.now().x,
                 (int) windowPosition.now().x + cha.camera.getWidth());
+        HWndCtrl top = hWndTopmostGetter.getValue();
         hWndPosSetter.setValue(rect);
         if (hWndPosSetter.isChanged()) {
             rect = hWndPosSetter.getValue();
-            hWndMine.setWindowPosition(hWndTopmostGetter.getValue(),
+            hWndMine.setWindowPosition(top,
                     rect.left(), rect.top(), rect.width(), rect.height());
         }
     }
