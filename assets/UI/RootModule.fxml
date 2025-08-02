@@ -30,7 +30,8 @@
             <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
                         prefHeight="376.0" prefWidth="600.0" StackPane.alignment="BOTTOM_CENTER">
                 <!-- ***** 1.1. Sidebar ***** -->
-                <Pane id="Sidebar" fx:id="sidebar" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                <Pane id="Sidebar" fx:id="sidebar" cache="true" cacheHint="SPEED"
+                      maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                       minWidth="-Infinity" prefHeight="376.0" prefWidth="140.0" styleClass="shadowed"
                       AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0" StackPane.alignment="BOTTOM_LEFT">
                     <Text id="Title" layoutX="12.0" layoutY="48.0" text="ArkPets" textAlignment="CENTER"
@@ -157,7 +158,8 @@
         </AnchorPane>
 
         <!-- ********** 3. Title Bar ********** -->
-        <AnchorPane id="Title-bar" fx:id="titleBar" maxHeight="-Infinity" minHeight="-Infinity"
+        <AnchorPane id="Title-bar" fx:id="titleBar"
+                    cache="true" cacheHint="SPEED" maxHeight="-Infinity" minHeight="-Infinity"
                     onMouseDragged="#titleBarDragged" onMousePressed="#titleBarPressed" prefHeight="24.0"
                     styleClass="shadowed" StackPane.alignment="TOP_CENTER">
             <HBox prefHeight="24.0" prefWidth="200.0" AnchorPane.leftAnchor="3.0">

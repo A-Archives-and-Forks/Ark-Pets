@@ -14,7 +14,7 @@
 <?import java.lang.String?>
 <AnchorPane fx:id="dialog" prefHeight="325.0" prefWidth="550.0" styleClass="wrapper" stylesheets="@Main.css"
             xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="cn.harryh.arkpets.controllers.AnnounceDialog">
+            cache="true" cacheHint="SPEED" fx:controller="cn.harryh.arkpets.controllers.AnnounceDialog">
     <HBox spacing="10.0" styleClass="dialog-oper-bar" AnchorPane.leftAnchor="-15.0" AnchorPane.rightAnchor="-15.0"
           AnchorPane.topAnchor="-15.0">
         <padding>
