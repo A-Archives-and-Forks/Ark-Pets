@@ -13,7 +13,6 @@ import cn.harryh.arkpets.utils.StringUtils;
 import cn.harryh.arkpets.utils.markdown.FxmlConvertor;
 import cn.harryh.arkpets.utils.markdown.FxmlDocumentController;
 import com.alibaba.fastjson.JSONObject;
-import com.jfoenix.controls.JFXRippler;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -21,15 +20,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
-import javafx.scene.shape.Shape;
 
 import java.time.Instant;
 import java.util.List;
@@ -143,7 +139,7 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
 
     private void selectCell(AnnounceItem cell) {
         // Display info
-        selectedAnnounce.setAnnounce(cell);
+        selectedAnnounce.setAnnounceItem(cell);
         // Display announcement
         GuiPrefabs.fadeOutNode(annoContainer, durationFast, e -> {
             GuiPrefabs.disableScrollPaneCache(annoScroll);
@@ -217,24 +213,68 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
         }
     }
 
+
+    private class AnnounceListCell extends GuiPrefabs.RipperListCell<AnnounceItem> {
+        private final double width;
+        private final double offset;
+        private final SVGPath dot;
+        private final Label name;
+        private final static DropShadow dotShadow = new DropShadow(null, GuiPrefabs.COLOR_WHITE, 4.0, 0.5, 0.0, 0.0);
+
+        public AnnounceListCell(double listWidth) {
+            this.width = listWidth * 0.925;
+            this.offset = listWidth * 0.175;
+
+            dot = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_DIAMOND, GuiPrefabs.COLOR_BLACK);
+            dot.setLayoutX(-offset);
+            dot.setScaleX(0.6);
+            dot.setScaleY(0.6);
+            dot.setEffect(dotShadow);
+            name = new Label();
+            name.getStyleClass().addAll("list-item-label");
+
+            getContent().setAll(dot, name);
+            setPrefWidth(width);
+        }
+
+        @Override
+        protected void updateItem(AnnounceItem anno, boolean empty) {
+            super.updateItem(anno, empty);
+            if (empty || anno == null) {
+                setContentVisible(false);
+            } else {
+                setId(anno.getAnnoId());
+                name.setText(anno.title);
+                name.setPrefWidth(width - (announceReadHandler.isRead(anno) ? 0 : offset));
+                name.setPrefHeight(35);
+                dot.setFill(anno.getParsedGroup().color);
+                dot.setVisible(!announceReadHandler.isRead(anno));
+                setContentVisible(true);
+            }
+        }
+    }
+
+
     private static class AnnounceItemWrapper {
         private final StringProperty titleProperty = new SimpleStringProperty("暂未选择任何公告");
         private final StringProperty sourceProperty = new SimpleStringProperty();
-        private AnnounceItem announce;
+        private AnnounceItem announceItem;
 
         private final StringBinding dateProperty = new StringBinding() {
             @Override
             protected String computeValue() {
-                if (announce == null) return "日期";
-                return announce.date != null && !announce.date.isEmpty() ? StringUtils.getSimpleTimeString(announce.getParsedDate()) : "";
+                if (announceItem == null)
+                    return "日期";
+                if (announceItem.date == null || announceItem.date.isEmpty())
+                    return "";
+                return StringUtils.getSimpleTimeString(announceItem.getParsedDate());
             }
         };
-
         private final StringBinding groupProperty = new StringBinding() {
             @Override
             protected String computeValue() {
-                if (announce == null) return "等级";
-                return switch (announce.getParsedGroup()) {
+                if (announceItem == null) return "等级";
+                return switch (announceItem.getParsedGroup()) {
                     case DEFAULT -> null;
                     case INFO -> "普通公告";
                     case WARN -> "重要公告";
@@ -243,69 +283,12 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
             }
         };
 
-        public void setAnnounce(AnnounceItem announce) {
-            this.announce = announce;
-            titleProperty.set(announce.title);
-            sourceProperty.set(announce.source);
+        public void setAnnounceItem(AnnounceItem announceItem) {
+            this.announceItem = announceItem;
+            titleProperty.set(announceItem.title);
+            sourceProperty.set(announceItem.source);
             dateProperty.invalidate();
             groupProperty.invalidate();
-        }
-    }
-
-    private class AnnounceListCell extends ListCell<AnnounceItem> {
-        private final double width;
-        private final double offset;
-        private final SVGPath dot;
-        private final Label name;
-        private final Group group;
-        private final JFXRippler rippler;
-
-        public AnnounceListCell(double listWidth) {
-            this.width = listWidth * 0.95;
-            this.offset = listWidth * 0.175;
-            dot = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_DIAMOND, GuiPrefabs.COLOR_BLACK);
-            dot.setLayoutX(-offset);
-            dot.setScaleX(0.6);
-            dot.setScaleY(0.6);
-            dot.setEffect(new DropShadow(null, GuiPrefabs.COLOR_WHITE, 4.0, 0.5, 0.0, 0.0));
-            name = new Label();
-            name.getStyleClass().addAll("list-item-label");
-            setPrefWidth(width);
-            this.group = new Group(dot, name);
-            this.rippler = new JFXRippler(this.group);
-            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-        }
-
-        @Override
-        protected void layoutChildren() {
-            super.layoutChildren();
-            rippler.resizeRelocate(0, 0, getWidth(), getHeight());
-            if (!getChildren().contains(rippler) && !getChildren().isEmpty()) {
-                for (Node child : getChildren()) {
-                    if (child instanceof Label || child instanceof Shape) {
-                        child.setMouseTransparent(true);
-                    }
-                }
-                getChildren().add(0, rippler);
-            }
-        }
-
-        @Override
-        protected void updateItem(AnnounceItem anno, boolean empty) {
-            super.updateItem(anno, empty);
-            if (empty || anno == null) {
-                setText(null);
-                setGraphic(null);
-            } else {
-                setId(anno.getAnnoId());
-                name.setText(anno.title);
-                name.setPrefWidth(width - (announceReadHandler.isRead(anno) ? 0 : offset));
-                name.setPrefHeight(35);
-                dot.setFill(anno.getParsedGroup().color);
-                dot.setVisible(!announceReadHandler.isRead(anno));
-                setGraphic(group);
-                setText(null);
-            }
         }
     }
 }

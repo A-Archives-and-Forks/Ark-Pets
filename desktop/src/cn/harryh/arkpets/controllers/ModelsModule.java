@@ -19,7 +19,6 @@ import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Version;
 import com.alibaba.fastjson.JSONObject;
-import com.jfoenix.controls.JFXRippler;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.When;
@@ -29,9 +28,9 @@ import javafx.collections.*;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -40,7 +39,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
-import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 
 import java.io.File;
@@ -127,7 +125,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     private Label modelHelp;
 
     private ModelItemGroup assetItemList;
-    private ModelWrapper selectedModel;
+    private ModelItemWrapper selectedModel;
     private final ObservableList<ModelItem> targetList = FXCollections.observableArrayList();
     private ObservableSet<String> filterTagSet = FXCollections.observableSet();
 
@@ -145,7 +143,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     @Override
     public void initializeWith(ArkHomeFX app) {
         this.app = app;
-        this.selectedModel = new ModelWrapper();
+        this.selectedModel = new ModelItemWrapper();
         this.modelListView.setItems(targetList);
         infoPaneComposer = new GuiPrefabs.PeerNodeComposer();
         infoPaneComposer.add(0, infoPane);
@@ -166,7 +164,6 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         initModelFilter();
         initModelManage();
         initModelFavorite();
-        modelListView.setCellFactory(this::createCell);
         modelReload(false);
         Platform.runLater(() -> {
             GuiPrefabs.disableScrollPaneCache(infoPaneTagScroll);
@@ -460,10 +457,13 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         }
 
         modelFavorite.setOnAction(e -> {
-            selectedModel.setFavorite(!selectedModel.isFavorite());
+            selectedModel.setFavorite(!selectedModel.getFavoriteProperty().get());
             modelListView.refresh();
             app.config.save();
         });
+        modelFavorite.graphicProperty().bind(
+                new When(selectedModel.getFavoriteProperty()).then(favFillIcon).otherwise(favIcon)
+        );
 
         topFavorite.setOnAction(e -> {
             Logger.debug("ModelManager", "Toggle favorite display");
@@ -538,6 +538,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                                     (Consumer<ModelItem>) this::selectCell)
                             )
                     );
+                    modelListView.setCellFactory(listView -> new ModelListCell(listView.getPrefWidth() - 30, 30));
                     modelListView.setFixedCellSize(30);
                     // Write models to menu items.
                     selectedModel.setSortTags(app.modelsDataset.sortTags);
@@ -613,18 +614,10 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             // Post process:
             loadFailureTip.setVisible(targetList.isEmpty());
             app.rootModule.launchBtn.setDisable(targetList.isEmpty());
-            modelFavorite.graphicProperty().bind(new When(selectedModel.favoriteProperty).then(favFillIcon).otherwise(favIcon));
             if (willGc)
                 System.gc();
             Logger.info("ModelManager", "Reloaded");
         });
-    }
-
-    private ListCell<ModelItem> createCell(ListView<ModelItem> modelItemListView) {
-        double width = modelListView.getPrefWidth() - 20;
-        double height = 30;
-        double divide = 0.618;
-        return new ModelListCell(width, divide, height);
     }
 
     private void selectCell(ModelItem model) {
@@ -777,82 +770,66 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         }
     }
 
-    private class ModelListCell extends ListCell<ModelItem> {
 
+    private class ModelListCell extends GuiPrefabs.RipperListCell<ModelItem> {
         private final double width;
-        private final double divide;
         private final double height;
+        private final SVGPath icon;
         private final Label name;
-        private final SVGPath fav;
-        private final Label alias1;
-        private final Group group;
-        private final JFXRippler rippler;
+        private final Label alias;
+        private static final double divide = 0.618;
+        private final static DropShadow iconShadow = new DropShadow(null, GuiPrefabs.COLOR_WHITE, 4.0, 0.5, 0.0, 0.0);
 
-        public ModelListCell(double width, double divide, double height) {
+        public ModelListCell(double width, double height) {
+            super();
             this.width = width;
-            this.divide = divide;
             this.height = height;
-            this.name = new Label();
-            name.getStyleClass().add("list-item-label");
-            name.setLayoutX(20);
-            this.fav = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_STAR_FILLED, GuiPrefabs.COLOR_WARNING);
-            fav.setLayoutX(0);
-            fav.setLayoutY(3);
-            fav.setScaleX(0.75);
-            fav.setScaleY(0.75);
-            fav.setOpacity(0);
-            this.alias1 = new Label();
-            alias1.setPrefSize(width * (1 - divide), height);
-            alias1.getStyleClass().add("list-item-label-sub");
-            this.group = new Group(fav, name, alias1);
-            this.rippler = new JFXRippler(this.group);
-            setPrefSize(width, height);
-            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-        }
 
-        @Override
-        protected void layoutChildren() {
-            super.layoutChildren();
-            rippler.resizeRelocate(0, 0, getWidth(), getHeight());
-            if (!getChildren().contains(rippler) && !getChildren().isEmpty()) {
-                for (Node child : getChildren()) {
-                    if (child instanceof Label || child instanceof Shape) {
-                        child.setMouseTransparent(true);
-                    }
-                }
-                getChildren().add(0, rippler);
-            }
+            icon = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_STAR_FILLED, GuiPrefabs.COLOR_WARNING);
+            icon.setLayoutX(3);
+            icon.setLayoutY(3);
+            icon.setScaleX(0.75);
+            icon.setScaleY(0.75);
+            icon.setOpacity(0);
+            icon.setEffect(iconShadow);
+            name = new Label();
+            name.getStyleClass().add("list-item-label");
+            name.setTranslateX(25);
+            alias = new Label();
+            alias.setPrefSize(width * (1 - divide), height);
+            alias.getStyleClass().add("list-item-label-sub");
+            alias.setTranslateX(20);
+
+            getContent().setAll(icon, name, alias);
+            setPrefSize(width, height);
         }
 
         @Override
         protected void updateItem(ModelItem model, boolean empty) {
             super.updateItem(model, empty);
             if (empty || model == null) {
-                setText(null);
-                setGraphic(null);
+                setContentVisible(false);
             } else {
                 name.setText(model.toString());
                 name.setPrefSize(model.skinGroupName == null ? width : width * divide, height);
-                alias1.setText(model.skinGroupName);
-                alias1.setLayoutX(model.skinGroupName == null ? 0 : width * divide);
-                if (app.config.character_favorites.containsKey(model.key))
-                    fav.setOpacity(1);
-                else
-                    fav.setOpacity(0);
+                alias.setText(model.skinGroupName);
+                alias.setLayoutX(model.skinGroupName == null ? 0 : width * divide);
+                icon.setOpacity(app.config.character_favorites.containsKey(model.key) ? 1 : 0);
                 setId(model.getLocation());
-                setGraphic(group);
-                setText(null);
+                setContentVisible(true);
             }
         }
     }
 
-    private class ModelWrapper {
+
+    private class ModelItemWrapper {
         private final StringProperty nameProperty = new SimpleStringProperty();
         private final StringProperty typeProperty = new SimpleStringProperty();
         private final StringProperty skinGroupNameProperty = new SimpleStringProperty();
         private final StringProperty appellationProperty = new SimpleStringProperty();
         private HashMap<String, String> sortTags;
         private ModelItem modelItem;
+
         private final BooleanBinding favoriteProperty = new BooleanBinding() {
             @Override
             protected boolean computeValue() {
@@ -872,22 +849,23 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                     modelItem.type : sortTags.getOrDefault(modelItem.type, modelItem.type));
             skinGroupNameProperty.set(modelItem.skinGroupName);
             appellationProperty.set(modelItem.appellation);
+            favoriteProperty.invalidate();
         }
 
-        public boolean isFavorite() {
-            return favoriteProperty.get();
-        }
-
-        public void setFavorite(boolean fav) {
+        public void setFavorite(boolean favorite) {
             if (modelItem == null) return;
             app.config.character_favorites.remove(modelItem.key);
-            if (fav) {
+            if (favorite) {
                 app.config.character_favorites.put(modelItem.key, new JSONObject());
                 Logger.debug("ModelManager", "Add favorite model " + modelItem.key);
             } else {
                 Logger.debug("ModelManager", "Remove favorite model " + modelItem.key);
             }
             favoriteProperty.invalidate();
+        }
+
+        public BooleanBinding getFavoriteProperty() {
+            return favoriteProperty;
         }
     }
 }
