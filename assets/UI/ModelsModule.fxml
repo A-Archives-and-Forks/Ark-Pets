@@ -222,7 +222,7 @@
         </styleClass>
     </JFXButton>
     <JFXListView fx:id="modelListView" layoutX="${_modelViewX}" layoutY="100.0" prefHeight="260.0"
-                 prefWidth="${_modelViewW}" styleClass="list">
+                 prefWidth="${_modelViewW}" styleClass="arklist">
         <placeholder>
             <VBox id="Loading-empty-tip" alignment="CENTER" spacing="5.0">
                 <SVGPath
