@@ -33,68 +33,47 @@ import javafx.util.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 
 
-/**
- * Utility class for ScrollPanes.
+/** Utility class for ScrollPanes.
  */
 public final class ScrollUtils {
-
     public enum ScrollDirection {
         UP(-1), RIGHT(-1), DOWN(1), LEFT(1);
 
-        final int intDirection;
+        public final int intDirection;
 
         ScrollDirection(int intDirection) {
             this.intDirection = intDirection;
-        }
-
-        public int intDirection() {
-            return intDirection;
         }
     }
 
     private ScrollUtils() {
     }
 
-    /**
-     * Determines if the given ScrollEvent comes from a trackpad.
-     * <p></p>
+    /** Determines if the given {@link ScrollEvent} comes from a trackpad.
+     * <p>
      * Although this method works in most cases, it is not very accurate.
-     * Since in JavaFX there's no way to tell if a ScrollEvent comes from a trackpad or a mouse
-     * we use this trick: I noticed that a mouse scroll has a delta of 32 (don't know if it changes depending on the device or OS)
-     * and trackpad scrolls have a way smaller delta. So depending on the scroll direction we check if the delta is lesser than 10
-     * (trackpad event) or greater(mouse event).
-     *
-     * @see ScrollEvent#getDeltaX()
-     * @see ScrollEvent#getDeltaY()
+     * Since in JavaFX there's no way to tell if a ScrollEvent comes from a trackpad or a mouse, we use this trick:
+     * I noticed that a mouse scroll has a delta of 32 (don't know if it changes depending on the device or OS)
+     * and trackpad scrolls have a way smaller delta. So depending on the scroll direction
+     * we check if the delta is lesser than 10 (trackpad event) or greater(mouse event).
      */
     public static boolean isTrackPad(ScrollEvent event, ScrollDirection scrollDirection) {
-        switch (scrollDirection) {
-            case UP:
-            case DOWN:
-                return Math.abs(event.getDeltaY()) < 10;
-            case LEFT:
-            case RIGHT:
-                return Math.abs(event.getDeltaX()) < 10;
-            default:
-                return false;
-        }
+        return switch (scrollDirection) {
+            case UP, DOWN -> Math.abs(event.getDeltaY()) < 10;
+            case LEFT, RIGHT -> Math.abs(event.getDeltaX()) < 10;
+        };
     }
 
-    /**
-     * Determines the scroll direction of the given ScrollEvent.
-     * <p></p>
+    /** Determines the scroll direction of the given {@link ScrollEvent}.
+     * <p>
      * Although this method works fine, it is not very accurate.
      * In JavaFX there's no concept of scroll direction, if you try to scroll with a trackpad
      * you'll notice that you can scroll in both directions at the same time, both deltaX and deltaY won't be 0.
-     * <p></p>
-     * For this method to work we assume that this behavior is not possible.
-     * <p></p>
-     * If deltaY is 0 we return LEFT or RIGHT depending on deltaX (respectively if lesser or greater than 0).
      * <p>
+     * For this method to work we assume that this behavior is not possible.
+     * <p>
+     * If deltaY is 0 we return LEFT or RIGHT depending on deltaX (respectively if lesser or greater than 0).
      * Else we return DOWN or UP depending on deltaY (respectively if lesser or greater than 0).
-     *
-     * @see ScrollEvent#getDeltaX()
-     * @see ScrollEvent#getDeltaY()
      */
     public static ScrollDirection determineScrollDirection(ScrollEvent event) {
         double deltaX = event.getDeltaX();
@@ -111,8 +90,7 @@ public final class ScrollUtils {
     // ScrollPanes
     //================================================================================
 
-    /**
-     * Adds a smooth scrolling effect to the given scroll pane,
+    /** Adds a smooth scrolling effect to the given scroll pane,
      * calls {@link #addSmoothScrolling(ScrollPane, double)} with a
      * default speed value of 1.
      */
@@ -120,8 +98,7 @@ public final class ScrollUtils {
         addSmoothScrolling(scrollPane, 1);
     }
 
-    /**
-     * Adds a smooth scrolling effect to the given scroll pane with the given scroll speed.
+    /** Adds a smooth scrolling effect to the given scroll pane with the given scroll speed.
      * Calls {@link #addSmoothScrolling(ScrollPane, double, double)}
      * with a default trackPadAdjustment of 7.
      */
@@ -129,12 +106,11 @@ public final class ScrollUtils {
         addSmoothScrolling(scrollPane, speed, 7);
     }
 
-    /**
-     * Adds a smooth scrolling effect to the given scroll pane with the given
+    /** Adds a smooth scrolling effect to the given scroll pane with the given
      * scroll speed and the given trackPadAdjustment.
-     * <p></p>
+     * <p>
      * The trackPadAdjustment is a value used to slow down the scrolling if a trackpad is used.
-     * This is kind of a workaround and it's not perfect, but at least it's way better than before.
+     * This is kind of a workaround, and it's not perfect, but at least it's way better than before.
      * The default value is 7, tested up to 10, further values can cause scrolling misbehavior.
      */
     public static void addSmoothScrolling(ScrollPane scrollPane, double speed, double trackPadAdjustment) {
@@ -208,5 +184,4 @@ public final class ScrollUtils {
         }));
         timeline.setCycleCount(Animation.INDEFINITE);
     }
-
 }
