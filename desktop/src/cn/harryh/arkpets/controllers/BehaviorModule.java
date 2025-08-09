@@ -11,6 +11,7 @@ import cn.harryh.arkpets.utils.GuiComponents.*;
 import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Monitor;
+import cn.harryh.arkpets.utils.ScrollUtils;
 import javafx.application.Platform;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
@@ -113,7 +114,7 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
         this.app = app;
         initConfigBehavior();
         initScheduledListener();
-
+        ScrollUtils.addSmoothScrolling(moduleScroll);
         Platform.runLater(() -> GuiPrefabs.disableScrollPaneCache(moduleScroll));
     }
 
