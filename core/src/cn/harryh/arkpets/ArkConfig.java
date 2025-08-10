@@ -96,7 +96,7 @@ public class ArkConfig implements Serializable {
     public float        physic_speed_limit_y;
     /** @since ArkPets 3.5 */ @JSONField(defaultValue = "0.3")
     public float        render_animation_mixture;
-    /** @since ArkPets 3.8 */ @JSONField(defaultValue = "false")
+    /** @since ArkPets 3.8 */ @JSONField(defaultValue = "true")
     public boolean      render_enable_angle;
     /** @since ArkPets 3.8 */ @JSONField(defaultValue = "true")
     public boolean      render_enable_mipmap;
@@ -105,9 +105,9 @@ public class ArkConfig implements Serializable {
     /** @since ArkPets 3.3 */ @JSONField(defaultValue = "#FFFF00FF")
     public String       render_outline_color;
     /** @since ArkPets 3.9 */ @JSONField(defaultValue = "3")
-    public int       render_outline_emphasis;
+    public int          render_outline_emphasis;
     /** @since ArkPets 3.9 */ @JSONField(defaultValue = "#FFBB00FF")
-    public String          render_outline_emphasis_color;
+    public String       render_outline_emphasis_color;
     /** @since ArkPets 3.3 */ @JSONField(defaultValue = "2.0")
     public float        render_outline_width;
     /** @since ArkPets 3.6 */ @JSONField(defaultValue = "#000000BB")
