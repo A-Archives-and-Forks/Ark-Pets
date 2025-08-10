@@ -232,7 +232,7 @@ public class AnimClip {
     }
 
     private RecognitionResult<AnimStage> recognizeStage(ArrayList<String> elements) {
-        final AnimType[] exMatchingTypes = new AnimType[]{AnimType.IDLE, AnimType.MOVE/*, AnimType.ATTACK*/};
+        final AnimType[] exMatchingTypes = new AnimType[]{AnimType.IDLE, AnimType.MOVE, AnimType.ATTACK};
         final Pattern exMatchingPattern = Pattern.compile("\\d", Pattern.CASE_INSENSITIVE);
         for (var iterator = elements.listIterator(); iterator.hasNext(); ) {
             String s = iterator.next();
