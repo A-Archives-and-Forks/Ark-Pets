@@ -18,7 +18,6 @@ import cn.harryh.arkpets.utils.*;
 import com.alibaba.fastjson.JSONObject;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.When;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.*;
@@ -83,6 +82,8 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     @FXML
     private Button modelFavorite;
     @FXML
+    public SVGPath modelFavoriteIconFill;
+    @FXML
     private Button topFavorite;
 
     @FXML
@@ -127,16 +128,12 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     private ModelItemWrapper selectedModel;
     private final ObservableList<ModelItem> targetList = FXCollections.observableArrayList();
     private ObservableSet<String> filterTagSet = FXCollections.observableSet();
+    private boolean filterFavorite;
 
     private GuiPrefabs.PeerNodeComposer infoPaneComposer;
     private GuiPrefabs.PeerNodeComposer mngBtnComposer;
     private NoticeBar datasetTooLowVerNotice;
     private NoticeBar datasetTooHighVerNotice;
-
-    private final SVGPath wikiIcon = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_BOOK, GuiPrefabs.COLOR_LIGHT_GRAY);
-    private final SVGPath favIcon = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_STAR, GuiPrefabs.COLOR_LIGHT_GRAY);
-    private final SVGPath favFillIcon = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_STAR_FILLED, GuiPrefabs.COLOR_WARNING);
-    private boolean filterFavorite;
 
     private ArkHomeFX app;
 
@@ -251,18 +248,10 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         selectedModelAppellation.textProperty().bind(selectedModel.appellationProperty);
         selectedModelType.textProperty().bind(selectedModel.typeProperty);
         selectedModelSkinGroupName.textProperty().bind(selectedModel.skinGroupNameProperty);
-        Tooltip nameTip = new Tooltip();
-        Tooltip appellationTip = new Tooltip();
-        Tooltip typeTip = new Tooltip();
-        Tooltip skinGroupTip = new Tooltip();
-        nameTip.textProperty().bind(selectedModel.nameProperty);
-        appellationTip.textProperty().bind(selectedModel.appellationProperty);
-        typeTip.textProperty().bind(selectedModel.typeProperty);
-        skinGroupTip.textProperty().bind(selectedModel.skinGroupNameProperty);
-        selectedModelName.setTooltip(nameTip);
-        selectedModelAppellation.setTooltip(appellationTip);
-        selectedModelType.setTooltip(typeTip);
-        selectedModelSkinGroupName.setTooltip(skinGroupTip);
+        GuiPrefabs.addTooltip(selectedModelName, selectedModel.nameProperty);
+        GuiPrefabs.addTooltip(selectedModelAppellation, selectedModel.appellationProperty);
+        GuiPrefabs.addTooltip(selectedModelType, selectedModel.typeProperty);
+        GuiPrefabs.addTooltip(selectedModelSkinGroupName, selectedModel.skinGroupNameProperty);
 
         // Model quick operations
         modelWiki.setOnAction(e -> {
@@ -271,24 +260,16 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                 app.popBrowser(urlWikiPrefix + name);
             }
         });
-        modelWiki.setGraphic(wikiIcon);
-        modelWiki.setTooltip(new Tooltip("Wiki"));
         modelWiki.visibleProperty().bind(selectedModel.getHasWikiProperty());
-        wikiIcon.setScaleX(0.8);
-        wikiIcon.setScaleY(0.8);
+        GuiPrefabs.addTooltip(modelWiki, "Wiki");
+
         modelFavorite.setOnAction(e -> {
             selectedModel.setFavorite(!selectedModel.getFavoriteProperty().get());
             modelListView.refresh();
             app.config.save();
         });
-        modelFavorite.setTooltip(new Tooltip("收藏"));
-        modelFavorite.graphicProperty().bind(
-                new When(selectedModel.getFavoriteProperty()).then(favFillIcon).otherwise(favIcon)
-        );
-        favIcon.setScaleX(0.9);
-        favIcon.setScaleY(0.9);
-        favFillIcon.setScaleX(0.9);
-        favFillIcon.setScaleY(0.9);
+        modelFavoriteIconFill.visibleProperty().bind(selectedModel.getFavoriteProperty());
+        GuiPrefabs.addTooltip(modelFavorite, "收藏");
     }
 
     private void initModelSearch() {
