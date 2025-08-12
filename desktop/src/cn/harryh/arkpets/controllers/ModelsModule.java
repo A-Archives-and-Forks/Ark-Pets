@@ -14,11 +14,7 @@ import cn.harryh.arkpets.guitasks.requests.McCheckModelsUpdateTask;
 import cn.harryh.arkpets.network.SourceStrategy;
 import cn.harryh.arkpets.network.api.McQueryVersion;
 import cn.harryh.arkpets.utils.GuiComponents.NoticeBar;
-import cn.harryh.arkpets.utils.GuiPrefabs;
-import cn.harryh.arkpets.utils.IOUtils;
-import cn.harryh.arkpets.utils.ScrollUtils;
-import cn.harryh.arkpets.utils.Logger;
-import cn.harryh.arkpets.utils.Version;
+import cn.harryh.arkpets.utils.*;
 import com.alibaba.fastjson.JSONObject;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanBinding;
@@ -83,6 +79,8 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     @FXML
     private Label selectedModelType;
     @FXML
+    private Button modelWiki;
+    @FXML
     private Button modelFavorite;
     @FXML
     private Button topFavorite;
@@ -135,6 +133,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     private NoticeBar datasetTooLowVerNotice;
     private NoticeBar datasetTooHighVerNotice;
 
+    private final SVGPath wikiIcon = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_BOOK, GuiPrefabs.COLOR_LIGHT_GRAY);
     private final SVGPath favIcon = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_STAR, GuiPrefabs.COLOR_LIGHT_GRAY);
     private final SVGPath favFillIcon = GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_STAR_FILLED, GuiPrefabs.COLOR_WARNING);
     private boolean filterFavorite;
@@ -164,7 +163,6 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         initModelSearch();
         initModelFilter();
         initModelManage();
-        initModelFavorite();
         modelReload(false);
         Platform.runLater(() -> {
             GuiPrefabs.disableScrollPaneCache(infoPaneTagScroll);
@@ -246,6 +244,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
     }
 
     private void initInfoPane() {
+        // Model info labels
         toggleFilterPane.setOnAction(e -> infoPaneComposer.toggle(1, 0));
         toggleManagePane.setOnAction(e -> infoPaneComposer.toggle(2, 0));
         selectedModelName.textProperty().bind(selectedModel.nameProperty);
@@ -264,6 +263,32 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         selectedModelAppellation.setTooltip(appellationTip);
         selectedModelType.setTooltip(typeTip);
         selectedModelSkinGroupName.setTooltip(skinGroupTip);
+
+        // Model quick operations
+        modelWiki.setOnAction(e -> {
+            String name = selectedModel.nameProperty.get();
+            if (name != null && !name.isEmpty()) {
+                app.popBrowser(urlWikiPrefix + name);
+            }
+        });
+        modelWiki.setGraphic(wikiIcon);
+        modelWiki.setTooltip(new Tooltip("Wiki"));
+        modelWiki.visibleProperty().bind(selectedModel.getHasWikiProperty());
+        wikiIcon.setScaleX(0.8);
+        wikiIcon.setScaleY(0.8);
+        modelFavorite.setOnAction(e -> {
+            selectedModel.setFavorite(!selectedModel.getFavoriteProperty().get());
+            modelListView.refresh();
+            app.config.save();
+        });
+        modelFavorite.setTooltip(new Tooltip("收藏"));
+        modelFavorite.graphicProperty().bind(
+                new When(selectedModel.getFavoriteProperty()).then(favFillIcon).otherwise(favIcon)
+        );
+        favIcon.setScaleX(0.9);
+        favIcon.setScaleY(0.9);
+        favFillIcon.setScaleX(0.9);
+        favFillIcon.setScaleY(0.9);
     }
 
     private void initModelSearch() {
@@ -303,6 +328,30 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             modelSearch(searchModelInput.getText());
             infoPaneComposer.activate(0);
         }));
+
+        if (app.config.character_favorites == null) {
+            app.config.character_favorites = new JSONObject();
+            app.config.save();
+        }
+
+        topFavorite.setOnAction(e -> {
+            Logger.debug("ModelManager", "Toggle favorite display");
+            modelListView.scrollTo(0);
+            if (filterFavorite) {
+                GuiPrefabs.replaceStyleClass(topFavorite, "btn-primary", "btn-secondary");
+            } else {
+                GuiPrefabs.replaceStyleClass(topFavorite, "btn-secondary", "btn-primary");
+            }
+            filterFavorite = !filterFavorite;
+            modelSearch(searchModelInput.getText());
+            ModelItem recentSelected = assetItemList.searchByRelPath(app.config.character_asset);
+            if (recentSelected != null)
+                for (ModelItem cell : modelListView.getItems())
+                    if (recentSelected.equals(cell)) {
+                        modelListView.scrollTo(cell);
+                        modelListView.getSelectionModel().select(cell);
+                    }
+        });
     }
 
     private void initModelManage() {
@@ -450,41 +499,6 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         });
 
         modelHelp.setOnMouseClicked(e -> app.popBrowser(urlHelp));
-    }
-
-    private void initModelFavorite() {
-        if (app.config.character_favorites == null) {
-            app.config.character_favorites = new JSONObject();
-            app.config.save();
-        }
-
-        modelFavorite.setOnAction(e -> {
-            selectedModel.setFavorite(!selectedModel.getFavoriteProperty().get());
-            modelListView.refresh();
-            app.config.save();
-        });
-        modelFavorite.graphicProperty().bind(
-                new When(selectedModel.getFavoriteProperty()).then(favFillIcon).otherwise(favIcon)
-        );
-
-        topFavorite.setOnAction(e -> {
-            Logger.debug("ModelManager", "Toggle favorite display");
-            modelListView.scrollTo(0);
-            if (filterFavorite) {
-                GuiPrefabs.replaceStyleClass(topFavorite, "btn-primary", "btn-secondary");
-            } else {
-                GuiPrefabs.replaceStyleClass(topFavorite, "btn-secondary", "btn-primary");
-            }
-            filterFavorite = !filterFavorite;
-            modelSearch(searchModelInput.getText());
-            ModelItem recentSelected = assetItemList.searchByRelPath(app.config.character_asset);
-            if (recentSelected != null)
-                for (ModelItem cell : modelListView.getItems())
-                    if (recentSelected.equals(cell)) {
-                        modelListView.scrollTo(cell);
-                        modelListView.getSelectionModel().select(cell);
-                    }
-        });
     }
 
     public void modelSearch(String keyWords) {
@@ -832,6 +846,12 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         private HashMap<String, String> sortTags;
         private ModelItem modelItem;
 
+        private final BooleanBinding hasWikiProperty = new BooleanBinding() {
+            @Override
+            protected boolean computeValue() {
+                return modelItem != null && nameProperty.get() != null && !nameProperty.get().isEmpty();
+            }
+        };
         private final BooleanBinding favoriteProperty = new BooleanBinding() {
             @Override
             protected boolean computeValue() {
@@ -852,6 +872,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             skinGroupNameProperty.set(modelItem.skinGroupName);
             appellationProperty.set(modelItem.appellation);
             favoriteProperty.invalidate();
+            hasWikiProperty.invalidate();
         }
 
         public void setFavorite(boolean favorite) {
@@ -864,10 +885,15 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
                 Logger.debug("ModelManager", "Remove favorite model " + modelItem.key);
             }
             favoriteProperty.invalidate();
+            hasWikiProperty.invalidate();
         }
 
         public BooleanBinding getFavoriteProperty() {
             return favoriteProperty;
+        }
+
+        public BooleanBinding getHasWikiProperty() {
+            return hasWikiProperty;
         }
     }
 }

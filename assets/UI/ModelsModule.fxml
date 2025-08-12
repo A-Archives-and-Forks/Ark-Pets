@@ -130,9 +130,15 @@
                 <FlowPane fx:id="infoPaneTagFlow" styleClass="tag-flow"/>
             </ScrollPane>
         </VBox>
-        <JFXButton fx:id="modelFavorite" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                   opacity="0.875" prefHeight="30.0" prefWidth="30.0" ripplerFill="gray" scaleX="0.875" scaleY="0.875"
-                   AnchorPane.topAnchor="5.0" AnchorPane.rightAnchor="2.5"/>
+        <HBox AnchorPane.topAnchor="0.0" AnchorPane.rightAnchor="0.0" alignment="CENTER_RIGHT" spacing="2.5">
+            <JFXButton fx:id="modelWiki" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                       opacity="0.875" prefHeight="25.0" prefWidth="25.0" ripplerFill="gray"/>
+            <JFXButton fx:id="modelFavorite" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                       opacity="0.875" prefHeight="25.0" prefWidth="25.0" ripplerFill="gray"/>
+            <padding>
+                <Insets topRightBottomLeft="5.0"/>
+            </padding>
+        </HBox>
     </AnchorPane>
     <AnchorPane fx:id="filterPane" layoutX="${_infoPaneX}" layoutY="${_infoPaneY}" prefHeight="${_infoPaneH}"
                 prefWidth="${_infoPaneW}" styleClass="info-pane-light" visible="false">
