@@ -5,12 +5,10 @@ package cn.harryh.arkpets.animations;
 
 import cn.harryh.arkpets.utils.Cached;
 
-import java.util.Arrays;
-
 
 abstract public class Behavior {
     protected AnimClipGroup animList;
-    protected AnimDataWeight[] actionList;
+    protected StochasticMatrix animMatrix;
     protected Cached<AnimData> actionAutoGetter;
     private int idxRec;
 
@@ -20,10 +18,10 @@ abstract public class Behavior {
      * @param animList The animation clip list.
      */
     public Behavior(AnimClipGroup animList) {
-        actionList = null;
+        animMatrix = null;
         this.animList = animList;
         actionAutoGetter = new Cached<>();
-        actionAutoGetter.setValueProducer(this::getRandomAction);
+        actionAutoGetter.setValueProducer(this::markovSelect);
         actionAutoGetter.setCacheAgeProducer(() -> {
             AnimData cache = actionAutoGetter.getCachedValue();
             return cache == null ? minAnimCacheAge : Math.max(minAnimCacheAge, cache.animClip().duration);
@@ -49,9 +47,9 @@ abstract public class Behavior {
      * @return AnimData object.
      */
     public final AnimData nextAnim() {
-        if (actionList.length > 0) {
-            idxRec = idxRec >= actionList.length - 1 ? 0 : idxRec + 1;
-            return actionList[idxRec].anim();
+        if (animMatrix.getLength() > 0) {
+            idxRec = idxRec <= 0 ? animMatrix.getLength() - 1 : idxRec - 1;
+            return animMatrix.getAnim(idxRec);
         }
         return new AnimData(null);
     }
@@ -60,25 +58,28 @@ abstract public class Behavior {
      * @return AnimData object.
      */
     public final AnimData prevAnim() {
-        if (actionList.length > 0) {
-            idxRec = idxRec <= 0 ? actionList.length - 1 : idxRec - 1;
-            return actionList[idxRec].anim();
+        if (animMatrix.getLength() > 0) {
+            idxRec = idxRec <= 0 ? animMatrix.getLength() - 1 : idxRec - 1;
+            return animMatrix.getAnim(idxRec);
         }
         return new AnimData(null);
     }
 
-    private AnimData getRandomAction() {
-        if (actionList.length > 0) {
-            // Calculate the sum of all action's weight
-            int weightSum = Arrays.stream(actionList).mapToInt(AnimDataWeight::weight).sum();
+    private AnimData markovSelect() {
+        if (animMatrix.getLength() > 0) {
+            // Calculate the sum of current action's weight
+            int weightSum = animMatrix.sum(idxRec);
             // Random select a weight
             int weightSelect = (int) Math.ceil(Math.random() * weightSum);
             // Figure out which action is selected
             int weight = 0;
-            for (AnimDataWeight animDataWeight : actionList) {
-                weight += animDataWeight.weight();
-                if (weightSelect <= weight)
-                    return animDataWeight.anim();
+            int[] weightGroup = animMatrix.get(idxRec);
+            for (int i = 0; i < weightGroup.length; i++) {
+                weight += weightGroup[i];
+                if (weight >= weightSelect) {
+                    idxRec = i;
+                    return animMatrix.getAnim(i);
+                }
             }
         }
         return new AnimData(null);

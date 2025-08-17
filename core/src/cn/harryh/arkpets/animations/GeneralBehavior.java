@@ -19,7 +19,7 @@ public class GeneralBehavior extends Behavior {
     protected Iterator<AnimStage> stageItr;
     protected final ArrayList<AnimStage> stageList;
     protected final HashMap<AnimStage, AnimClipGroup> stageAnimMap;
-    protected final HashMap<AnimStage, AnimDataWeight[]> stageAnimWeightMap;
+    protected final HashMap<AnimStage, StochasticMatrix> stageAnimWeightMap;
 
     public GeneralBehavior(ArkConfig config, AnimClipGroup animList) {
         super(animList);
@@ -27,10 +27,9 @@ public class GeneralBehavior extends Behavior {
         this.config = config;
         stageAnimMap = this.animList.clusterByStage();
         stageAnimWeightMap = new HashMap<>();
+
         for (AnimStage key : stageAnimMap.keySet()) {
-            AnimDataWeight[] temp = getActionList(stageAnimMap.get(key));
-            if (temp.length > 0)
-                stageAnimWeightMap.put(key, temp);
+            stageAnimWeightMap.put(key, getMatrix(stageAnimMap.get(key)));
         }
 
         stageList = new ArrayList<>(stageAnimWeightMap.keySet().stream().toList());
@@ -39,8 +38,45 @@ public class GeneralBehavior extends Behavior {
             throw new NoSuchElementException("Animation stage map was empty because no animation's name was matched.");
         stageItr = stageList.iterator();
 
-        actionList = new AnimDataWeight[0];
         nextStage();
+    }
+
+    private StochasticMatrix getMatrix(AnimClipGroup animClips) {
+        StochasticMatrix mat = StochasticMatrix.buildMatrixLv3();
+        AnimData anim;
+        mat.bind(0, animClips.getLoopAnimData(AnimType.IDLE));
+        anim = animClips.getLoopAnimData(AnimType.SIT);
+        if (anim == null || !config.behavior_allow_sit) {
+            mat.removeRow(1);
+            mat.removeCol(1, true);
+        } else {
+            mat.bind(1, anim);
+        }
+        anim = animClips.getLoopAnimData(AnimType.MOVE);
+        if (anim == null || !config.behavior_allow_walk) {
+            mat.removeRow(3);
+            mat.removeCol(3, true);
+            mat.removeRow(4);
+            mat.removeCol(4, true);
+        } else {
+            mat.bind(3, anim.derive(-1));
+            mat.bind(4, anim.derive(+1));
+        }
+        anim = animClips.getLoopAnimData(AnimType.SLEEP);
+        if (anim == null || !config.behavior_allow_sleep) {
+            mat.removeRow(2);
+            mat.removeCol(2, true);
+        } else {
+            mat.bind(2, anim);
+        }
+        anim = animClips.getStrictAnimData(AnimType.SPECIAL);
+        if (anim == null || !config.behavior_allow_special) {
+            mat.removeRow(5);
+            mat.removeCol(5, true);
+        } else {
+            mat.bind(5, anim);
+        }
+        return mat;
     }
 
     public void nextStage() {
@@ -48,7 +84,7 @@ public class GeneralBehavior extends Behavior {
             stageItr = stageList.iterator();
         stageCur = stageItr.next();
         stageAnimList = stageAnimMap.get(stageCur);
-        actionList = stageAnimWeightMap.get(stageCur);
+        animMatrix = stageAnimWeightMap.get(stageCur);
         actionAutoGetter.removeCachedValue();
     }
 
