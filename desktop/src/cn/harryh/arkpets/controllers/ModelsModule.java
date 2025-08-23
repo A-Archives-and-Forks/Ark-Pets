@@ -40,6 +40,8 @@ import javafx.stage.FileChooser;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -257,7 +259,7 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         modelWiki.setOnAction(e -> {
             String name = selectedModel.nameProperty.get();
             if (name != null && !name.isEmpty()) {
-                app.popBrowser(urlWikiPrefix + name);
+                app.popBrowser(urlWikiPrefix + URLEncoder.encode(name, StandardCharsets.UTF_8));
             }
         });
         modelWiki.visibleProperty().bind(selectedModel.getHasWikiProperty());
