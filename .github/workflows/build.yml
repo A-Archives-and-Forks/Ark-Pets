@@ -44,6 +44,9 @@ jobs:
         with:
           gradle-version: 8.1.1
 
+      - name: Setup Inno Setup
+        run: choco install innosetup --no-progress
+
       - name: Execute Gradle Tasks
         run: gradle clean distAll
 
