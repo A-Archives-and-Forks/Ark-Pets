@@ -5,11 +5,12 @@ package cn.harryh.arkpets.platform;
 
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
-import com.sun.jna.platform.win32.User32;
-import com.sun.jna.platform.win32.WinDef;
+import com.sun.jna.platform.win32.COM.COMUtils;
+import com.sun.jna.platform.win32.COM.Unknown;
+import com.sun.jna.platform.win32.*;
 import com.sun.jna.platform.win32.WinDef.HWND;
-import com.sun.jna.platform.win32.WinDef.RECT;
-import com.sun.jna.platform.win32.WinUser;
+import com.sun.jna.platform.win32.WinNT.HRESULT;
+import com.sun.jna.ptr.PointerByReference;
 
 import java.util.ArrayList;
 
@@ -34,6 +35,8 @@ public class User32HWndCtrl extends HWndCtrl {
     private static final int MK_LBUTTON  = 0x0001;
     private static final int MK_RBUTTON  = 0x0002;
     private static final int MK_MBUTTON  = 0x0010;
+
+    private static TaskbarList taskbarList = null;
 
 
     /** HWnd Controller instance.
@@ -89,10 +92,17 @@ public class User32HWndCtrl extends HWndCtrl {
     @Override
     public void setTaskbar(boolean enable) {
         // On Windows, this is implemented by toggle app-window ex-style and tool-window ex-style.
-        if (enable)
+        // Furthermore, we introduced ITaskbarList operation to make the behavior more reliable.
+        if (taskbarList == null) {
+            taskbarList = TaskbarList.createAndInit();
+        }
+        if (enable) {
             setWindowExStyle((getWindowExStyle() & ~User32HWndCtrl.WS_EX_TOOLWINDOW) | User32HWndCtrl.WS_EX_APPWINDOW);
-        else
+            taskbarList.AddTab(hWnd);
+        } else {
             setWindowExStyle((getWindowExStyle() | User32HWndCtrl.WS_EX_TOOLWINDOW) & ~User32HWndCtrl.WS_EX_APPWINDOW);
+            taskbarList.DeleteTab(hWnd);
+        }
     }
 
     @Override
@@ -176,6 +186,7 @@ public class User32HWndCtrl extends HWndCtrl {
      */
     protected void setWindowExStyle(int newLong) {
         User32.INSTANCE.SetWindowLong(hWnd, WinUser.GWL_EXSTYLE, newLong);
+        User32.INSTANCE.SetWindowPos(hWnd, null, 0, 0, 0, 0, WinUser.SWP_NOSIZE | WinUser.SWP_NOMOVE | WinUser.SWP_NOZORDER | WinUser.SWP_FRAMECHANGED);
     }
 
     /** Gets the topmost window.
@@ -192,7 +203,7 @@ public class User32HWndCtrl extends HWndCtrl {
     }
 
     protected static WindowRect getWindowRect(HWND hWnd) {
-        RECT rect = new RECT();
+        WinDef.RECT rect = new WinDef.RECT();
         User32.INSTANCE.GetWindowRect(hWnd, rect);
         return new WindowRect(rect.top, rect.bottom, rect.left, rect.right);
     }
@@ -228,5 +239,67 @@ public class User32HWndCtrl extends HWndCtrl {
     public String toString() {
         return "‘" + windowText + "’ " + windowWidth + "*" + windowHeight +
                 " ex-style=0x" + Integer.toHexString(getWindowExStyle());
+    }
+
+
+    /** The Windows taskbar controller that implements the ITaskbarList COM interface.
+     * @see <a href="https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nn-shobjidl_core-itaskbarlist">ITaskbarList</a>
+     */
+    public static class TaskbarList extends Unknown {
+        private static final Guid.GUID CLSID = new Guid.GUID("{56FDF344-FD6D-11d0-958A-006097C9A090}");
+        private static final Guid.GUID IID = new Guid.GUID("{56FDF342-FD6D-11d0-958A-006097C9A090}");
+        private boolean initialized = false;
+
+        private TaskbarList(Pointer ptr) {
+            super(ptr);
+        }
+
+        public static TaskbarList create() {
+            Ole32.INSTANCE.CoInitialize(null);
+            PointerByReference p = new PointerByReference();
+            HRESULT hr = Ole32.INSTANCE.CoCreateInstance(CLSID, Pointer.NULL, WTypes.CLSCTX_INPROC_SERVER, IID, p);
+            COMUtils.checkRC(hr);
+            return new TaskbarList(p.getValue());
+        }
+
+        public static TaskbarList createAndInit() {
+            TaskbarList taskbarList = create();
+            taskbarList.HrInit();
+            return taskbarList;
+        }
+
+        /** Initializes the taskbar list object.
+         * This method must be called before any other ITaskbarList methods can be called.
+         */
+        public void HrInit() {
+            int res = this._invokeNativeInt(3, new Object[]{this.getPointer()});
+            COMUtils.checkRC(new HRESULT(res));
+            initialized = true;
+        }
+
+        /** Adds an item to the taskbar.
+         * @param hwnd The handle of the window to be added.
+         */
+        public void AddTab(HWND hwnd) {
+            if (!initialized)
+                throw new IllegalStateException("TaskbarList not initialized.");
+            int res = this._invokeNativeInt(4, new Object[]{this.getPointer(), hwnd});
+            COMUtils.checkRC(new HRESULT(res));
+        }
+
+        /** Deletes an item from the taskbar.
+         * @param hwnd The handle of the window to be deleted.
+         */
+        public void DeleteTab(HWND hwnd) {
+            if (!initialized)
+                throw new IllegalStateException("TaskbarList not initialized.");
+            int res = this._invokeNativeInt(5, new Object[]{this.getPointer(), hwnd});
+            COMUtils.checkRC(new HRESULT(res));
+        }
+
+        @Override
+        public String toString() {
+            return "TaskbarList{" + "pointer=" + this.getPointer() + '}';
+        }
     }
 }

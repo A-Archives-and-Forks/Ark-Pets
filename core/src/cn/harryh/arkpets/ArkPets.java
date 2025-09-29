@@ -45,7 +45,6 @@ public class ArkPets extends InputApplicationAdaptor {
 
     private final String APP_TITLE;
     private int offsetY = 0;
-    private boolean isToolwindowStyle = false;
     private boolean isAlwaysTransparent = false;
     private final Cached<Boolean> isFocused;
 
@@ -109,6 +108,8 @@ public class ArkPets extends InputApplicationAdaptor {
         hWndMine.attachGLFWWindow((Lwjgl3Graphics) Gdx.graphics);
         if (config.window_style_topmost)
             hWndMine.setTopmost(true);
+        if (config.window_style_toolwindow)
+            hWndMine.setTaskbar(false);
         updateWindow();
 
         // 6.Tray icon setup
@@ -328,19 +329,6 @@ public class ArkPets extends InputApplicationAdaptor {
     private void updateWindow() {
         if (hWndMine == null)
             return;
-        // Tool window style
-        if (config.window_style_toolwindow && !isToolwindowStyle) {
-            // Make sure ArkPets has been set as foreground window once
-            for (int i = 0; i < 1; i++) {
-                if (hWndMine.isForeground()) {
-                    hWndMine.setTaskbar(false);
-                    Logger.info("Window", "SetForegroundWindow succeeded");
-                    isToolwindowStyle = true;
-                    break;
-                }
-                hWndMine.setForeground();
-            }
-        }
         // Transparent style
         hWndTransparentSetter.setValue(isAlwaysTransparent);
         if (hWndTransparentSetter.isChanged()) {
