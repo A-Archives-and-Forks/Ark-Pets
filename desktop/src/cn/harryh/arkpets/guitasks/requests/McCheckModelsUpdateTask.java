@@ -16,7 +16,7 @@ public class McCheckModelsUpdateTask extends FetchAsDataTask {
     private final String cdk;
 
     public McCheckModelsUpdateTask(StackPane parent, GuiTaskStyle style, String cdk) {
-        super(parent, style);
+        super(parent, style, new int[]{400, 403});
         this.cdk = cdk;
     }
 
