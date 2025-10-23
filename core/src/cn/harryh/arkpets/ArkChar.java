@@ -9,6 +9,7 @@ import cn.harryh.arkpets.animations.AnimClipGroup;
 import cn.harryh.arkpets.animations.AnimComposer;
 import cn.harryh.arkpets.animations.AnimData;
 import cn.harryh.arkpets.assets.ModelItem.ModelAssetAccessor;
+import cn.harryh.arkpets.assets.SkeletonLoader;
 import cn.harryh.arkpets.transitions.EasingFunction;
 import cn.harryh.arkpets.transitions.TransitionFloat;
 import cn.harryh.arkpets.transitions.TransitionVector3;
@@ -97,16 +98,15 @@ public class ArkChar {
                 }
             }
             TextureAtlas atlas = new TextureAtlas(atlasData);
-            // Load skel (use SkeletonJson instead of SkeletonBinary if the file type is JSON)
+            // Load skel
             try {
-                SkeletonBinary binary = new SkeletonBinary(atlas);
-                binary.setScale(scale * skelBaseScale);
-                skeletonData = binary.readSkeletonData(Gdx.files.internal(path2skel));
+                SkeletonLoader skeletonLoader = new SkeletonLoader(Gdx.files.internal(path2skel));
+                Logger.debug("Character", "Skeleton loading as " + (skeletonLoader.isJson() ? "JSON" : "binary"));
+                skeletonData = skeletonLoader.loadSkeletonData(atlas, scale * skelBaseScale);
+                Logger.debug("Character", "Skeleton loaded");
             } catch (Exception e) {
-                Logger.warn("Character", "Failed to load skeleton, trying load as json");
-                SkeletonJson json = new SkeletonJson(atlas);
-                json.setScale(scale * skelBaseScale);
-                skeletonData = json.readSkeletonData(Gdx.files.internal(path2skel));
+                Logger.error("Character", "Failed to load skeleton, details see below.", e);
+                throw new RuntimeException("Launch ArkPets failed, the model asset may be inaccessible.");
             }
         } catch (SerializationException | GdxRuntimeException e) {
             Logger.error("Character", "The model asset may be inaccessible, details see below.", e);
