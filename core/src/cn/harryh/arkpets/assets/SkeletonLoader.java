@@ -6,7 +6,9 @@ package cn.harryh.arkpets.assets;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas.TextureAtlasData;
 import com.esotericsoftware.spine.SkeletonBinary;
 import com.esotericsoftware.spine.SkeletonData;
 import com.esotericsoftware.spine.SkeletonJson;
@@ -185,12 +187,12 @@ public class SkeletonLoader {
         return new SkeletonLoader(tempHandle);
     }
 
-    /** Loads the skeleton data with the given texture atlas and scale.
+    /** Loads the skeleton data with the given texture atlas.
      * @param atlas The texture atlas to be attached to the skeleton data.
      * @param scale The scale factor to be applied to the skeleton data.
      * @return A skeleton data instance.
      */
-    public SkeletonData loadSkeletonData(TextureAtlas atlas, float scale) {
+    public SkeletonData loadSkeletonDataWith(TextureAtlas atlas, float scale) {
         if (isJson) {
             SkeletonJson json = new SkeletonJson(atlas);
             json.setScale(scale);
@@ -200,6 +202,23 @@ public class SkeletonLoader {
             binary.setScale(scale);
             return binary.readSkeletonData(file);
         }
+    }
+
+    /** Loads the skeleton data with the texture atlas from the given atlas file.
+     * @param atlasFile The file handle of the texture atlas file.
+     * @param scale The scale factor to be applied to the skeleton data.
+     * @param forceMipmap Whether to force enable mipmapping for the atlas textures.
+     * @return A skeleton data instance.
+     */
+    public SkeletonData loadSkeletonDataWith(FileHandle atlasFile, float scale, boolean forceMipmap) {
+        TextureAtlasData atlasData = new TextureAtlasData(atlasFile, atlasFile.parent(), false);
+        if (forceMipmap) {
+            for (TextureAtlasData.Page page : atlasData.getPages()) {
+                page.minFilter = TextureFilter.MipMapLinearLinear;
+                page.useMipMaps = true;
+            }
+        }
+        return loadSkeletonDataWith(new TextureAtlas(atlasData), scale);
     }
 
     protected static boolean isJson(FileHandle file) throws IOException {

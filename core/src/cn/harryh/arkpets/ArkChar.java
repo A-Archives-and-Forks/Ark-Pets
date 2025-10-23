@@ -20,7 +20,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.Pixmap.Format;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -88,26 +87,18 @@ public class ArkChar {
             ModelAssetAccessor modelAssetAccessor = new ModelAssetAccessor(config.character_files);
             String path2atlas = assetLocation + separator + modelAssetAccessor.getFirstFileOf(".atlas");
             String path2skel = assetLocation + separator + modelAssetAccessor.getFirstFileOf(".skel");
-            // Load atlas
-            FileHandle packFile = Gdx.files.internal(path2atlas);
-            TextureAtlas.TextureAtlasData atlasData = new TextureAtlas.TextureAtlasData(packFile, packFile.parent(), false);
-            if (config.render_enable_mipmap) {
-                for (TextureAtlas.TextureAtlasData.Page page : atlasData.getPages()) {
-                    page.minFilter = Texture.TextureFilter.MipMapLinearLinear;
-                    page.useMipMaps = true;
-                }
-            }
-            TextureAtlas atlas = new TextureAtlas(atlasData);
+            FileHandle atlasFile = Gdx.files.internal(path2atlas);
+            FileHandle skelFile = Gdx.files.internal(path2skel);
             // Load skel
             try {
-                SkeletonLoader skeletonLoader = new SkeletonLoader(Gdx.files.internal(path2skel));
+                SkeletonLoader skeletonLoader = new SkeletonLoader(skelFile);
                 Logger.info("Character", "Skeleton loading as " + (skeletonLoader.isJson() ? "JSON" : "binary"));
                 if (skeletonLoader.needFix()) {
                     skeletonLoader = skeletonLoader.fixed();
                     Logger.warn("Character", "Skeleton fixed");
                 }
-                skeletonData = skeletonLoader.loadSkeletonData(atlas, scale * skelBaseScale);
                 Logger.debug("Character", "Skeleton loaded");
+                skeletonData = skeletonLoader.loadSkeletonDataWith(atlasFile, scale * skelBaseScale, config.render_enable_mipmap);
             } catch (Exception e) {
                 Logger.error("Character", "Failed to load skeleton, details see below.", e);
                 throw new RuntimeException("Launch ArkPets failed, the model asset may be inaccessible.");
