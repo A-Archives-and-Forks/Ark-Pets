@@ -11,9 +11,7 @@ import com.esotericsoftware.spine.SkeletonBinary;
 import com.esotericsoftware.spine.SkeletonData;
 import com.esotericsoftware.spine.SkeletonJson;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -21,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+
+import static cn.harryh.arkpets.Const.PathConfig.tempDirPath;
 
 
 public class SkeletonLoader {
@@ -115,16 +115,74 @@ public class SkeletonLoader {
         return isJson;
     }
 
-    /** Loads the skeleton data with the given texture atlas.
-     * @param atlas The texture atlas to be attached to the skeleton data.
-     * @return A skeleton data instance.
+    /** Checks if the skeleton file needs to be fixed.
+     * @return True if it needs to be fixed; false otherwise.
+     * @see <a href="https://github.com/isHarryh/Ark-Pets/issues/150">ArkPets Issue #150</a>
      */
-    public SkeletonData loadSkeletonData(TextureAtlas atlas) {
+    public boolean needFix() {
         if (isJson) {
-            return new SkeletonJson(atlas).readSkeletonData(file);
-        } else {
-            return new SkeletonBinary(atlas).readSkeletonData(file);
+            return false;
         }
+        for (String s : strings) {
+            if (s.matches(".*\\s")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** Returns a skeleton loader instance with fixed skeleton.
+     * @return A new skeleton loader instance with fixed skeleton, or this instance if no fix is needed.
+     * @throws IOException If I/O error occurs.
+     * @see #needFix()
+     */
+    public SkeletonLoader fixed() throws IOException {
+        if (!needFix()) {
+            return this;
+        }
+        File tempFile = File.createTempFile("fixed_", "_" + file.name(), new File(tempDirPath));
+        tempFile.deleteOnExit();
+        FileHandle tempHandle = new FileHandle(tempFile);
+        try (OutputStream os = tempHandle.write(false)) {
+            // Write header
+            writeString(os, ""); // Empty hash
+            writeString(os, version);
+            writeFloat(os, x);
+            writeFloat(os, y);
+            writeFloat(os, width);
+            writeFloat(os, height);
+            writeBoolean(os, nonEssential);
+            if (nonEssential) {
+                writeFloat(os, fps);
+                writeString(os, images_path != null ? images_path : "");
+                writeString(os, audio_path != null ? audio_path : "");
+            }
+            // Write strings pool
+            List<String> fixedStrings = strings.stream()
+                    .map(s -> s.replaceAll("\\s+$", ""))
+                    .toList();
+            writeVarInt(os, fixedStrings.size());
+            for (String s : fixedStrings) {
+                writeString(os, s);
+            }
+            // Write the remaining data
+            try (InputStream is = file.read()) {
+                long toSkip = headerSize;
+                while (toSkip > 0) {
+                    long skipped = is.skip(toSkip);
+                    if (skipped <= 0) {
+                        throw new IOException("Failed to skip header");
+                    }
+                    toSkip -= skipped;
+                }
+                byte[] buffer = new byte[8192];
+                int read;
+                while ((read = is.read(buffer)) != -1) {
+                    os.write(buffer, 0, read);
+                }
+            }
+        }
+        return new SkeletonLoader(tempHandle);
     }
 
     /** Loads the skeleton data with the given texture atlas and scale.
@@ -209,5 +267,33 @@ public class SkeletonLoader {
         }
         bytesRead[0] += length - 1;
         return new String(b, StandardCharsets.UTF_8);
+    }
+
+    protected static void writeBoolean(OutputStream os, boolean value) throws IOException {
+        os.write(value ? 1 : 0);
+    }
+
+    protected static void writeFloat(OutputStream os, float value) throws IOException {
+        ByteBuffer bb = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN);
+        bb.putFloat(value);
+        os.write(bb.array());
+    }
+
+    protected static void writeVarInt(OutputStream os, int value) throws IOException {
+        do {
+            int b = value & 0x7F;
+            value >>>= 7;
+            if (value != 0) {
+                b |= 0x80;
+            }
+            os.write(b);
+        } while (value != 0);
+    }
+
+    protected static void writeString(OutputStream os, String value) throws IOException {
+        byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+        int length = bytes.length + 1;
+        writeVarInt(os, length);
+        os.write(bytes);
     }
 }

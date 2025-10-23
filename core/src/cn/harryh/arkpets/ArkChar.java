@@ -101,7 +101,11 @@ public class ArkChar {
             // Load skel
             try {
                 SkeletonLoader skeletonLoader = new SkeletonLoader(Gdx.files.internal(path2skel));
-                Logger.debug("Character", "Skeleton loading as " + (skeletonLoader.isJson() ? "JSON" : "binary"));
+                Logger.info("Character", "Skeleton loading as " + (skeletonLoader.isJson() ? "JSON" : "binary"));
+                if (skeletonLoader.needFix()) {
+                    skeletonLoader = skeletonLoader.fixed();
+                    Logger.warn("Character", "Skeleton fixed");
+                }
                 skeletonData = skeletonLoader.loadSkeletonData(atlas, scale * skelBaseScale);
                 Logger.debug("Character", "Skeleton loaded");
             } catch (Exception e) {
