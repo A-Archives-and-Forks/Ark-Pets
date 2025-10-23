@@ -30,13 +30,13 @@ public class SkeletonLoader {
     protected final boolean isJson;
     protected final long headerSize;
 
-    protected final String hash;
-    protected final String version;
-    protected final float x, y, width, height;
-    protected final boolean nonEssential;
-    protected final float fps;
-    protected final String images_path, audio_path;
-    protected final List<String> strings;
+    public final String hash;
+    public final String version;
+    public final float x, y, width, height;
+    public final boolean nonEssential;
+    public final float fps;
+    public final String images_path, audio_path;
+    public final List<String> strings;
 
     protected static final int MAX_SKELETON_FILE_SIZE = 64 << 20;
 
