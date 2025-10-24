@@ -1,5 +1,30 @@
 # 更新日志 / CHANGELOG
 
+## v3.10
+| **新增**                  |                                                               |
+|:------------------------|:--------------------------------------------------------------|
+| [`#131`]<br>[`9488a85`] | 新增了可以在导出日志对话框中选取 JVM 崩溃日志的功能。                                 |
+| [`#136`]<br>[`93d4ff8`] | 新增了可以通过 JVM 选项 `-Darkpets.usesystemfont` 来控制是否在启动器中使用系统字体的功能。 |
+| [`#117`]<br>[`19d5fd7`] | 新增了允许播放具有多阶段的敌方模型的攻击动作的功能（开放性测试）。                             |
+| [`796167b`]             | 新增了默认启用 Angle 原生渲染模式的功能（开放性测试）。                               |
+| [`4d4b10d`]             | 新增了可以在模型详情区域点击 **Wiki 按钮**快速跳转到对应角色的 Wiki 网页的功能。              |
+
+| **修复**                  |                                                 |
+|:------------------------|:------------------------------------------------|
+| [`1b73f80`]             | 修复了在 Mirror 酱 CDK 失效时，下载模型库的逻辑不正确的问题。           |
+| [`6bd28d3`]             | 修复了当模型骨骼的 MeshAttachment 路径名称包含尾随空格时，无法加载模型的问题。 |
+
+| **优化**                                 |                                             |
+|:---------------------------------------|:--------------------------------------------|
+| [`#133`]<br>[`22cf0ca`]                | 优化了桌宠鼠标穿透的实现方式，现在采用 GLFW 提供的原生穿透。           |
+| [`#133`]<br>[`3fdad5d`]                | 优化了设置桌宠窗口位置的调用逻辑，减少了桌宠静止时的性能开销。             |
+| [`ae17135`]                            | 将 JavaFX 库升级到了 17.0.15。                     |
+| [`#139`]<br>[`86c0189`]<br>[`36ffc79`] | 优化了启动器界面中列表组件（例如模型列表和公告列表）的性能开销。            |
+| [`#141`]<br>[`df89573`]                | 优化了启动器界面中滚动面板（ScrollPane）的交互体验。             |
+| [`#140`]<br>[`272e821`]                | 优化了启动器界面的渲染缓存，缓解了界面卡顿问题。                    |
+| [`#146`]<br>[`17d406a`]                | 优化了隐藏系统托盘图标的实现方式，现在采用 ITaskbarList 提供的底层实现。 |
+| [`60be366`]<br>[`59469b8`]             | 优化了加载骨骼文件的实现方式。                             |
+
 ## v3.9
 | **新增**                              |                                                                                     |
 |:------------------------------------|:------------------------------------------------------------------------------------|
@@ -537,10 +562,18 @@
 [`#112`]: https://github.com/isHarryh/Ark-Pets/pull/112
 [`#113`]: https://github.com/isHarryh/Ark-Pets/pull/113
 [`#116`]: https://github.com/isHarryh/Ark-Pets/pull/116
+[`#117`]: https://github.com/isHarryh/Ark-Pets/issues/117
 [`#123`]: https://github.com/isHarryh/Ark-Pets/pull/123
 [`#124`]: https://github.com/isHarryh/Ark-Pets/pull/124
 [`#125`]: https://github.com/isHarryh/Ark-Pets/pull/125
 [`#126`]: https://github.com/isHarryh/Ark-Pets/pull/126
+[`#131`]: https://github.com/isHarryh/Ark-Pets/pull/131
+[`#133`]: https://github.com/isHarryh/Ark-Pets/pull/133
+[`#136`]: https://github.com/isHarryh/Ark-Pets/pull/136
+[`#139`]: https://github.com/isHarryh/Ark-Pets/pull/139
+[`#140`]: https://github.com/isHarryh/Ark-Pets/pull/140
+[`#141`]: https://github.com/isHarryh/Ark-Pets/pull/141
+[`#146`]: https://github.com/isHarryh/Ark-Pets/issues/146
 [`3253706`]: https://github.com/isHarryh/Ark-Pets/commit/3253706fde859a316b3e08362dd57adb98c1df8c
 [`7b2e856`]: https://github.com/isHarryh/Ark-Pets/commit/7b2e8562579ebabbb102b40122cf3130463f03bc
 [`ff82a1e`]: https://github.com/isHarryh/Ark-Pets/commit/ff82a1e21ce396c345038b4cb340f10eeca89cf2
@@ -653,3 +686,20 @@
 [`c4e0f40`]: https://github.com/isHarryh/Ark-Pets/commit/c4e0f40638bed4e2a30d6c59209899559b988a53
 [`cd34faa`]: https://github.com/isHarryh/Ark-Pets/commit/cd34faaee325ebb31d29ccfe4dfa3c766cdd634d
 [`5294d91`]: https://github.com/isHarryh/Ark-Pets/commit/5294d918451c4d3421cb9fc10110fa01f77d21bc
+[`9488a85`]: https://github.com/isHarryh/Ark-Pets/commit/9488a85d9be4353158fefcb8e48b12f045f6ad23
+[`22cf0ca`]: https://github.com/isHarryh/Ark-Pets/commit/22cf0ca995ff13015856a3801d1aa962fe0786de
+[`3fdad5d`]: https://github.com/isHarryh/Ark-Pets/commit/3fdad5db3f677b8289452ffd2a2079731b0a8185
+[`ae17135`]: https://github.com/isHarryh/Ark-Pets/commit/ae17135a752c0295d4d32032fe3371b4a4b866d3
+[`86c0189`]: https://github.com/isHarryh/Ark-Pets/commit/86c0189ef96956a9aac5047777f3b34ad9319f29
+[`36ffc79`]: https://github.com/isHarryh/Ark-Pets/commit/36ffc794c0d01db39b288c3b6ffe524c436f3d12
+[`93d4ff8`]: https://github.com/isHarryh/Ark-Pets/commit/93d4ff859fe61f12ee96e10bbda4599314cb863b
+[`df89573`]: https://github.com/isHarryh/Ark-Pets/commit/df89573179a53f428716008b23484f06e4f539a6
+[`272e821`]: https://github.com/isHarryh/Ark-Pets/commit/272e8212b4a8c19e15e0d64a6a55ce7071fa79c4
+[`19d5fd7`]: https://github.com/isHarryh/Ark-Pets/commit/19d5fd71469f4cd6f241e5f51a124a7bb9bd0787
+[`796167b`]: https://github.com/isHarryh/Ark-Pets/commit/796167ba49acf2cdd1a33c526a2d4ed03ee55214
+[`4d4b10d`]: https://github.com/isHarryh/Ark-Pets/commit/4d4b10dddd99c6cdedf75ce13c57f161b4ee390d
+[`17d406a`]: https://github.com/isHarryh/Ark-Pets/commit/17d406a8374d3c7d84ad13c9ba66f06fcbaa1c0d
+[`1b73f80`]: https://github.com/isHarryh/Ark-Pets/commit/1b73f80fc2f2195ebac71de31dd610843ba5f52a
+[`60be366`]: https://github.com/isHarryh/Ark-Pets/commit/60be366813df03a30c7dc81a03a809fddb831d9c
+[`6bd28d3`]: https://github.com/isHarryh/Ark-Pets/commit/6bd28d360f96a5bf09f8ec409cfe944177da775d
+[`59469b8`]: https://github.com/isHarryh/Ark-Pets/commit/59469b865651a4d63ccd95d8dd3adeae333186fc
