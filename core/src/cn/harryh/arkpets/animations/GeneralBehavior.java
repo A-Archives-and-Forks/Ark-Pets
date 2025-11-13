@@ -10,8 +10,6 @@ import cn.harryh.arkpets.animations.StochasticMatrix.StochasticState;
 
 import java.util.*;
 
-import static cn.harryh.arkpets.Const.behaviorBaseWeight;
-
 
 public class GeneralBehavior extends Behavior {
     protected ArkConfig config;
@@ -23,10 +21,10 @@ public class GeneralBehavior extends Behavior {
     protected final HashMap<AnimStage, StochasticMatrix> stageAnimWeightMap;
 
     public GeneralBehavior(ArkConfig config, AnimClipGroup animList) {
-        super(animList);
+        super();
 
         this.config = config;
-        stageAnimMap = this.animList.clusterByStage();
+        stageAnimMap = animList.clusterByStage();
         stageAnimWeightMap = new HashMap<>();
 
         for (AnimStage key : stageAnimMap.keySet()) {
@@ -93,37 +91,6 @@ public class GeneralBehavior extends Behavior {
 
     public AnimStage getCurrentStage() {
         return stageCur;
-    }
-
-    private AnimDataWeight[] getActionList(AnimClipGroup animList) {
-        ArrayList<AnimDataWeight> actionList = new ArrayList<>(List.of(
-                new AnimDataWeight(
-                        animList.getLoopAnimData(AnimType.IDLE),
-                        Math.round(behaviorBaseWeight / (float) Math.sqrt(config.behavior_ai_activation))
-                ),
-                new AnimDataWeight(
-                        animList.getLoopAnimData(AnimType.SIT),
-                        config.behavior_allow_sit ? 1 << 6 : 0
-                ),
-                new AnimDataWeight(
-                        animList.getLoopAnimData(AnimType.SLEEP),
-                        config.behavior_allow_sleep ? 1 << 5 : 0
-                ),
-                new AnimDataWeight(
-                        animList.getLoopAnimData(AnimType.MOVE).derive(+1),
-                        config.behavior_allow_walk ? 1 << 5 : 0
-                ),
-                new AnimDataWeight(
-                        animList.getLoopAnimData(AnimType.MOVE).derive(-1),
-                        config.behavior_allow_walk ? 1 << 5 : 0),
-                new AnimDataWeight(
-                        animList.getStrictAnimData(AnimType.SPECIAL)
-                                .join(animList.getLoopAnimData(AnimType.IDLE)),
-                        config.behavior_allow_special ? 1 << 4 : 0
-                )
-        ));
-        actionList.removeIf(e -> e.anim().isEmpty());
-        return actionList.toArray(new AnimDataWeight[0]);
     }
 
     @Override

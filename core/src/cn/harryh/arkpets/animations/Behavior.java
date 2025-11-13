@@ -8,7 +8,6 @@ import cn.harryh.arkpets.utils.Cached;
 
 
 abstract public class Behavior {
-    protected AnimClipGroup animList;
     protected final Cached<AnimData> actionAutoGetter;
     protected StochasticMatrix currentMatrix;
     protected StochasticState currentState;
@@ -16,10 +15,8 @@ abstract public class Behavior {
     private static final double minAnimCacheAge = 0.5;
 
     /** Character Behavior Controller Instance.
-     * @param animList The animation clip list.
      */
-    public Behavior(AnimClipGroup animList) {
-        this.animList = animList;
+    public Behavior() {
         actionAutoGetter = new Cached<>();
         actionAutoGetter.setValueProducer(() -> currentMatrix.transitedAnimOf(currentState));
         actionAutoGetter.setCacheAgeProducer(() -> {
