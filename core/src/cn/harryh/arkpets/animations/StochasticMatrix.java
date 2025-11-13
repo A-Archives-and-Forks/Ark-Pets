@@ -10,6 +10,16 @@ public class StochasticMatrix {
     protected final boolean[] disabled;
     protected final AnimData[] binds;
 
+    public static int[][] DEFAULT_WEIGHTS = new int[][]{
+            // IDLE SIT SLEEP MOVE_L MOVE_R SPECIAL
+            {40, 20, 10, 10, 10, 10}, // IDLE -> ?
+            {30, 40, 20, 10, 10, 10}, // SIT -> ?
+            {20, 20, 60, 0, 0, 0}, // SLEEP -> ?
+            {40, 10, 0, 20, 20, 10}, // MOVE_L -> ?
+            {40, 10, 0, 20, 20, 10}, // MOVE_R -> ?
+            {50, 20, 10, 10, 10, 0} // SPECIAL -> ?
+    };
+
     /** One stochastic state corresponding to an auto-played animation.
      */
     public enum StochasticState {
@@ -70,20 +80,6 @@ public class StochasticMatrix {
             this.weights[i] = new StochasticMatrixRow(weights[i], this.disabled);
     }
 
-    public static StochasticMatrix buildMatrixLv3() {
-        return new StochasticMatrix(new int[][] {
-                //IDLE   SIT   SLEEP   MOVE_L   MOVE_R   SPECIAL  //NEXT
-
-                { 400,   200,  0,      150,     150,     100 },   // IDLE
-                { 300,   400,  100,    75,      75,      50  },   // SIT
-                { 200,   200,  600,    0,       0,       0   },   // SLEEP
-                { 400,   100,  100,    200,     200,     0   },   // MOVE_L
-                { 400,   100,  100,    200,     200,     0   },   // MOVE_R
-                { 600,   300,  50,     20,      20,      10  }    // SPECIAL
-                                                                  // CURRENT
-        });
-    }
-
     public AnimData nextAnimOf(StochasticState state) {
         StochasticState newState = state;
         for (int i = 0; i < StochasticState.values().length; i++) {
@@ -111,6 +107,14 @@ public class StochasticMatrix {
 
     public void bind(StochasticState state, AnimData anim) {
         binds[state.ordinal()] = anim;
+    }
+
+    public void scale(StochasticState state, float factor) {
+        if (factor < 0)
+            throw new IllegalArgumentException("Scale factor cannot be positive");
+        int ord = state.ordinal();
+        for (int i = 0; i < weights[ord].weights.length; i++)
+            weights[ord].weights[i] = Math.round(weights[ord].weights[i] * factor);
     }
 
     public void disable(StochasticState state) {

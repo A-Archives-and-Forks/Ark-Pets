@@ -43,7 +43,9 @@ public class GeneralBehavior extends Behavior {
     }
 
     private StochasticMatrix getMatrix(AnimClipGroup animClips) {
-        StochasticMatrix mat = StochasticMatrix.buildMatrixLv3();
+        StochasticMatrix mat = new StochasticMatrix(StochasticMatrix.DEFAULT_WEIGHTS);
+
+        // Bind and disable states based on config
         AnimData sitAnim, sleepAnim, moveAnim, specialAnim;
         if ((sitAnim = animClips.getLoopAnimData(AnimType.SIT)) != null && !config.behavior_allow_sit) {
             mat.bind(StochasticState.SIT, sitAnim);
@@ -67,6 +69,11 @@ public class GeneralBehavior extends Behavior {
         } else {
             mat.disable(StochasticState.SPECIAL);
         }
+
+        // Scale idle weights based on activation value
+        float factor = 1 + (8 - Math.max(0, Math.min(16, config.behavior_ai_activation))) / 8f;
+        mat.scale(StochasticState.IDLE, factor);
+
         return mat;
     }
 
