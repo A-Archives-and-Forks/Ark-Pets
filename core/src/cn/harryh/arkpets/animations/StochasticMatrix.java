@@ -1,16 +1,73 @@
 package cn.harryh.arkpets.animations;
 
-import com.badlogic.gdx.utils.IntMap;
-
-import java.util.Arrays;
+import java.util.stream.IntStream;
 
 
+/** The stochastic matrix (markov matrix) to manage the transition of auto-played animations in a natural way.
+ */
 public class StochasticMatrix {
-    private final int[][] weight;
-    private final IntMap<AnimData> anim = new IntMap<>();
+    protected final StochasticMatrixRow[] weights;
+    protected final boolean[] disabled;
+    protected final AnimData[] binds;
 
-    public StochasticMatrix(int[][] weight) {
-        this.weight = weight;
+    /** One stochastic state corresponding to an auto-played animation.
+     */
+    public enum StochasticState {
+        IDLE,
+        SIT,
+        SLEEP,
+        MOVE_L,
+        MOVE_R,
+        SPECIAL;
+
+        public StochasticState next() {
+            int ord = (ordinal() + 1) % StochasticState.values().length;
+            return StochasticState.values()[ord];
+        }
+
+        public StochasticState prev() {
+            int ord = (ordinal() - 1 + StochasticState.values().length) % StochasticState.values().length;
+            return StochasticState.values()[ord];
+        }
+    }
+
+    /** One row of the stochastic matrix. Each element represents the weight of transition to the corresponding state.
+     * @param weights The weights array of the states.
+     * @param disabledRef The reference to the disabled states array. If a state is disabled, its weight is ignored.
+     */
+    public record StochasticMatrixRow(int[] weights, boolean[] disabledRef) {
+        public StochasticMatrixRow {
+            if (weights.length != StochasticState.values().length)
+                throw new IllegalArgumentException("Weights length mismatch");
+        }
+
+        public StochasticState random() {
+            int sum = IntStream.range(0, weights.length).filter(i -> !disabledRef[i]).map(i -> weights[i]).sum();
+            int rnd = (int) (Math.random() * sum);
+            int acc = 0;
+            for (int i = 0; i < weights.length; i++) {
+                if (disabledRef[i])
+                    continue;
+                acc += weights[i];
+                if (rnd < acc)
+                    return StochasticState.values()[i];
+            }
+            return null;
+        }
+    }
+
+    /** Initializes the stochastic matrix with given weights.
+     * @param weights The weights 2D array. Each row corresponds to a state,
+     *                and each column corresponds to the weight of transition to another state.
+     */
+    public StochasticMatrix(int[][] weights) {
+        if (weights.length != StochasticState.values().length)
+            throw new IllegalArgumentException("Weights length mismatch");
+        this.weights = new StochasticMatrixRow[weights.length];
+        this.disabled = new boolean[StochasticState.values().length];
+        this.binds = new AnimData[StochasticState.values().length];
+        for (int i = 0; i < weights.length; i++)
+            this.weights[i] = new StochasticMatrixRow(weights[i], this.disabled);
     }
 
     public static StochasticMatrix buildMatrixLv3() {
@@ -27,44 +84,43 @@ public class StochasticMatrix {
         });
     }
 
-    public int sum(int i) {
-        return Arrays.stream(weight[i]).sum();
-    }
-
-    public int[] get(int i) {
-        return weight[i];
-    }
-
-    public void removeRow(int i) {
-        Arrays.fill(weight[i], 0);
-    }
-
-    public void removeCol(int i, boolean spare) {
-        for (int j = 0; j < weight.length; j++) {
-            int v = weight[j][i];
-            weight[j][i] = 0;
-            if (spare) {
-                long count = Arrays.stream(weight[j]).filter(q -> q != 0).count();
-                if (count == 0) continue;
-                int div = Math.toIntExact(v / count);
-                for (int k = 0; k < weight[j].length; k++) {
-                    if (k == i) continue;
-                    if (weight[j][k] == 0) continue;
-                    weight[j][k] += div;
-                }
-            }
+    public AnimData nextAnimOf(StochasticState state) {
+        StochasticState newState = state;
+        for (int i = 0; i < StochasticState.values().length; i++) {
+            newState = newState.next();
+            if (!disabled[newState.ordinal()])
+                return binds[newState.ordinal()];
         }
+        return binds[state.ordinal()];
     }
 
-    public void bind(int i, AnimData anim) {
-        this.anim.put(i, anim);
+    public AnimData prevAnimOf(StochasticState state) {
+        StochasticState newState = state;
+        for (int i = 0; i < StochasticState.values().length; i++) {
+            newState = newState.prev();
+            if (!disabled[newState.ordinal()])
+                return binds[newState.ordinal()];
+        }
+        return binds[state.ordinal()];
     }
 
-    public int getLength() {
-        return this.anim.size;
+    public AnimData transitedAnimOf(StochasticState state) {
+        StochasticState newState = weights[state.ordinal()].random();
+        return newState == null ? binds[state.ordinal()] : binds[newState.ordinal()];
     }
 
-    public AnimData getAnim(int idxRec) {
-        return this.anim.get(idxRec);
+    public void bind(StochasticState state, AnimData anim) {
+        binds[state.ordinal()] = anim;
+    }
+
+    public void disable(StochasticState state) {
+        disabled[state.ordinal()] = true;
+    }
+
+    public boolean isAllDisabled() {
+        for (boolean d : disabled)
+            if (!d)
+                return false;
+        return true;
     }
 }

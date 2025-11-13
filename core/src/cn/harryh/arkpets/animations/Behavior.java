@@ -3,14 +3,15 @@
  */
 package cn.harryh.arkpets.animations;
 
+import cn.harryh.arkpets.animations.StochasticMatrix.StochasticState;
 import cn.harryh.arkpets.utils.Cached;
 
 
 abstract public class Behavior {
     protected AnimClipGroup animList;
-    protected StochasticMatrix animMatrix;
-    protected Cached<AnimData> actionAutoGetter;
-    private int idxRec;
+    protected final Cached<AnimData> actionAutoGetter;
+    protected StochasticMatrix currentMatrix;
+    protected StochasticState currentState;
 
     private static final double minAnimCacheAge = 0.5;
 
@@ -18,15 +19,15 @@ abstract public class Behavior {
      * @param animList The animation clip list.
      */
     public Behavior(AnimClipGroup animList) {
-        animMatrix = null;
         this.animList = animList;
         actionAutoGetter = new Cached<>();
-        actionAutoGetter.setValueProducer(this::markovSelect);
+        actionAutoGetter.setValueProducer(() -> currentMatrix.transitedAnimOf(currentState));
         actionAutoGetter.setCacheAgeProducer(() -> {
             AnimData cache = actionAutoGetter.getCachedValue();
             return cache == null ? minAnimCacheAge : Math.max(minAnimCacheAge, cache.animClip().duration);
         });
-        idxRec = 0;
+        currentMatrix = null;
+        currentState = null;
     }
 
     /** Checks whether the random animation is expired or empty.
@@ -36,7 +37,7 @@ abstract public class Behavior {
         return actionAutoGetter.isExpired();
     }
 
-    /** Gets a random animation.
+    /** Gets a random animation. This method has caching mechanism.
      * @return AnimData object.
      */
     public final AnimData autoAnim() {
@@ -47,42 +48,14 @@ abstract public class Behavior {
      * @return AnimData object.
      */
     public final AnimData nextAnim() {
-        if (animMatrix.getLength() > 0) {
-            idxRec = idxRec <= 0 ? animMatrix.getLength() - 1 : idxRec - 1;
-            return animMatrix.getAnim(idxRec);
-        }
-        return new AnimData(null);
+        return currentMatrix.isAllDisabled() ? new AnimData(null) : currentMatrix.nextAnimOf(currentState);
     }
 
     /** Gets the previous animation.
      * @return AnimData object.
      */
     public final AnimData prevAnim() {
-        if (animMatrix.getLength() > 0) {
-            idxRec = idxRec <= 0 ? animMatrix.getLength() - 1 : idxRec - 1;
-            return animMatrix.getAnim(idxRec);
-        }
-        return new AnimData(null);
-    }
-
-    private AnimData markovSelect() {
-        if (animMatrix.getLength() > 0) {
-            // Calculate the sum of current action's weight
-            int weightSum = animMatrix.sum(idxRec);
-            // Random select a weight
-            int weightSelect = (int) Math.ceil(Math.random() * weightSum);
-            // Figure out which action is selected
-            int weight = 0;
-            int[] weightGroup = animMatrix.get(idxRec);
-            for (int i = 0; i < weightGroup.length; i++) {
-                weight += weightGroup[i];
-                if (weight >= weightSelect) {
-                    idxRec = i;
-                    return animMatrix.getAnim(i);
-                }
-            }
-        }
-        return new AnimData(null);
+        return currentMatrix.isAllDisabled() ? new AnimData(null) : currentMatrix.prevAnimOf(currentState);
     }
 
     /** Gets the default animation.

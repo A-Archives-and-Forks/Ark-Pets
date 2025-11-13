@@ -6,6 +6,7 @@ package cn.harryh.arkpets.animations;
 import cn.harryh.arkpets.ArkConfig;
 import cn.harryh.arkpets.animations.AnimClip.AnimStage;
 import cn.harryh.arkpets.animations.AnimClip.AnimType;
+import cn.harryh.arkpets.animations.StochasticMatrix.StochasticState;
 
 import java.util.*;
 
@@ -43,38 +44,28 @@ public class GeneralBehavior extends Behavior {
 
     private StochasticMatrix getMatrix(AnimClipGroup animClips) {
         StochasticMatrix mat = StochasticMatrix.buildMatrixLv3();
-        AnimData anim;
-        mat.bind(0, animClips.getLoopAnimData(AnimType.IDLE));
-        anim = animClips.getLoopAnimData(AnimType.SIT);
-        if (anim == null || !config.behavior_allow_sit) {
-            mat.removeRow(1);
-            mat.removeCol(1, true);
+        AnimData sitAnim, sleepAnim, moveAnim, specialAnim;
+        if ((sitAnim = animClips.getLoopAnimData(AnimType.SIT)) != null && !config.behavior_allow_sit) {
+            mat.bind(StochasticState.SIT, sitAnim);
         } else {
-            mat.bind(1, anim);
+            mat.disable(StochasticState.SIT);
         }
-        anim = animClips.getLoopAnimData(AnimType.MOVE);
-        if (anim == null || !config.behavior_allow_walk) {
-            mat.removeRow(3);
-            mat.removeCol(3, true);
-            mat.removeRow(4);
-            mat.removeCol(4, true);
+        if ((sleepAnim = animClips.getLoopAnimData(AnimType.SIT)) != null && config.behavior_allow_sleep) {
+            mat.bind(StochasticState.SLEEP, sleepAnim);
         } else {
-            mat.bind(3, anim.derive(-1));
-            mat.bind(4, anim.derive(+1));
+            mat.disable(StochasticState.SLEEP);
         }
-        anim = animClips.getLoopAnimData(AnimType.SLEEP);
-        if (anim == null || !config.behavior_allow_sleep) {
-            mat.removeRow(2);
-            mat.removeCol(2, true);
+        if ((moveAnim = animClips.getLoopAnimData(AnimType.MOVE)) != null && config.behavior_allow_walk) {
+            mat.bind(StochasticState.MOVE_L, moveAnim.derive(-1));
+            mat.bind(StochasticState.MOVE_R, moveAnim.derive(+1));
         } else {
-            mat.bind(2, anim);
+            mat.disable(StochasticState.MOVE_L);
+            mat.disable(StochasticState.MOVE_R);
         }
-        anim = animClips.getStrictAnimData(AnimType.SPECIAL);
-        if (anim == null || !config.behavior_allow_special) {
-            mat.removeRow(5);
-            mat.removeCol(5, true);
+        if ((specialAnim = animClips.getLoopAnimData(AnimType.SIT)) != null && config.behavior_allow_special) {
+            mat.bind(StochasticState.SPECIAL, specialAnim);
         } else {
-            mat.bind(5, anim);
+            mat.disable(StochasticState.SPECIAL);
         }
         return mat;
     }
@@ -84,7 +75,8 @@ public class GeneralBehavior extends Behavior {
             stageItr = stageList.iterator();
         stageCur = stageItr.next();
         stageAnimList = stageAnimMap.get(stageCur);
-        animMatrix = stageAnimWeightMap.get(stageCur);
+        currentMatrix = stageAnimWeightMap.get(stageCur);
+        currentState = StochasticState.IDLE;
         actionAutoGetter.removeCachedValue();
     }
 
