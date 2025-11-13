@@ -143,7 +143,7 @@ public final class BehaviorModule implements Controller<ArkHomeFX> {
         SliderSetup<Integer> setupBehaviorAiActivation = new SimpleIntegerSliderSetup(configBehaviorAiActivation);
         setupBehaviorAiActivation
                 .setDisplay(configBehaviorAiActivationValue, "%d 级", "活跃级别 (activation level)")
-                .setRange(0, 8)
+                .setRange(0, 16)
                 .setTicks(1, 0)
                 .setSliderValue(app.config.behavior_ai_activation)
                 .setOnChanged((observable, oldValue, newValue) -> {
