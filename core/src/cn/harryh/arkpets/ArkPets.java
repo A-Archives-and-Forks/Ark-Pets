@@ -48,7 +48,7 @@ public class ArkPets extends InputApplicationAdaptor {
     private boolean isAlwaysTransparent = false;
     private final Cached<Boolean> isFocused;
 
-    public ArkPets(String title) {
+    public ArkPets(String title, ArkConfig appConfig) {
         APP_TITLE = title;
 
         hWndTopmostGetter = new Cached<>();
@@ -61,6 +61,7 @@ public class ArkPets extends InputApplicationAdaptor {
 
         hWndTransparentSetter = new Cached<>();
         hWndPosSetter = new Cached<>();
+        config = appConfig;
     }
 
     @Override
@@ -68,7 +69,6 @@ public class ArkPets extends InputApplicationAdaptor {
         // When the APP was created
         // 1.App setup
         Logger.info("App", "Create with title \"" + APP_TITLE + "\"");
-        config = Objects.requireNonNull(ArkConfig.getConfig(), "ArkConfig returns a null instance, please check the config file.");
         Gdx.input.setInputProcessor(this);
         Gdx.graphics.setForegroundFPS(config.display_fps);
         registerDebugger();
