@@ -45,24 +45,24 @@ public class GeneralBehavior extends Behavior {
 
         // Bind and disable states based on config
         AnimData sitAnim, sleepAnim, moveAnim, specialAnim;
-        if ((sitAnim = animClips.getLoopAnimData(AnimType.SIT)) != null && !config.behavior_allow_sit) {
+        if (!(sitAnim = animClips.getLoopAnimData(AnimType.SIT)).isEmpty() && config.behavior_allow_sit) {
             mat.bind(StochasticState.SIT, sitAnim);
         } else {
             mat.disable(StochasticState.SIT);
         }
-        if ((sleepAnim = animClips.getLoopAnimData(AnimType.SIT)) != null && config.behavior_allow_sleep) {
+        if (!(sleepAnim = animClips.getLoopAnimData(AnimType.SLEEP)).isEmpty() && config.behavior_allow_sleep) {
             mat.bind(StochasticState.SLEEP, sleepAnim);
         } else {
             mat.disable(StochasticState.SLEEP);
         }
-        if ((moveAnim = animClips.getLoopAnimData(AnimType.MOVE)) != null && config.behavior_allow_walk) {
+        if (!(moveAnim = animClips.getLoopAnimData(AnimType.MOVE)).isEmpty() && config.behavior_allow_walk) {
             mat.bind(StochasticState.MOVE_L, moveAnim.derive(-1));
             mat.bind(StochasticState.MOVE_R, moveAnim.derive(+1));
         } else {
             mat.disable(StochasticState.MOVE_L);
             mat.disable(StochasticState.MOVE_R);
         }
-        if ((specialAnim = animClips.getLoopAnimData(AnimType.SIT)) != null && config.behavior_allow_special) {
+        if (!(specialAnim = animClips.getLoopAnimData(AnimType.SPECIAL)).isEmpty() && config.behavior_allow_special) {
             mat.bind(StochasticState.SPECIAL, specialAnim);
         } else {
             mat.disable(StochasticState.SPECIAL);
