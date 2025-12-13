@@ -100,9 +100,12 @@ public class StochasticMatrix {
         return binds[state.ordinal()];
     }
 
-    public AnimData transitedAnimOf(StochasticState state) {
-        StochasticState newState = weights[state.ordinal()].random();
-        return newState == null ? binds[state.ordinal()] : binds[newState.ordinal()];
+    public StochasticState transitedAnimOf(StochasticState state) {
+        return weights[state.ordinal()].random();
+    }
+
+    public AnimData getStateAnim(StochasticState state) {
+        return binds[state.ordinal()];
     }
 
     public void bind(StochasticState state, AnimData anim) {
