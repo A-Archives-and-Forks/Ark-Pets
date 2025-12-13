@@ -105,4 +105,12 @@ abstract public class Behavior {
     public AnimData dropped() {
         return new AnimData(null);
     }
+
+    public int[][] getDebugMatrix() {
+        return currentMatrix.getDebugMatrix();
+    }
+
+    public StochasticState getCurrentMatrixState() {
+        return currentState;
+    }
 }
