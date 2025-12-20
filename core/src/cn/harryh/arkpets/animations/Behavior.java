@@ -18,7 +18,15 @@ abstract public class Behavior {
      */
     public Behavior() {
         actionAutoGetter = new Cached<>();
-        actionAutoGetter.setValueProducer(() -> currentMatrix.transitedAnimOf(currentState));
+        actionAutoGetter.setValueProducer(() -> {
+            StochasticState newState = currentMatrix.transitedAnimOf(currentState);
+            if (newState == null) {
+                return currentMatrix.getStateAnim(currentState);
+            } else {
+                currentState = newState;
+                return currentMatrix.getStateAnim(newState);
+            }
+        });
         actionAutoGetter.setCacheAgeProducer(() -> {
             AnimData cache = actionAutoGetter.getCachedValue();
             return cache == null ? minAnimCacheAge : Math.max(minAnimCacheAge, cache.animClip().duration);
@@ -96,5 +104,13 @@ abstract public class Behavior {
      */
     public AnimData dropped() {
         return new AnimData(null);
+    }
+
+    public int[][] getDebugMatrix() {
+        return currentMatrix.getDebugMatrix();
+    }
+
+    public StochasticState getCurrentMatrixState() {
+        return currentState;
     }
 }
