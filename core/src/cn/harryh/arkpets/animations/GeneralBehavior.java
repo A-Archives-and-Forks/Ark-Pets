@@ -44,7 +44,12 @@ public class GeneralBehavior extends Behavior {
         StochasticMatrix mat = new StochasticMatrix(StochasticMatrix.DEFAULT_WEIGHTS);
 
         // Bind and disable states based on config
-        AnimData sitAnim, sleepAnim, moveAnim, specialAnim;
+        AnimData idleAnim, sitAnim, sleepAnim, moveAnim, specialAnim;
+        if (!(idleAnim = animClips.getLoopAnimData(AnimType.IDLE)).isEmpty()) {
+            mat.bind(StochasticState.IDLE, idleAnim);
+        } else {
+            mat.disable(StochasticState.IDLE);
+        }
         if (!(sitAnim = animClips.getLoopAnimData(AnimType.SIT)).isEmpty() && config.behavior_allow_sit) {
             mat.bind(StochasticState.SIT, sitAnim);
         } else {
@@ -62,7 +67,7 @@ public class GeneralBehavior extends Behavior {
             mat.disable(StochasticState.MOVE_L);
             mat.disable(StochasticState.MOVE_R);
         }
-        if (!(specialAnim = animClips.getLoopAnimData(AnimType.SPECIAL)).isEmpty() && config.behavior_allow_special) {
+        if (!(specialAnim = animClips.getStrictAnimData(AnimType.SPECIAL)).isEmpty() && config.behavior_allow_special) {
             mat.bind(StochasticState.SPECIAL, specialAnim);
         } else {
             mat.disable(StochasticState.SPECIAL);
