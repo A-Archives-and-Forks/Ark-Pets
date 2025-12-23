@@ -53,14 +53,20 @@ abstract public class Behavior {
      * @return AnimData object.
      */
     public final AnimData nextAnim() {
-        return currentMatrix.isAllDisabled() ? new AnimData(null) : currentMatrix.nextAnimOf(currentState);
+        if (currentMatrix.isAllDisabled()) return new AnimData(null);
+        AnimData newAnim = currentMatrix.nextAnimOf(currentState);
+        currentState = currentState.next();
+        return newAnim;
     }
 
     /** Gets the previous animation.
      * @return AnimData object.
      */
     public final AnimData prevAnim() {
-        return currentMatrix.isAllDisabled() ? new AnimData(null) : currentMatrix.prevAnimOf(currentState);
+        if (currentMatrix.isAllDisabled()) return new AnimData(null);
+        AnimData newAnim = currentMatrix.prevAnimOf(currentState);
+        currentState = currentState.prev();
+        return newAnim;
     }
 
     /** Gets the default animation.
