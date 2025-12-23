@@ -114,9 +114,13 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppName}.exe"; Tasks: d
 [Run]
 Filename: "{app}\{#MyAppName}.exe"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall
 
+[InstallDelete]
+Type: files; Name: "{app}\app\desktop*.jar"
+
 [UninstallDelete]
 Type: files; Name: "{app}\ArkPetsConfig.json"
 Type: files; Name: "{app}\models_data.json"
+Type: files; Name: "{app}\hs_err_pid*.log"
 Type: filesandordirs; Name: "{app}\logs"
 Type: filesandordirs; Name: "{app}\temp"
 Type: filesandordirs; Name: "{app}\models"
