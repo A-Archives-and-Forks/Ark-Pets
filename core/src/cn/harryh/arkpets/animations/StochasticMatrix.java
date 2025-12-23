@@ -135,8 +135,8 @@ public class StochasticMatrix {
         int[][] matrix = new int[StochasticState.values().length][StochasticState.values().length];
         for (int i = 0; i < weights.length; i++) {
             StochasticMatrixRow row = weights[i];
-            for (int j=0; j < row.weights.length;j++) {
-                if(row.disabledRef[j]) matrix[i][j] = -row.weights[j];
+            for (int j = 0; j < row.weights.length; j++) {
+                if (row.disabledRef[j]) matrix[i][j] = -row.weights[j];
                 else matrix[i][j] = row.weights[j];
             }
         }

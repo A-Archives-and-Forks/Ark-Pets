@@ -99,7 +99,7 @@ public class AnimClipGroup implements Collection<AnimClip> {
      * A steamed animation is a series of animation which may consist of the {@code BEGIN} animation, the {@code LOOP}
      * animation and the {@code END} animation.
      * @param type The specified animation type.
-     * @return The animation data whose animation clip will be none if not found.
+     * @return A new animation data, or {@code null} if not found.
      */
     public AnimData getStreamedAnimData(AnimType type) {
         AnimClipGroup found = this.findAnimations(type);
@@ -116,14 +116,14 @@ public class AnimClipGroup implements Collection<AnimClip> {
                 result = result.join(new AnimData(end));
             return result;
         }
-        return new AnimData(null);
+        return null;
     }
 
     /** Draws a loop animation data from this animation clip group.
      * <hr>
      * A loop animation is a single animation which could be played in loop and typically could be interrupted.
      * @param type The specified animation type.
-     * @return The animation data whose animation clip will be none if not found.
+     * @return A new animation data, or {@code null} if not found.
      */
     public AnimData getLoopAnimData(AnimType type) {
         AnimClipGroup found = this.findAnimations(type);
@@ -132,14 +132,14 @@ public class AnimClipGroup implements Collection<AnimClip> {
         AnimClip center = loop != null ? loop : none;
         if (center != null)
             return new AnimData(center, null, true, false, 0);
-        return new AnimData(null);
+        return null;
     }
 
     /** Draws a strict animation data from this animation clip group.
      * <hr>
      * A strict animation is a single animation which couldn't be interrupted and typically should be played once.
      * @param type The specified animation type.
-     * @return The animation data whose animation clip will be none if not found.
+     * @return A new animation data, or {@code null} if not found.
      */
     public AnimData getStrictAnimData(AnimType type) {
         AnimClipGroup found = this.findAnimations(type);
@@ -148,7 +148,7 @@ public class AnimClipGroup implements Collection<AnimClip> {
         AnimClip center = loop != null ? loop : none;
         if (center != null)
             return new AnimData(center, null, false, true);
-        return new AnimData(null);
+        return null;
     }
 
     protected void sortStages() {

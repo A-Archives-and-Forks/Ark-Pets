@@ -20,6 +20,11 @@ public record AnimData(
         boolean isStrict,
         int mobility
 ) {
+    public AnimData {
+        if (animClip == null)
+            throw new IllegalArgumentException("animClip cannot be null");
+    }
+
     /** Animation data record (simplified constructor).
      * @param animClip The animation clip of THIS animation data.
      */
@@ -56,12 +61,8 @@ public record AnimData(
             return new AnimData(this.animClip, this.animNext.join(animNext), this.isLoop, this.isStrict, this.mobility);
     }
 
-    public boolean isEmpty() {
-        return animClip == null;
-    }
-
     public String name() {
-        return isEmpty() ? null : animClip.fullName;
+        return animClip.fullName;
     }
 
     @Override

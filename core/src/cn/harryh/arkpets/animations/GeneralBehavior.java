@@ -45,30 +45,30 @@ public class GeneralBehavior extends Behavior {
 
         // Bind and disable states based on config
         AnimData idleAnim, sitAnim, sleepAnim, moveAnim, specialAnim;
-        if (!(idleAnim = animClips.getLoopAnimData(AnimType.IDLE)).isEmpty()) {
+        if ((idleAnim = animClips.getLoopAnimData(AnimType.IDLE)) != null) {
             mat.bind(StochasticState.IDLE, idleAnim);
         } else {
             mat.disable(StochasticState.IDLE);
         }
-        if (!(sitAnim = animClips.getLoopAnimData(AnimType.SIT)).isEmpty() && config.behavior_allow_sit) {
+        if ((sitAnim = animClips.getLoopAnimData(AnimType.SIT)) != null && config.behavior_allow_sit) {
             mat.bind(StochasticState.SIT, sitAnim);
         } else {
             mat.disable(StochasticState.SIT);
         }
-        if (!(sleepAnim = animClips.getLoopAnimData(AnimType.SLEEP)).isEmpty() && config.behavior_allow_sleep) {
+        if ((sleepAnim = animClips.getLoopAnimData(AnimType.SLEEP)) != null && config.behavior_allow_sleep) {
             mat.bind(StochasticState.SLEEP, sleepAnim);
         } else {
             mat.disable(StochasticState.SLEEP);
         }
-        if (!(moveAnim = animClips.getLoopAnimData(AnimType.MOVE)).isEmpty() && config.behavior_allow_walk) {
+        if ((moveAnim = animClips.getLoopAnimData(AnimType.MOVE)) != null && config.behavior_allow_walk) {
             mat.bind(StochasticState.MOVE_L, moveAnim.derive(-1));
             mat.bind(StochasticState.MOVE_R, moveAnim.derive(+1));
         } else {
             mat.disable(StochasticState.MOVE_L);
             mat.disable(StochasticState.MOVE_R);
         }
-        if (!(specialAnim = animClips.getStrictAnimData(AnimType.SPECIAL)).isEmpty() && config.behavior_allow_special) {
-            mat.bind(StochasticState.SPECIAL, specialAnim);
+        if ((specialAnim = animClips.getStrictAnimData(AnimType.SPECIAL)) != null && config.behavior_allow_special) {
+            mat.bind(StochasticState.SPECIAL, specialAnim.join(idleAnim == null ? specialAnim : idleAnim));
         } else {
             mat.disable(StochasticState.SPECIAL);
         }
@@ -105,14 +105,16 @@ public class GeneralBehavior extends Behavior {
 
     @Override
     public AnimData walkAnim(int mobility) {
-        return stageAnimList.getLoopAnimData(AnimType.MOVE).derive(mobility);
+        AnimData anim = stageAnimList.getLoopAnimData(AnimType.MOVE);
+        return anim == null ? null : anim.derive(mobility);
     }
 
     @Override
     public AnimData clickEnd() {
         AnimData a1 = stageAnimList.getStreamedAnimData(AnimType.ATTACK);
         AnimData a2 = stageAnimList.getStreamedAnimData(AnimType.INTERACT);
-        AnimData a3 = a2.isEmpty() ? a1 : a2;
+        AnimData a3 = a2 == null ? a1 : a2;
+        if (a3 == null) return defaultAnim();
         return new AnimData(a3.animClip(), a3.animNext(), false, true, a3.mobility()).join(defaultAnim());
     }
 

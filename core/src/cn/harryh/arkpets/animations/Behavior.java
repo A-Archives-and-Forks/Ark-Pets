@@ -53,63 +53,63 @@ abstract public class Behavior {
      * @return AnimData object.
      */
     public final AnimData nextAnim() {
-        if (currentMatrix.isAllDisabled()) return new AnimData(null);
+        if (currentMatrix.isAllDisabled()) return null;
         AnimData newAnim = currentMatrix.nextAnimOf(currentState);
         currentState = currentState.next();
         return newAnim;
     }
 
     /** Gets the previous animation.
-     * @return AnimData object.
+     * @return Animation data, or {@code null} if not available.
      */
     public final AnimData prevAnim() {
-        if (currentMatrix.isAllDisabled()) return new AnimData(null);
+        if (currentMatrix.isAllDisabled()) return null;
         AnimData newAnim = currentMatrix.prevAnimOf(currentState);
         currentState = currentState.prev();
         return newAnim;
     }
 
     /** Gets the default animation.
-     * @return AnimData object.
+     * @return Animation data, or {@code null} if not available.
      */
     public AnimData defaultAnim() {
-        return new AnimData(null);
+        return null;
     }
 
     /** Gets the walk animation.
      * @param mobility 1=GoRight, -1=GoLeft.
-     * @return AnimData object.
+     * @return Animation data, or {@code null} if not available.
      */
     public AnimData walkAnim(int mobility) {
-        return new AnimData(null);
+        return null;
     }
 
     /** Gets the animation when mouse-down.
-     * @return AnimData object.
+     * @return Animation data, or {@code null} if not available.
      */
     public AnimData clickStart() {
-        return new AnimData(null);
+        return null;
     }
 
     /** Gets the animation when mouse-up.
-     * @return AnimData object.
+     * @return Animation data, or {@code null} if not available.
      */
     public AnimData clickEnd() {
-        return new AnimData(null);
+        return null;
     }
 
     /** Gets the animation when the user starts dragging.
-     * @return AnimData object.
+     * @return Animation data, or {@code null} if not available.
      */
     public AnimData dragging() {
-        return new AnimData(null);
+        return null;
     }
 
     /** Gets the animation when character dropped.
-     * @return AnimData object.
+     * @return Animation data, or {@code null} if not available.
      */
     public AnimData dropped() {
-        return new AnimData(null);
+        return null;
     }
 
     public int[][] getDebugMatrix() {
