@@ -293,15 +293,19 @@ public class ArkPets extends InputApplicationAdaptor {
             if (isUpPressed()) {
                 do {
                     data = behavior.prevAnim();
-                } while (data.animClip().type == AnimClip.AnimType.MOVE); // Skip Move Animation
-                tray.keepAnim = data;
-                Logger.debug("Animation", "Switch to previous " + data);
+                } while (data != null && data.animClip().type == AnimClip.AnimType.MOVE); // Skip Move Animation
+                if (data != null) {
+                    tray.keepAnim = data;
+                    Logger.debug("Animation", "Switch to previous " + data);
+                }
             } else if (isDownPressed()) {
                 do {
                     data = behavior.nextAnim();
-                } while (data.animClip().type == AnimClip.AnimType.MOVE);
-                tray.keepAnim = data;
-                Logger.debug("Animation", "Switch to next " + data);
+                } while (data != null && data.animClip().type == AnimClip.AnimType.MOVE);
+                if (data != null) {
+                    tray.keepAnim = data;
+                    Logger.debug("Animation", "Switch to next " + data);
+                }
             }
         }
     }
