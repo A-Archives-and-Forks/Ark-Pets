@@ -114,13 +114,9 @@ public class ArkChar {
         }
         skeleton = new Skeleton(skeletonData);
         skeleton.updateWorldTransform();
-        animList = new AnimClipGroup(skeletonData.getAnimations().toArray(Animation.class));
-        // 4.Animation mixing
+        // 4.Animation setup
         AnimationStateData asd = new AnimationStateData(skeletonData);
-        for (AnimClip i : animList)
-            for (AnimClip j : animList)
-                if (!i.fullName.equals(j.fullName))
-                    asd.setMix(i.fullName, j.fullName, config.render_animation_mixture);
+        animList = new AnimClipGroup(skeletonData.getAnimations().toArray(Animation.class));
         // 5.Animation state setup
         animationState = new AnimationState(asd);
         animationState.apply(skeleton);
@@ -138,6 +134,7 @@ public class ArkChar {
         outlineWidth = config.render_outline_width;
         outlineColor = new Color(Color.CLEAR);
         shadowColor = ArkConfig.getGdxColorFrom(config.render_shadow_color);
+        // 7.Canvas fitting
         stageInsertMap = new HashMap<>();
         for (AnimStage stage : animList.clusterByStage().keySet()) {
             // Figure out the suitable canvas size
@@ -152,6 +149,8 @@ public class ArkChar {
             }
         }
         camera.setInsertMaxed();
+        // 8.Animation mixing
+        animList.applyCompleteAnimMix(asd, config.render_animation_mixture);
     }
 
     /** Sets the canvas with the specified background color.
@@ -330,7 +329,9 @@ public class ArkChar {
         camera.getFBO().begin();
         ScreenUtils.clear(0, 0, 0, 0, true);
         // Render all animations to the FBO
-        float alphaPerSample = (float) Math.max(1.0 - 254.0 / 255.0, 1.0 - Math.pow(10.0, -4.0 / totalSamples));
+        float alphaPerSample = (float) Math.max(1.0 - 254.0 / 255.0, Math.min(1.0,
+                1.0 - Math.pow(10.0, -4.0 / totalSamples) + Math.pow(10, 1.0 / totalSamples - 2.0)
+        ));
         for (AnimClip animClip : animList.findAnimations(stage)) {
             composer.reset();
             composer.offer(new AnimData(animClip));

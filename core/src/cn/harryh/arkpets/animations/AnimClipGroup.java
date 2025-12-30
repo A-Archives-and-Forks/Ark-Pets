@@ -7,6 +7,7 @@ import cn.harryh.arkpets.animations.AnimClip.AnimModifier;
 import cn.harryh.arkpets.animations.AnimClip.AnimStage;
 import cn.harryh.arkpets.animations.AnimClip.AnimType;
 import com.esotericsoftware.spine.Animation;
+import com.esotericsoftware.spine.AnimationStateData;
 
 import java.util.*;
 
@@ -149,6 +150,17 @@ public class AnimClipGroup implements Collection<AnimClip> {
         if (center != null)
             return new AnimData(center, null, false, true);
         return null;
+    }
+
+    /** Applies complete animation mixing to the target {@link AnimationStateData}.
+     * @param target The target AnimationStateData to have the mixing applied.
+     * @param duration The duration of each animation mixing.
+     */
+    public void applyCompleteAnimMix(AnimationStateData target, float duration) {
+        animClipList.forEach(i -> animClipList.forEach(j -> {
+            if (!i.fullName.equals(j.fullName))
+                target.setMix(i.fullName, j.fullName, duration);
+        }));
     }
 
     protected void sortStages() {
