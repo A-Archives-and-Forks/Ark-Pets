@@ -17,14 +17,12 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.PixmapIO;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
+import static cn.harryh.arkpets.Const.PathConfig.tempDirPath;
 import static cn.harryh.arkpets.Const.coreTitleManager;
 
 
@@ -492,11 +490,13 @@ public class ArkPets extends InputApplicationAdaptor {
             });
             registerKeyTyped('P', () -> Logger.debug("Debugger", "Showing plane info\n" + plane.getDebugMsg()));
             registerKeyTyped('S', () -> {
-                String name = "temp/snapshot-" + System.currentTimeMillis() + ".png";
-                Pixmap snapshot = Pixmap.createFromFrameBuffer(0, 0, cha.camera.getWidth(), cha.camera.getHeight());
-                PixmapIO.writePNG(new FileHandle(name), snapshot);
-                snapshot.dispose();
-                Logger.debug("Debugger", "Snapshot saved to `" + name + "`");
+                FileHandle dir = new FileHandle(tempDirPath);
+                dir.mkdirs();
+                FileHandle file = dir.child("snapshot-" + System.currentTimeMillis() + ".png");
+                PixmapWrapper pw = PixmapWrapper.fromCamera(cha.camera);
+                pw.savePixmap(file, true);
+                pw.dispose();
+                Logger.debug("Debugger", "Saved snapshot to: " + file.path() );
             });
             registerKeyTyped('W', () -> {
                 StringBuilder builder = new StringBuilder("Showing window list\n");

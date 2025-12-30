@@ -16,10 +16,14 @@ import cn.harryh.arkpets.transitions.TransitionVector3;
 import cn.harryh.arkpets.utils.DynamicOrthographicCamara;
 import cn.harryh.arkpets.utils.DynamicOrthographicCamara.Insert;
 import cn.harryh.arkpets.utils.Logger;
+import cn.harryh.arkpets.utils.PixmapWrapper;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -29,6 +33,7 @@ import com.esotericsoftware.spine.utils.TwoColorPolygonBatch;
 
 import java.util.HashMap;
 
+import static cn.harryh.arkpets.Const.PathConfig.tempDirPath;
 import static cn.harryh.arkpets.Const.*;
 import static java.io.File.separator;
 
@@ -345,13 +350,13 @@ public class ArkChar {
             }
         }
         // Take down the snapshot from the rendered FBO
-        Pixmap snapshot = Pixmap.createFromFrameBuffer(0, 0, camera.getWidth(), camera.getHeight());
+        PixmapWrapper pw = PixmapWrapper.fromCamera(camera);
         camera.getFBO().end();
         // Crop the canvas in order to fit the snapshot
         float alphaThreshold = Math.max(0f, Math.min(coverage, 1f));
         Insert insert;
         do {
-            insert = camera.getFittedInsert(snapshot, alphaThreshold, false, true);
+            insert = camera.getFittedInsert(pw.getPixmap(), alphaThreshold, false, true);
             if (!insert.equals(camera.getInsert()) || alphaThreshold < 0.75f)
                 break;
             alphaThreshold *= 0.9375f;
@@ -360,18 +365,21 @@ public class ArkChar {
             Logger.warn("Character", stage + " has inappropriate canvas coverage setting, auto adjusted to " + alphaThreshold);
         // For debugging
         if (isDebugEnabled) {
-            snapshot.setColor(Color.RED);
-            snapshot.drawLine(0, -insert.bottom, camera.getWidth(), -insert.bottom);
-            snapshot.drawLine(0, camera.getHeight() + insert.top, camera.getWidth(), camera.getHeight() + insert.top);
-            snapshot.drawLine(-insert.left, 0, -insert.left, camera.getHeight());
-            snapshot.drawLine(camera.getWidth() + insert.right, 0, camera.getWidth() + insert.right, camera.getHeight());
-            FileHandle dir = new FileHandle("temp/");
+            pw.drawCmap("tab16t", "a");
+            pw.drawUnfilledRectangle(Color.RED,
+                    -insert.left,
+                    -insert.bottom,
+                    camera.getWidth() + insert.left + insert.right,
+                    camera.getHeight() + insert.top + insert.bottom,
+                    2);
+            FileHandle dir = new FileHandle(tempDirPath);
             dir.mkdirs();
             FileHandle file = dir.child("acSnapshot-" + skeleton.toString() + "-" + stage.id() + ".png");
-            PixmapIO.writePNG(file, snapshot);
+            pw.savePixmap(file, true);
+            Logger.debug("Character", "Saved acSnapshot to: " + file.path());
         }
         // Complete
         camera.setInsert(insert);
-        snapshot.dispose();
+        pw.dispose();
     }
 }
