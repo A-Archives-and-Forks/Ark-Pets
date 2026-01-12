@@ -144,6 +144,8 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
         this.app = app;
         this.selectedModel = new ModelItemWrapper();
         this.modelListView.setItems(targetList);
+        ScrollUtils.addSmoothScrolling(modelListView);
+
         infoPaneComposer = new GuiPrefabs.PeerNodeComposer();
         infoPaneComposer.add(0, infoPane);
         infoPaneComposer.add(1,
