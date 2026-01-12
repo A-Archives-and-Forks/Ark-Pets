@@ -4,8 +4,8 @@
 package cn.harryh.arkpets.assets;
 
 import cn.harryh.arkpets.utils.Version;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.annotation.JSONField;
 
 import java.io.File;
 import java.io.Serializable;

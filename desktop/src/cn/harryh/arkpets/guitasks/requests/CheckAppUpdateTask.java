@@ -10,7 +10,7 @@ import cn.harryh.arkpets.utils.GuiPrefabs;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.StringUtils;
 import cn.harryh.arkpets.utils.Version;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import javafx.scene.layout.StackPane;
 
 import java.net.URL;

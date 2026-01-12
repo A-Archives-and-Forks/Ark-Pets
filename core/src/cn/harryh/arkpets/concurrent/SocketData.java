@@ -3,8 +3,8 @@
  */
 package cn.harryh.arkpets.concurrent;
 
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.annotation.JSONField;
 
 import java.io.Serializable;
 import java.nio.charset.Charset;

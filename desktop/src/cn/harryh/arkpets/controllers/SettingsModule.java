@@ -18,7 +18,7 @@ import cn.harryh.arkpets.platform.StartupConfig;
 import cn.harryh.arkpets.tray.HostTray;
 import cn.harryh.arkpets.utils.*;
 import cn.harryh.arkpets.utils.GuiComponents.*;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import com.badlogic.gdx.graphics.Color;
 import com.jfoenix.controls.JFXDialog;
 import javafx.application.Platform;

@@ -7,8 +7,8 @@ import cn.harryh.arkpets.Const;
 import cn.harryh.arkpets.network.Connections;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.StringUtils;
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONException;
+import com.alibaba.fastjson2.JSONObject;
 import javafx.concurrent.Task;
 import javafx.scene.layout.StackPane;
 

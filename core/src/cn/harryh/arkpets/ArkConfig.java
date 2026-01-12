@@ -7,9 +7,9 @@ import cn.harryh.arkpets.transitions.EasingFunction;
 import cn.harryh.arkpets.utils.IOUtils.FileUtil;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.SecretUtils;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.badlogic.gdx.graphics.Color;
 
 import java.io.File;
@@ -22,6 +22,7 @@ import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.charsetDefault;
 import static cn.harryh.arkpets.Const.hexColorRegex;
+import static com.alibaba.fastjson2.JSONWriter.Feature.PrettyFormat;
 
 
 public class ArkConfig implements Serializable {
@@ -133,7 +134,7 @@ public class ArkConfig implements Serializable {
     @JSONField(serialize = false)
     public void save() {
         try {
-            FileUtil.writeString(configCustom, charsetDefault, JSON.toJSONString(this, true), false);
+            FileUtil.writeString(configCustom, charsetDefault, JSON.toJSONString(this, PrettyFormat), false);
             Logger.debug("Config", "Config saved");
         } catch (IOException e) {
             Logger.error("Config", "Config saving failed, details see below.", e);

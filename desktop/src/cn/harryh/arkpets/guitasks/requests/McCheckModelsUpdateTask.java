@@ -4,7 +4,7 @@
 package cn.harryh.arkpets.guitasks.requests;
 
 import cn.harryh.arkpets.utils.StringUtils;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import javafx.scene.layout.StackPane;
 
 import java.net.URL;
