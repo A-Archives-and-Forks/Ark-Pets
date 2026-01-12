@@ -147,7 +147,6 @@ JFXButton>AnchorPane>SVGPath {
 .arklist.list-view {
     -fx-padding: 4px;
     -fx-background-radius: 3px;
-    -fx-skin: "cn.harryh.arkpets.utils.SmoothScrollListViewSkin";
 }
 
 .arklist .list-cell {

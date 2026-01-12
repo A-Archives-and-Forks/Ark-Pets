@@ -82,6 +82,7 @@ public final class AnnounceDialog implements DialogController<ArkHomeFX> {
                 )
         );
         annoListView.setCellFactory(this::createCell);
+        ScrollUtils.addSmoothScrolling(annoListView);
 
         annoRefetch.setOnAction(e -> this.fetchAnnounce(true, () -> {}));
 
