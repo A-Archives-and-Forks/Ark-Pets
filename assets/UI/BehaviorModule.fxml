@@ -46,6 +46,10 @@
                     <JFXCheckBox fx:id="configBehaviorDoPeerRepulsion" mnemonicParsing="false"
                                  text="允许被其他桌宠排斥"/>
                 </HBox>
+                <HBox>
+                    <Label text="交互式朝向翻转"/>
+                    <JFXComboBox fx:id="configDirectionSwitching" prefWidth="120.0"/>
+                </HBox>
                 <Separator/>
                 <Label styleClass="config-group-title" text="位置"/>
                 <HBox>

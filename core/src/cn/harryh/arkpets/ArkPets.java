@@ -218,18 +218,15 @@ public class ArkPets extends InputApplicationAdaptor {
             offsetY = (int) (animData.animClip().type.offsetY * config.display_scale);
     }
 
-    private void updateMobility() {
-        if (Math.abs(getLastDragDeltaX()) >= changeDirectionXThreshold) {
-            // Update the z-axis of the character
-            cha.position.reset(cha.position.end().x, cha.position.end().y, getLastDragDeltaX() > 0 ? 1f : -1f);
-            if (cha.getPlaying() != null && cha.getPlaying().mobility() != 0) {
-                AnimData anim = cha.getPlaying();
-                cha.setAnimation(anim.derive(Math.abs(anim.mobility()) * getLastDragDeltaX() > 0 ? 1 : -1));
-            }
-            if (tray.keepAnim != null && tray.keepAnim.mobility() != 0) {
-                AnimData anim = tray.keepAnim;
-                tray.keepAnim = anim.derive(Math.abs(anim.mobility()) * getLastDragDeltaX() > 0 ? 1 : -1);
-            }
+    private void changeMobilitySign(int sign) {
+        cha.position.reset(cha.position.end().x, cha.position.end().y, sign);
+        if (cha.getPlaying() != null && cha.getPlaying().mobility() != 0) {
+            AnimData anim = cha.getPlaying();
+            cha.setAnimation(anim.derive(Math.abs(anim.mobility()) * sign));
+        }
+        if (tray.keepAnim != null && tray.keepAnim.mobility() != 0) {
+            AnimData anim = tray.keepAnim;
+            tray.keepAnim = anim.derive(Math.abs(anim.mobility()) * sign);
         }
     }
 
@@ -238,7 +235,7 @@ public class ArkPets extends InputApplicationAdaptor {
     protected void onMouseDown() {
         if (!isMouseAtSolidPixel()) {
             // Transfer mouse event
-            RelativeWindowPosition rwp = getRelativeWindowPositionAt(getMouseX(), getMouseY());
+            RelativeWindowPosition rwp = getUnderlyingRWP();
             if (rwp != null)
                 rwp.sendMouseEvent(switch (getMouseButton()) {
                     case Input.Buttons.LEFT -> HWndCtrl.MouseEvent.LBUTTONDOWN;
@@ -267,16 +264,19 @@ public class ArkPets extends InputApplicationAdaptor {
             plane.changePosition(Gdx.graphics.getDeltaTime(), x, -(cha.camera.getHeight() + y));
             windowPosition.setToEnd();
             tray.hideDialog();
+            if (Math.abs(getLastDragDeltaX()) >= changeDirectionXThreshold && config.behavior_direction_switching >= 2)
+                changeMobilitySign((int) Math.signum(getLastDragDeltaX()));
         }
     }
 
     @Override
     protected void onMouseUp() {
         if (isMouseDragging()) {
-            updateMobility();
+            if (Math.abs(getLastDragDeltaX()) >= changeDirectionXThreshold && config.behavior_direction_switching >= 1)
+                changeMobilitySign((int) Math.signum(getLastDragDeltaX()));
         } else if (!isMouseAtSolidPixel()) {
             // Transfer mouse event
-            RelativeWindowPosition rwp = getRelativeWindowPositionAt(getMouseX(), getMouseY());
+            RelativeWindowPosition rwp = getUnderlyingRWP();
             if (rwp != null)
                 rwp.sendMouseEvent(switch (getMouseButton()) {
                     case Input.Buttons.LEFT -> HWndCtrl.MouseEvent.LBUTTONUP;
@@ -288,6 +288,19 @@ public class ArkPets extends InputApplicationAdaptor {
             // Left Click: Play the specified animation
             changeAnimation(behavior.clickEnd());
             tray.hideDialog();
+        }
+    }
+
+    @Override
+    protected void onMouseMoved() {
+        if (!isMouseAtSolidPixel()) {
+            // Transfer mouse event
+            RelativeWindowPosition rwp = getUnderlyingRWP();
+            if (rwp != null)
+                rwp.sendMouseEvent(HWndCtrl.MouseEvent.MOUSEMOVE);
+        } else {
+            if (Math.abs(getLastMoveDeltaX()) >= changeDirectionXThreshold && config.behavior_direction_switching >= 3)
+                changeMobilitySign((int) Math.signum(getLastMoveDeltaX()));
         }
     }
 
@@ -319,16 +332,6 @@ public class ArkPets extends InputApplicationAdaptor {
     protected void onKeyUp(int keycode) {
     }
 
-    @Override
-    protected void onMouseMoved() {
-        if (!isMouseAtSolidPixel()) {
-            // Transfer mouse event
-            RelativeWindowPosition rwp = getRelativeWindowPositionAt(getMouseX(), getMouseY());
-            if (rwp != null)
-                rwp.sendMouseEvent(HWndCtrl.MouseEvent.MOUSEMOVE);
-        }
-    }
-
     private boolean isMouseAtSolidPixel() {
         int pixel = cha.getPixel(getMouseX(), cha.camera.getHeight() - getMouseY() - 1);
         return (pixel & 0x000000FF) > 0;
@@ -358,11 +361,11 @@ public class ArkPets extends InputApplicationAdaptor {
         }
     }
 
-    private RelativeWindowPosition getRelativeWindowPositionAt(int x, int y) {
+    private RelativeWindowPosition getUnderlyingRWP() {
         if (hWndList == null)
             return null;
-        int absX = x + (int) (windowPosition.now().x);
-        int absY = y + (int) (windowPosition.now().y);
+        int absX = getMouseX() + (int) (windowPosition.now().x);
+        int absY = getMouseY() + (int) (windowPosition.now().y);
         for (HWndCtrl hWndCtrl : hWndList) {
             if (coreTitleManager.getNumber(hWndCtrl) < 0)
                 if (hWndCtrl.posLeft <= absX && hWndCtrl.posRight > absX)
@@ -503,7 +506,7 @@ public class ArkPets extends InputApplicationAdaptor {
                 PixmapWrapper pw = PixmapWrapper.fromCamera(cha.camera);
                 pw.savePixmap(file, true);
                 pw.dispose();
-                Logger.debug("Debugger", "Saved snapshot to: " + file.path() );
+                Logger.debug("Debugger", "Saved snapshot to: " + file.path());
             });
             registerKeyTyped('W', () -> {
                 StringBuilder builder = new StringBuilder("Showing window list\n");

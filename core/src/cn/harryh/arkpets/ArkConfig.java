@@ -42,6 +42,8 @@ public class ArkConfig implements Serializable {
     public boolean      behavior_allow_special;
     /** @since ArkPets 1.0 */ @JSONField(defaultValue = "true")
     public boolean      behavior_allow_walk;
+    /** @since ArkPets 3.11 */ @JSONField(defaultValue = "1")
+    public int          behavior_direction_switching;
     /** @since ArkPets 1.6 */ @JSONField(defaultValue = "true")
     public boolean      behavior_do_peer_repulsion;
     /** @since ArkPets 3.9 */ @JSONField(defaultValue = "30.0")

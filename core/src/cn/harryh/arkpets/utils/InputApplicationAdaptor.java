@@ -19,6 +19,8 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
     private int mouseButton = 0;
     private int lastDragDeltaX = 0;
     private int lastDragDeltaY = 0;
+    private int lastMoveDeltaX = 0;
+    private int lastMoveDeltaY = 0;
     private boolean isMouseDragging = false;
     private boolean isMouseDown = false;
 
@@ -87,6 +89,14 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
         return lastDragDeltaY;
     }
 
+    public final int getLastMoveDeltaX() {
+        return lastMoveDeltaX;
+    }
+
+    public final int getLastMoveDeltaY() {
+        return lastMoveDeltaY;
+    }
+
     public final double getLastActiveDeltaTime() {
         return (System.nanoTime() - lastActiveNanoTime) / 1_000_000_000.0;
     }
@@ -143,6 +153,8 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
             mouseDeltaY = 0;
             lastDragDeltaX = 0;
             lastDragDeltaY = 0;
+            lastMoveDeltaX = 0;
+            lastMoveDeltaY = 0;
             mouseButton = button;
             isMouseDown = true;
             onMouseDown();
@@ -186,8 +198,12 @@ abstract public class InputApplicationAdaptor extends ApplicationAdapter impleme
     @Deprecated
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
+        int dx = screenX - mouseX;
+        int dy = screenY - mouseY;
         mouseX = screenX;
         mouseY = screenY;
+        lastMoveDeltaX = dx * lastMoveDeltaX <= 0 ? dx : lastMoveDeltaX + dx;
+        lastMoveDeltaY = dy * lastMoveDeltaY <= 0 ? dy : lastMoveDeltaY + dy;
         onMouseMoved();
         return true;
     }
