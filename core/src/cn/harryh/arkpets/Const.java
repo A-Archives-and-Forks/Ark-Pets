@@ -45,8 +45,8 @@ public final class Const {
     public static final float skelBaseScale     = 0.3f;
 
     // Behavior presets
-    public static final int behaviorBaseWeight      = 320;
-    public static final float droppedThreshold      = 10f;
+    public static final float changeDirectionXThreshold = 4f;
+    public static final float droppedYThreshold         = 10f;
 
     // Duration presets
     public static final Duration durationFast   = new Duration(150);

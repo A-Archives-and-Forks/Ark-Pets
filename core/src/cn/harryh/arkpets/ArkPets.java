@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static cn.harryh.arkpets.Const.PathConfig.tempDirPath;
+import static cn.harryh.arkpets.Const.changeDirectionXThreshold;
 import static cn.harryh.arkpets.Const.coreTitleManager;
 
 
@@ -217,6 +218,21 @@ public class ArkPets extends InputApplicationAdaptor {
             offsetY = (int) (animData.animClip().type.offsetY * config.display_scale);
     }
 
+    private void updateMobility() {
+        if (Math.abs(getLastDragDeltaX()) >= changeDirectionXThreshold) {
+            // Update the z-axis of the character
+            cha.position.reset(cha.position.end().x, cha.position.end().y, getLastDragDeltaX() > 0 ? 1f : -1f);
+            if (cha.getPlaying() != null && cha.getPlaying().mobility() != 0) {
+                AnimData anim = cha.getPlaying();
+                cha.setAnimation(anim.derive(Math.abs(anim.mobility()) * getLastDragDeltaX() > 0 ? 1 : -1));
+            }
+            if (tray.keepAnim != null && tray.keepAnim.mobility() != 0) {
+                AnimData anim = tray.keepAnim;
+                tray.keepAnim = anim.derive(Math.abs(anim.mobility()) * getLastDragDeltaX() > 0 ? 1 : -1);
+            }
+        }
+    }
+
     /* INPUT PROCESS */
     @Override
     protected void onMouseDown() {
@@ -257,16 +273,7 @@ public class ArkPets extends InputApplicationAdaptor {
     @Override
     protected void onMouseUp() {
         if (isMouseDragging()) {
-            // Update the z-axis of the character
-            cha.position.reset(cha.position.end().x, cha.position.end().y, getMouseIntention());
-            if (cha.getPlaying() != null && cha.getPlaying().mobility() != 0) {
-                AnimData anim = cha.getPlaying();
-                cha.setAnimation(anim.derive(Math.abs(anim.mobility()) * getMouseIntention()));
-            }
-            if (tray.keepAnim != null && tray.keepAnim.mobility() != 0) {
-                AnimData anim = tray.keepAnim;
-                tray.keepAnim = anim.derive(Math.abs(anim.mobility()) * getMouseIntention());
-            }
+            updateMobility();
         } else if (!isMouseAtSolidPixel()) {
             // Transfer mouse event
             RelativeWindowPosition rwp = getRelativeWindowPositionAt(getMouseX(), getMouseY());
