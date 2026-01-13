@@ -26,8 +26,9 @@ tasks.register("run", JavaExec) {
     mainClass = mainClassName
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
-    ignoreExitValue = true
     workingDir = assetsDir
+
+    setIgnoreExitValue(true)
 
     if (OperatingSystem.current() == OperatingSystem.MAC_OS) {
         jvmArgs += "-XstartOnFirstThread" // Required to run on macOS
@@ -43,8 +44,9 @@ tasks.register("debug", JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in
     workingDir = project.assetsDir
-    ignoreExitValue = true
-    debug = true
+
+    setIgnoreExitValue(true)
+    setDebug(true)
 }
 
 
@@ -73,6 +75,14 @@ tasks.register("distJar", Jar) {
     dependsOn = ["classes"]
     group = "dist"
 
+    doLast() {
+        copy {
+            from "${jarLibDir}/${jarLibName}.jar"
+            into distDir
+            rename "${jarLibName}.jar", "${distName}.jar"
+        }
+    }
+
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
         attributes 'Main-Class': mainClassName
@@ -82,13 +92,6 @@ tasks.register("distJar", Jar) {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
     with jar
-    doLast() {
-        copy {
-            from "${jarLibDir}/${jarLibName}.jar"
-            into distDir
-            rename "${jarLibName}.jar", "${distName}.jar"
-        }
-    }
 }
 
 // Creates a customized Java Runtime Environment for the app.
@@ -132,6 +135,7 @@ tasks.register("jpackage", Exec) {
             into jpackageDir
         }
     }
+
     workingDir project.projectDir
     def commands = [
             "${javaHome}/bin/jpackage",
@@ -155,7 +159,7 @@ tasks.register("jpackage", Exec) {
         commands << '--java-options'
         commands << "-XstartOnFirstThread"
     }
-    commandLine = commands
+    commandLine = commands as List<String>
 }
 
 // Generates a distributable ZIP file for the app.
@@ -190,13 +194,13 @@ tasks.register("distAll") {
     group = "dist"
 
     doLast() {
-        println("All files were successfully generated, see: ${new File(distDir as String).absolutePath}")
+        logger.lifecycle("All files were successfully generated, see: ${new File(distDir as String).absolutePath}")
         try {
             delete layout.buildDirectory.dir("tmp")
             delete jlinkDir
             delete jpackageDir
         } catch (Exception ignored) {
-            println("Unable to delete temp files.")
+            logger.lifecycle("Unable to delete temp files.")
         }
     }
 }
