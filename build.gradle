@@ -46,7 +46,6 @@ project(":desktop") {
         implementation project(":core")
         // libGDX Desktop
         api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
-        api "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
     }
 }
 
@@ -81,6 +80,6 @@ project(":core") {
         // TiniPinyin
         api 'com.github.promeg:tinypinyin:2.0.3'
         // OpenCC4j
-        api 'com.github.houbb:opencc4j:1.8.1'
+        api 'com.github.houbb:opencc4j:1.14.0'
     }
 }
