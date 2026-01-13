@@ -60,14 +60,14 @@ ext {
     osPathSep = File.pathSeparatorChar
     // Distribution related vars
     jarLibDir = layout.buildDirectory.dir("libs").get().toString()
-    jarLibName = project.ext.appName + "-" + project.version
+    jarLibName = project.name + "-" + project.version
     jlinkDir = layout.buildDirectory.dir("jlink").get().toString()
     jlinkModuleList = "java.base,java.desktop,java.logging,java.management,java.scripting,jdk.crypto.ec,jdk.localedata,jdk.unsupported"
     jlinkLocalesList = "en-US,zh-CN"
     jpackageDir = layout.buildDirectory.dir("jpackage").get().toString()
     issFileRel = "docs/scripts/ExePacking.iss"
     distDir = layout.buildDirectory.dir("dist").get().toString()
-    distName = project.ext.appName + "-v" + project.version
+    distName = project.appName + "-v" + project.version
 }
 
 // Generates a distributable JAR file for the app.
@@ -196,7 +196,7 @@ tasks.register("distAll") {
     doLast() {
         logger.lifecycle("All files were successfully generated, see: ${new File(distDir as String).absolutePath}")
         try {
-            delete layout.buildDirectory.dir("tmp")
+            delete jarLibDir
             delete jlinkDir
             delete jpackageDir
         } catch (Exception ignored) {
