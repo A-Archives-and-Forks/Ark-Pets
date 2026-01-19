@@ -25,11 +25,9 @@ public class GeneralBehavior extends Behavior {
 
         this.config = config;
         stageAnimMap = animList.clusterByStage();
+        stageAnimMap.entrySet().removeIf(e -> e.getValue().getLoopAnimData(AnimType.IDLE) == null);
         stageAnimWeightMap = new HashMap<>();
-
-        for (AnimStage key : stageAnimMap.keySet()) {
-            stageAnimWeightMap.put(key, getMatrix(stageAnimMap.get(key)));
-        }
+        stageAnimMap.forEach((k, v) -> stageAnimWeightMap.put(k, getMatrix(v)));
 
         stageList = new ArrayList<>(stageAnimWeightMap.keySet().stream().toList());
         stageList.sort(Comparator.comparing(AnimStage::id));
