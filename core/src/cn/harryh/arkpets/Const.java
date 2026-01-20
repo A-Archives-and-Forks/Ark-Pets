@@ -4,14 +4,15 @@
 package cn.harryh.arkpets;
 
 import cn.harryh.arkpets.platform.HWndCtrl.NumberedTitleManager;
+import cn.harryh.arkpets.utils.IOUtils;
 import cn.harryh.arkpets.utils.Logger;
 import cn.harryh.arkpets.utils.Version;
 import javafx.util.Duration;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -126,35 +127,56 @@ public final class Const {
     }
 
 
-    /** Fonts provider class.
+    /** Fonts provider enum.
      */
-    public static class FontsConfig {
-        private static final String fontFileRegular  = "/fonts/SourceHanSansCN-Regular.otf";
-        private static final String fontFileBold     = "/fonts/SourceHanSansCN-Bold.otf";
+    public enum FontsConfig {
+        REGULAR("SourceHanSansCN-Regular.otf", 8331636),
+        BOLD("SourceHanSansCN-Bold.otf", 8543504);
 
-        public static void loadFontsToJavafx() {
+        private final String name;
+        private final int fileSize;
+
+        FontsConfig(String name, int fileSize) {
+            this.name = name;
+            this.fileSize = fileSize;
+        }
+
+        public void loadFontToJavafx() {
             if (System.getProperty("arkpets.usesystemfont") == null) {
-                javafx.scene.text.Font.loadFont(FontsConfig.class.getResourceAsStream(fontFileRegular),
-                        javafx.scene.text.Font.getDefault().getSize());
-                javafx.scene.text.Font.loadFont(FontsConfig.class.getResourceAsStream(fontFileBold),
+                javafx.scene.text.Font.loadFont(Objects.requireNonNull(extractFont()).toURI().toString(),
                         javafx.scene.text.Font.getDefault().getSize());
             }
         }
 
-        public static void loadFontsToSwing() {
+        public void loadFontToSwing() {
             if (System.getProperty("arkpets.usesystemfont") == null) {
                 try {
-                    InputStream in = Objects.requireNonNull(FontsConfig.class.getResourceAsStream(fontFileRegular));
-                    java.awt.Font font = java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, in);
-                    if (font != null) {
-                        UIManager.put("Label.font", font.deriveFont(10f).deriveFont(Font.ITALIC));
-                        UIManager.put("Menu.font", font.deriveFont(11f));
-                        UIManager.put("MenuItem.font", font.deriveFont(11f));
-                    }
+                    File fontFile = Objects.requireNonNull(extractFont());
+                    java.awt.Font font = java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, fontFile);
+                    UIManager.put("Label.font", font.deriveFont(10f).deriveFont(Font.ITALIC));
+                    UIManager.put("Menu.font", font.deriveFont(11f));
+                    UIManager.put("MenuItem.font", font.deriveFont(11f));
                 } catch (FontFormatException | IOException e) {
                     Logger.error("System", "Failed to load tray menu font, details see below.", e);
                 }
             }
         }
+
+        private File extractFont() {
+            try {
+                var tempFont = new File(PathConfig.tempDirPath, name);
+                if (tempFont.exists() && tempFont.length() >= fileSize)
+                    return tempFont;
+                Logger.debug("System", "Extracting font " + name + " into " + tempFont.getAbsolutePath());
+                var stream = Objects.requireNonNull(FontsConfig.class.getResourceAsStream("/fonts/" + name));
+                IOUtils.FileUtil.writeStream(tempFont, stream, false);
+                stream.close();
+                return tempFont;
+            } catch (IOException e) {
+                Logger.error("System", "Failed to extract font " + name + ", details see below.", e);
+            }
+            return null;
+        }
     }
+
 }
