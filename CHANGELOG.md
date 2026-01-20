@@ -20,6 +20,11 @@
 | [`#159`]<br>[`a8829c4`]<br>[`823b904`] | 将 Gradle 版本从 8.1 升级到 8.14，并移除了过时的 Gradle 脚本语法。 |
 | [`1c7200d`]                            | 优化了 GitHub Actions 的 `build` 工作流脚本，并升级了其依赖项版本。 |
 
+| **补丁**                   |                                             |
+|:-------------------------|:--------------------------------------------|
+| `v3.11.1`<br>[`deedced`] | 修复了此版本引入的由阶段过滤问题导致的个别多阶段的敌方模型无法正常启动的问题。     |
+| `v3.11.1`<br>[`69ef274`] | 修复了之前版本中的阶段名称前导零适配问题导致的个别多阶段的敌方模型无法正常启动的问题。 |
+
 ## v3.10
 | **新增**                  |                                                               |
 |:------------------------|:--------------------------------------------------------------|
@@ -742,3 +747,5 @@
 [`a8829c4`]: https://github.com/isHarryh/Ark-Pets/commit/a8829c4546110a003b045f32c8ef4b6ff645bfbd
 [`823b904`]: https://github.com/isHarryh/Ark-Pets/commit/823b904e5a0a88fd1cd9981d83fc167d9a5c07b8
 [`1c7200d`]: https://github.com/isHarryh/Ark-Pets/commit/1c7200d1ef78aa82efee9fcb3b38f65ab5d1eec3
+[`deedced`]: https://github.com/isHarryh/Ark-Pets/commit/deedced4b7c14defde4c60d2ec52e6e153de15fd
+[`69ef274`]: https://github.com/isHarryh/Ark-Pets/commit/69ef2741ad703aab4a8490c7a3307b556982374d
