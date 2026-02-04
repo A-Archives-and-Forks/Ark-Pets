@@ -13,6 +13,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -61,6 +62,7 @@ public final class Const {
     public static final String configExternal   = "ArkPetsConfig.json";
     public static final String configInternal   = "/ArkPetsConfigDefault.json";
     public static final String iconFilePng      = "/icons/icon.png";
+    public static final String fontDirInternal  = "/fonts/";
     // %s will be replaced by GL version (gl21, gles30)
     public static final String pass1VShader     = "shaders/%s/PlainVertex.glsl";
     public static final String pass1FShader     = "shaders/%s/PlainFragment.glsl";
@@ -164,11 +166,11 @@ public final class Const {
 
         private File extractFont() {
             try {
-                var tempFont = new File(PathConfig.tempDirPath, name);
-                if (tempFont.exists() && tempFont.length() >= fileSize)
+                File tempFont = new File(PathConfig.tempDirPath, name);
+                if (tempFont.exists() && tempFont.length() == fileSize)
                     return tempFont;
                 Logger.debug("System", "Extracting font " + name + " into " + tempFont.getAbsolutePath());
-                var stream = Objects.requireNonNull(FontsConfig.class.getResourceAsStream("/fonts/" + name));
+                InputStream stream = Objects.requireNonNull(FontsConfig.class.getResourceAsStream(fontDirInternal + name));
                 IOUtils.FileUtil.writeStream(tempFont, stream, false);
                 stream.close();
                 return tempFont;
