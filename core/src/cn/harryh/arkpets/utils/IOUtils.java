@@ -77,6 +77,26 @@ public class IOUtils {
             writeByte(file, content.getBytes(charsetName), append);
         }
 
+        /** Writes a stream data into a file.
+         * @param file The file to write to.
+         * @param stream The specified stream to be written.
+         * @param append If false, the existed file will be overwritten; If true, content will be appended to its end.
+         * @throws IOException If I/O error occurs. It may be FileNotFoundException, etc.
+         */
+        public static void writeStream(File file, InputStream stream, boolean append) throws IOException {
+            if (!append && file.exists() && !file.delete())
+                throw new IOException("Cannot delete file:" + file.getAbsolutePath());
+            if (!file.exists() && !file.createNewFile())
+                throw new IOException("Cannot create file:" + file.getAbsolutePath());
+            FileOutputStream out = new FileOutputStream(file);
+            int index;
+            byte[] bytes = new byte[1024];
+            while ((index = stream.read(bytes)) != -1) {
+                out.write(bytes, 0, index);
+            }
+            out.close();
+        }
+
         /** Gets the MD5 checksum of the given content.
          * @param content A byte array.
          * @return MD5 hex String.

@@ -56,7 +56,8 @@ public class ArkHomeFX extends Application {
     public SettingsModule settingsModule;
 
     static {
-        FontsConfig.loadFontsToJavafx();
+        FontsConfig.REGULAR.loadFontToJavafx();
+        FontsConfig.BOLD.loadFontToJavafx();
     }
 
     @Override

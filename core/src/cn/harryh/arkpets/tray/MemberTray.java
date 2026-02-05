@@ -31,7 +31,7 @@ public abstract class MemberTray {
             UIManager.setLookAndFeel(laf);
         } catch (Exception ignored) {
         }
-        Const.FontsConfig.loadFontsToSwing();
+        Const.FontsConfig.REGULAR.loadFontToSwing();
     }
 
     /** Initializes a tray icon instance for a ArkPets.

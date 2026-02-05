@@ -44,7 +44,7 @@ public class HostTray {
             } catch (Exception ignored) {
             }
         });
-        Const.FontsConfig.loadFontsToSwing();
+        Const.FontsConfig.REGULAR.loadFontToSwing();
     }
 
     public static HostTray getInstance() {
