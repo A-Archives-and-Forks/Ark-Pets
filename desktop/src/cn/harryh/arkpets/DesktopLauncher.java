@@ -7,6 +7,7 @@ import cn.harryh.arkpets.utils.ArgPending;
 import cn.harryh.arkpets.utils.Logger;
 import javafx.application.Application;
 
+import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
@@ -59,6 +60,12 @@ public class DesktopLauncher {
                 System.exit(0);
             }
         };
+
+        // Init temp folder
+        File temp = new File(Const.PathConfig.tempDirPath);
+        if (!(temp.exists() || temp.mkdir())) {
+            Logger.error("System", "Failed to create the temporary directory.");
+        }
 
         // Java FX bootstrap
         Application.launch(ArkHomeFX.class, args);
