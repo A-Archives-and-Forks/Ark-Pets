@@ -373,9 +373,7 @@ public class ArkChar {
                     camera.getWidth() + insert.left + insert.right,
                     camera.getHeight() + insert.top + insert.bottom,
                     2);
-            FileHandle dir = new FileHandle(tempDirPath);
-            dir.mkdirs();
-            FileHandle file = dir.child("acSnapshot-" + skeleton.toString() + "-" + stage.id() + ".png");
+            FileHandle file = new FileHandle(tempDirPath).child("acSnapshot-" + skeleton.toString() + "-" + stage.id() + ".png");
             pw.savePixmap(file, true);
             Logger.debug("Character", "Saved acSnapshot to: " + file.path());
         }

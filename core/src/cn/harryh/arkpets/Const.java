@@ -101,7 +101,7 @@ public final class Const {
         public static final String urlLicense       = "https://github.com/isHarryh/Ark-Pets";
         public static final String urlMirrorChyan   = "https://mirrorchyan.com/?source=" + appName + "Gui";
         public static final String urlWikiPrefix    = "https://prts.wiki/w/";
-        public static final String tempDirPath      = "temp/";
+        public static final String tempDirPath                  = "temp/";
         public static final String fileModelsZipName            = "ArkModels";
         public static final String fileModelsDataPath           = "models_data.json";
         public static final String tempModelsUnzipDirPath       = tempDirPath + "models_unzipped/";
