@@ -500,9 +500,7 @@ public class ArkPets extends InputApplicationAdaptor {
             });
             registerKeyTyped('P', () -> Logger.debug("Debugger", "Showing plane info\n" + plane.getDebugMsg()));
             registerKeyTyped('S', () -> {
-                FileHandle dir = new FileHandle(tempDirPath);
-                dir.mkdirs();
-                FileHandle file = dir.child("snapshot-" + System.currentTimeMillis() + ".png");
+                FileHandle file = new FileHandle(tempDirPath).child("snapshot-" + System.currentTimeMillis() + ".png");
                 PixmapWrapper pw = PixmapWrapper.fromCamera(cha.camera);
                 pw.savePixmap(file, true);
                 pw.dispose();
