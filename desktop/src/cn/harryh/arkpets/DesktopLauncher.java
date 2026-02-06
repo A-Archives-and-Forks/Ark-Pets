@@ -12,6 +12,7 @@ import java.nio.charset.Charset;
 import java.util.Objects;
 
 import static cn.harryh.arkpets.Const.LogConfig;
+import static cn.harryh.arkpets.Const.PathConfig;
 import static cn.harryh.arkpets.Const.appVersion;
 
 
@@ -62,7 +63,7 @@ public class DesktopLauncher {
         };
 
         // Init temp folder
-        File temp = new File(Const.PathConfig.tempDirPath);
+        File temp = new File(PathConfig.tempDirPath);
         if (!(temp.exists() || temp.mkdir())) {
             Logger.error("System", "Failed to create the temporary directory.");
         }
