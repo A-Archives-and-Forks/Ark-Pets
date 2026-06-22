@@ -10,6 +10,8 @@ import cn.harryh.arkpets.animations.AnimComposer;
 import cn.harryh.arkpets.animations.AnimData;
 import cn.harryh.arkpets.assets.ModelItem.ModelAssetAccessor;
 import cn.harryh.arkpets.assets.SkeletonLoader;
+import cn.harryh.arkpets.render.ComplexShader;
+import cn.harryh.arkpets.render.PlainShader;
 import cn.harryh.arkpets.transitions.EasingFunction;
 import cn.harryh.arkpets.transitions.TransitionFloat;
 import cn.harryh.arkpets.transitions.TransitionVector3;
@@ -24,6 +26,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -42,7 +45,8 @@ public class ArkChar {
     protected final DynamicOrthographicCamara camera;
     protected final TransitionVector3 position;
 
-    private final TwoColorPolygonBatch batch;
+    private final TwoColorPolygonBatch spineBatch;
+    private final SpriteBatch finalBatch;
     private Texture bgTexture;
     private final float outlineWidth;
     private final Color outlineColor;
@@ -51,8 +55,8 @@ public class ArkChar {
     private final TransitionFloat outlineAlpha;
     private final TransitionFloat alpha;
 
-    private final ShaderProgram shader1;
-    private final ShaderProgram shader2;
+    private final PlainShader shader1;
+    private final ComplexShader shader2;
     private final Skeleton skeleton;
     private final SkeletonRenderer renderer;
 
@@ -70,14 +74,17 @@ public class ArkChar {
         camera = new DynamicOrthographicCamara(canvasMaxSize, canvasMaxSize, Math.round(canvasReserveLength * scale));
         camera.setMaxInsert(0);
         camera.setMinInsert(canvasReserveLength - canvasMaxSize);
-        batch = new TwoColorPolygonBatch();
+        spineBatch = new TwoColorPolygonBatch();
+        finalBatch = new SpriteBatch();
         renderer = new SkeletonRenderer();
         renderer.setPremultipliedAlpha(true);
         /* Shader pedantic should be disabled to avoid uniform not-found error. */
         ShaderProgram.pedantic = false;
-        shader1 = getShader(pass1VShader, pass1FShader, config.render_enable_angle);
-        shader2 = getShader(pass2VShader, pass2FShader, config.render_enable_angle);
+        shader1 = new PlainShader(config.render_enable_angle);
+        shader2 = new ComplexShader(config.render_enable_angle, config.render_shader_high_quality);
         Logger.debug("Shader", "Shader program compiled");
+        spineBatch.setShader(shader1);
+        finalBatch.setShader(shader2);
         // 2.Geometry setup
         EasingFunction easingFunction = ArkConfig.getEasingFunctionFrom(config.transition_type);
         float easingDuration = Math.max(0, config.transition_duration);
@@ -240,42 +247,39 @@ public class ArkChar {
         skeleton.setPosition(position.now().x, position.now().y + offsetY.now());
         skeleton.setScaleX(position.now().z);
         skeleton.updateWorldTransform();
-        batch.getProjectionMatrix().set(camera.combined);
+        spineBatch.getProjectionMatrix().set(camera.combined);
+        finalBatch.getProjectionMatrix().set(camera.combined);
         // Apply current animation
         animationState.apply(skeleton);
         animationState.update(Gdx.graphics.getDeltaTime());
         // Render Pass 1: Render the skeleton
         camera.getFBO().begin();
         shader1.bind();
-        shader1.setUniformf("u_alpha", 1.0f);
-        batch.setShader(shader1);
+        shader1.setAlpha(1.0f);
         ScreenUtils.clear(0, 0, 0, 0, true);
-        batch.begin();
-        renderer.draw(batch, skeleton);
-        batch.end();
-        batch.setShader(null);
+        spineBatch.begin();
+        renderer.draw(spineBatch, skeleton);
+        spineBatch.end();
         camera.getFBO().end();
         // Render Pass 2: Render additional effects
         Texture passedTexture = camera.getFBO().getColorBufferTexture();
         shader2.bind();
-        shader2.setUniformf("u_outlineColor", outlineColor.r, outlineColor.g, outlineColor.b, outlineColor.a);
-        shader2.setUniformf("u_outlineWidth", outlineWidth);
-        shader2.setUniformf("u_outlineAlpha", outlineAlpha.now());
-        shader2.setUniformf("u_shadowColor", shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
-        shader2.setUniformi("u_textureSize", passedTexture.getWidth(), passedTexture.getHeight());
-        shader2.setUniformf("u_alpha", alpha.now());
-        batch.setShader(shader2);
+        shader2.setOutlineColor(outlineColor);
+        shader2.setOutlineWidth(outlineWidth);
+        shader2.setOutlineAlpha(outlineAlpha.now());
+        shader2.setShadowColor(shadowColor);
+        shader2.setTextureSize(passedTexture);
+        shader2.setAlpha(alpha.now());
         ScreenUtils.clear(0, 0, 0, 0, true);
-        batch.begin();
-        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        batch.draw(bgTexture, 0, 0);
-        batch.draw(passedTexture,
+        finalBatch.begin();
+        finalBatch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        finalBatch.draw(bgTexture, 0, 0);
+        finalBatch.draw(passedTexture,
                 0, 0, 0, 0, camera.getWidth(), camera.getHeight(),
                 1, 1, 0,
                 0, 0, passedTexture.getWidth(), passedTexture.getHeight(),
                 false, true);
-        batch.end();
-        batch.setShader(null);
+        finalBatch.end();
     }
 
     /** Renders the character to the graphics additively, ignoring delta time and complex shaders.
@@ -287,26 +291,12 @@ public class ArkChar {
         skeleton.setScaleX(position.end().z);
         skeleton.updateWorldTransform();
         animationState.apply(skeleton);
-        batch.getProjectionMatrix().set(camera.combined);
+        spineBatch.getProjectionMatrix().set(camera.combined);
         shader1.bind();
-        shader1.setUniformf("u_alpha", alpha);
-        batch.setShader(shader1);
-        batch.begin();
-        renderer.draw(batch, skeleton);
-        batch.end();
-        batch.setShader(null);
-    }
-
-    private ShaderProgram getShader(String path2vertex, String path2fragment, boolean gles30) {
-        String ver = gles30 ? "gles30" : "gl21";
-        ShaderProgram shader = new ShaderProgram(Gdx.files.internal(String.format(path2vertex, ver)), Gdx.files.internal(String.format(path2fragment, ver)));
-        if (!shader.isCompiled()) {
-            Logger.error("Shader", "Shader program failed to compile.");
-            Logger.error("Shader", "Shader source: " + path2vertex + " & " + path2fragment);
-            Logger.error("Shader", "Shader log: " + shader.getLog());
-            throw new RuntimeException("Launch ArkPets failed, failed to compile shaders.");
-        }
-        return shader;
+        shader1.setAlpha(alpha);
+        spineBatch.begin();
+        renderer.draw(spineBatch, skeleton);
+        spineBatch.end();
     }
 
     private void adjustCanvas(AnimStage stage, int framePerSample, float coverage) {

@@ -54,8 +54,7 @@ vec4 getGaussianNeighborsSum(vec2 unitLength) {
     return sum;
 }
 
-vec4 getOutlined() {
-    vec4 texColor = texture2D(u_texture, v_texCoords);
+vec4 getOutlined(vec4 texColor) {
     if (u_outlineColor.a > 0.0 && u_outlineWidth > 0.0 && u_outlineAlpha > 0.0) {
         vec2 relOutlineWidth = vec2(1.0) / u_textureSize * u_outlineWidth;
         vec4 neighbor = getGaussianNeighborsSum(relOutlineWidth) * c_outlineOverstate;
@@ -82,7 +81,7 @@ void main() {
     if (texColor.a < c_alphaHigh) {
         if (texColor.a < c_alphaLow) {
             // Outline effect
-            texColor = getOutlined();
+            texColor = getOutlined(texColor);
         }
         // Box shadow effect
         texColor = mix(getBoxShadow(), texColor, texColor.a);
