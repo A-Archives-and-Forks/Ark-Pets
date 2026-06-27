@@ -303,7 +303,9 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
 
         searchModelRandom.setOnAction(e -> modelRandom());
 
-        searchModelReload.setOnAction(e -> modelReload(true));
+        searchModelReload.setOnAction(e -> {
+            modelReload(true);
+        });
     }
 
     private void initModelFilter() {
@@ -526,11 +528,13 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             boolean willGc = !targetList.isEmpty();
             assetItemList = new ModelItemGroup();
 
+            int modelCount = 0;
             if (initModelsDataset(doPopNotice)) {
                 // 1. Update list cells and asset items:
                 try {
                     // Find every model assets.
                     assetItemList.addAll(app.modelsDataset.data.filter(ModelItem::isExisted));
+                    modelCount = assetItemList.size();
                     if (assetItemList.isEmpty())
                         throw new IOException("Found no assets in the target directories.");
                     // Initialize list view.
@@ -618,6 +622,8 @@ public final class ModelsModule implements Controller<ArkHomeFX> {
             if (willGc)
                 System.gc();
             Logger.info("ModelManager", "Reloaded");
+            if (doPopNotice) app.toast.showText("已载入 " + modelCount + " 个模型",
+                    GuiPrefabs.Icons.getIcon(GuiPrefabs.Icons.SVG_CHECK, GuiPrefabs.COLOR_SUCCESS), durationLong);
         });
     }
 
